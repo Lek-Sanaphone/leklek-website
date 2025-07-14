@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkleklek_website=self.webpackChunkleklek_website||[]).push([[3316],{5051:e=>{e.exports=JSON.parse('{"metadata":{"permalink":"/leklek-website/blog","page":1,"postsPerPage":10,"totalPages":1,"totalCount":4,"blogDescription":"Blog","blogTitle":"Blog"}}')}}]);

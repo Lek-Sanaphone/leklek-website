@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkleklek_website=self.webpackChunkleklek_website||[]).push([[1903],{1912:e=>{e.exports=JSON.parse('{"blogBasePath":"/leklek-website/blog","blogTitle":"Blog","authorsListPath":"/leklek-website/blog/authors"}')}}]);
