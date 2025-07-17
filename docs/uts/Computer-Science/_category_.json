@@ -1,0 +1,9 @@
+{
+  "label": "Computer Science",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "title": "Computer Science",
+    "description": "A collection of projects I've built and documented in details."
+  }
+}

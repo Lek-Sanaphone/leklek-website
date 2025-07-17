@@ -5,14 +5,26 @@
 // See: https://docusaurus.io/docs/api/docusaurus-config
 
 import {themes as prismThemes} from 'prism-react-renderer';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'LekLek',
-  tagline: 'Dinosaurs are cool',
+  tagline: 'Cloud and Softskills Enthusiast',
   favicon: 'img/favicon.ico',
+
+  stylesheets: [
+    {
+      href: 'https://cdn.jsdelivr.net/npm/katex@0.13.24/dist/katex.min.css',
+      type: 'text/css',
+      integrity:
+        'sha384-odtC+0UGzzFL/6PNoE8rX/SPcQDXBJ+uRepguP4QkPCm2LBxH3FA3y+fKSiJ+AmM',
+      crossorigin: 'anonymous',
+    },
+  ],
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -49,25 +61,12 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
+          remarkPlugins: [remarkMath],
+          rehypePlugins: [rehypeKatex],
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
-        },
-        blog: {
-          showReadingTime: true,
-          feedOptions: {
-            type: ['rss', 'atom'],
-            xslt: true,
-          },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
-          // Useful options to enforce blogging best practices
-          onInlineTags: 'warn',
-          onInlineAuthors: 'warn',
-          onUntruncatedBlogPosts: 'warn',
+            'https://github.com/Lek-Sanaphone/leklek-website/tree/main/',
         },
         theme: {
           customCss: './src/css/custom.css',
@@ -80,24 +79,30 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       // Replace with your project's social card
-      image: 'img/docusaurus-social-card.jpg',
+      image: 'img/leklek-social-card.png',
       navbar: {
-        title: 'My Site',
+        title: 'LekLek',
         logo: {
           alt: 'My Site Logo',
-          src: 'img/logo.svg',
+          src: 'img/avatar.png',
         },
         items: [
           {
             type: 'docSidebar',
             sidebarId: 'tutorialSidebar',
             position: 'left',
-            label: 'Tutorial',
+            label: 'Note',
           },
-          {to: '/blog', label: 'Blog', position: 'left'},
+          {to: '/projects', label: 'Projects', position: 'left'},
+          {to: '/resume', label: 'Resume', position: 'left'},
           {
             href: 'https://github.com/facebook/docusaurus',
             label: 'GitHub',
+            position: 'right',
+          },
+          {
+            href: 'https://resume.leklek.net',
+            label: 'Resume',
             position: 'right',
           },
         ],
@@ -106,28 +111,20 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'Docs',
+            title: 'Note',
             items: [
               {
-                label: 'Tutorial',
+                label: 'Main',
                 to: '/docs/intro',
               },
             ],
           },
           {
-            title: 'Community',
+            title: 'Social',
             items: [
               {
-                label: 'Stack Overflow',
-                href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-              },
-              {
-                label: 'Discord',
-                href: 'https://discordapp.com/invite/docusaurus',
-              },
-              {
-                label: 'X',
-                href: 'https://x.com/docusaurus',
+                label: 'LinkedIn',
+                href: 'https://www.linkedin.com/in/lek-sanaphone-nammathao-4aa0a3312/',
               },
             ],
           },
@@ -135,8 +132,12 @@ const config = {
             title: 'More',
             items: [
               {
-                label: 'Blog',
-                to: '/blog',
+                label: 'Resume',
+                to: '/resume',
+              },
+              {
+                label: 'Projects',
+                to: '/projects',
               },
               {
                 label: 'GitHub',

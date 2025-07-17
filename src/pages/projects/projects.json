@@ -1,0 +1,14 @@
+[
+  {
+    "title": "Rainwater Prediction Dashboard",
+    "description": "A data visualization tool built with FastAPI, React, and PostgreSQL to monitor and predict rainfall on Saibai Island.",
+    "image": "/img/rainwater.png",
+    "link": "https://github.com/yourgithub/rainwater-dashboard"
+  },
+  {
+    "title": "LekLek Music App",
+    "description": "A modern music player built with React Native and Zustand featuring custom playback modes and sleek UI.",
+    "image": "/img/music-app.png",
+    "link": "/docs/projects/music-app"
+  }
+]
