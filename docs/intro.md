@@ -3,7 +3,7 @@ sidebar_position: 1
 ---
 
 # LekLek's Note
-- This is the main note section where I mostly document
+- A professional archive of my ongoing learning journey, projects, and academic insights. Feel free to explore 👋🏻.
 
 # Education
 - [University of Technology Sydney](/docs/category/uts)

@@ -3,7 +3,7 @@ id: Mathematics-1
 description: This course builds core skills in calculus and linear algebra. Topics include vectors, lines, planes, and complex numbers. It covers applications of derivatives such as related rates, differentials, and Newton’s Method. Students learn inverse and transcendental functions, integration techniques, and numerical methods for definite integrals. The course also introduces differential equations—first-order, second-order, and non-homogeneous—and ends with the study of sequences and series.
 title: 33130 Mathematics 1
 ---
-# Mathematic 1 - Summary
+# Mathematic 1 - Calculus 1 - Summary
 
 # 1. Vector
 

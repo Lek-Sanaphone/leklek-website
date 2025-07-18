@@ -53,7 +53,8 @@ export default function Home() {
         <section className={styles.hero}>
           <img src="/img/avatar.png" alt="Lek avatar" className={styles.avatar} />
           <h1>Hello, I'm Lek Nammathao</h1>
-          <p>I'm a Cloud and Softskill Enthusiast, and Full-Stack Developer passionate about building real-world solutions.</p>
+          <p>I am a second-year Software Engineering student at the University of Technology Sydney with a strong passion for cloud and cybersecurity. I have been working with self-hosted servers, managing Linux environments, and writing Bash scripts to keep systems running smoothly.</p>
+          <p>These experiences have deepened my interest in building scalable cloud solutions and securing modern infrastructure.</p>
           <div className={styles.buttons}>
             <Link className="button button--primary button--lg" to="/projects">
               View My Projects

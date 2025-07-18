@@ -79,7 +79,7 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       // Replace with your project's social card
-      image: 'img/leklek-social-card.png',
+      image: 'img/leklek-social-card.jpg',
       navbar: {
         title: 'LekLek',
         logo: {
