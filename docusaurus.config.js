@@ -12,8 +12,8 @@ import rehypeKatex from 'rehype-katex';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'LekLek',
-  tagline: 'Cloud and Softskills Enthusiast',
+  title: 'Lek Nammathao | LekLek',
+  tagline: 'I am a Software Engineering student at the University of Technology Sydney with a strong passion for cloud, networking, and technology.',
   favicon: 'img/favicon.ico',
 
   stylesheets: [
@@ -79,7 +79,7 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       // Replace with your project's social card
-      image: 'img/leklek-social-card.jpg',
+      image: 'https://leklek.net/img/leklek-social-card.jpg',
       navbar: {
         title: 'LekLek',
         logo: {
@@ -96,7 +96,7 @@ const config = {
           {to: '/projects', label: 'Projects', position: 'left'},
           {to: '/resume', label: 'Resume', position: 'left'},
           {
-            href: 'https://github.com/facebook/docusaurus',
+            href: 'https://github.com/Lek-Sanaphone',
             label: 'GitHub',
             position: 'right',
           },
@@ -141,7 +141,7 @@ const config = {
               },
               {
                 label: 'GitHub',
-                href: 'https://github.com/facebook/docusaurus',
+                href: 'https://github.com/Lek-Sanaphone',
               },
             ],
           },
