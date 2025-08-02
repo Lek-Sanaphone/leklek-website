@@ -1,0 +1,9 @@
+{
+  "label": "Tech Courses",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "title": "Tech Courses",
+    "description": "A Summary of Online Courses"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "label": "AWS",
+  "position": 1,
+  "link": {
+    "type": "generated-index",
+    "title": "AWS",
+    "description": "AWS related courses"
+  }
+}

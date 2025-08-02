@@ -7,9 +7,7 @@ title: 33230 Mathematics 2
 # Mathematic 2 - Calculus 2 - Summary
 # 1. Linear System
 
-## 1.1 Linear Equations and Systems
-- [[Linear "Equation and Systems" & Augmented Matrices]]
-
+## 1.1 Linear Equations and Systems & Augmented Matrices
 ### Linear Equation
 - Variables like $x$, $y$, or $z$ must have power 1 and constant coefficients:
   $$
@@ -49,7 +47,6 @@ a_{m1}+a_{m2}+...+a_{mn}&=b_m
 $$
 
 ## 1.2 Elementary Row Operations & Row-Reduced Matrices
-- [[Elementary Row Operations & Row-Reduced Matrices]]
 
 ### Elementary Row Operations
 Used to simplify matrices for solving:
@@ -106,7 +103,6 @@ Transform into row-echelon or reduced row-echelon form:
 - If all 1–4 are satisfied → **reduced row-echelon form**
 
 ## 1.3 Gauss-Jordan Elimination
-- [[Gauss-Jordan Elimination]]
 
 Used to solve:
 $$
