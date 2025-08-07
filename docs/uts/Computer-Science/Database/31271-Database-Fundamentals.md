@@ -46,7 +46,7 @@ title: 31271 Database Fundamentals
 - **DDL commands**: CREATE, ALTER, DROP, RENAME
 - **DML commands**:  INSERT, DELETE, UPDATE
 
-### 1. Create Table and Constraints
+### 1. Create Table and Constraints, and DROP
 
 **Defines the structure of a table, including columns and constraints.**
 
@@ -58,7 +58,21 @@ CREATE TABLE Customer_T (
   CONSTRAINT Customer_PK PRIMARY KEY (CustomerID)
 );
 ```
+A primary key constraint can be defined in two ways:
+- Named constraint (out-of-line):
+  - `CONSTRAINT Customer_PK PRIMARY KEY (CustomerID)`
+  - This allows you to assign a custom name like Customer_PK, which is useful for clarity, maintenance, and future alterations
+- Inline constraint:
+  - `CustomerID NUMERIC(4) NOT NULL PRIMARY KEY`
+  - This creates the constraint without a custom name. Instead, the database auto-generates a name. 
+  - Less readable and harder to reference
 
+
+**DROP table**
+
+```sql
+DROP TABLE Customer_T
+```
 
 ### 2. Insert Data
 
@@ -73,7 +87,8 @@ VALUES (1, 'Contemporary Casuals', 'NSW');
 INSERT INTO Customer_T
 VALUES (2, 'Home Furnishings', 'VIC');
 ```
-
+- Without specify columns: Data that will be insert must match with all columns.
+- With specify columns: Only specific columns will be insert. Columns that aren't define will result as "(NULL)"
 
 ### 3. Update Data
 
@@ -137,12 +152,18 @@ CREATE TABLE OrderLine_T (
   OrderID NUMERIC(5) NOT NULL,
   ProductID NUMERIC(4) NOT NULL,
   OrderedQuantity NUMERIC(10),
-  PRIMARY KEY (OrderID, ProductID),
-  FOREIGN KEY (OrderID) REFERENCES Order_T(OrderID),
-  FOREIGN KEY (ProductID) REFERENCES Product_T(ProductID)
+  PRIMARY KEY (OrderID, ProductID), -- Composite PK (auto-named)
+  FOREIGN KEY (OrderID) REFERENCES Order_T(OrderID), -- FK1 (auto-named)
+  FOREIGN KEY (ProductID) REFERENCES Product_T(ProductID) -- FK2 (auto-named)
 );
 ```
 
+- Use constraint for set the name manually
+```sql
+CONSTRAINT OrderLine_PK PRIMARY KEY (OrderID, ProductID),
+CONSTRAINT FK_Order FOREIGN KEY (OrderID) REFERENCES Order_T(OrderID),
+CONSTRAINT FK_Product FOREIGN KEY (ProductID) REFERENCES Product_T(ProductID)
+```
 
 ### 7. Design Reminders
 
@@ -179,7 +200,13 @@ CREATE TABLE Order_T (
 **Examples of retrieving data using PK–FK relationships.**
 
 ```sql
--- Retrieve all orders for CustomerID 1
+-- Retrieve all data from table
+SELECT * FROM Order_T;
+
+-- Retrieve some fields from table
+SELECT field-1, field-2 FROM Order_T;
+
+-- Retrieve all orders for CustomerID 1, allow: =, >, <, <=, >=, and, or
 SELECT * FROM Order_T WHERE CustomerID = 1;
 
 -- Count how many orders a customer has placed

@@ -7,14 +7,19 @@ title: AWS Certified Cloud Practitioner CLF-CO2
 ## 1. What is Cloud Computing?
 ### Cloud Computing
 - Cloud Computing is the on-demand delivery of IT resources—such as servers, storage, and databases—via the internet, with pay-as-you-go pricing. It replaces traditional data centers by allowing users to instantly provision and scale resources without upfront costs.
-- The Deployment Models of the Cloud:
+- **The Deployment Models of the Cloud:**
     - Public Cloud: Provided by third parties (e.g., AWS, Azure, GCP)
     - Private Cloud: Dedicated to a single organization
     - Hybrid Cloud: Mix of public and private
-- Five Characteristics of Cloud Computing:
+- **Five Characteristics of Cloud Computing:**
     - On-demand access, broad network availability, shared resources (multi-tenancy), rapid scalability, and pay-per-use.
-- Six Advantages of Cloud Computing:
-    - Lower costs, automatic scaling, faster deployment, global reach, no maintenance, and cost-efficiency at scale.
+- **Six Advantages of Cloud Computing:**
+    - Trade capital expense for variable expense
+    - Benefit from massive economies of scale
+    - Stop guessing capacity
+    - Increase speed and agility
+    - Stop spending money running and maintaining data centers 
+    - Go global in minutes
 
 ### Types of Cloud Computing
 - Cloud computing is categorized into three main service models:
@@ -40,11 +45,11 @@ title: AWS Certified Cloud Practitioner CLF-CO2
     - Edge Locations: 400+ global points for fast content delivery
 
 ### Security in Cloud: The Shared Responsibility Model & AWS Acceptable Use
-- Shared Responsibility Model:
+- **Shared Responsibility Model**:
     - Customer: Security in the cloud (data, OS, network, firewall)
     - AWS: Security of the cloud (infra, hardware, software)
-- Acceptable Use Policy:
-    - Prohibits illegal, harmful, offensive, or abusive activities on AWS.
+- **Acceptable Use Policy**:
+    - **Prohibits** illegal, harmful, offensive, or abusive activities on AWS.
 
 ---
 ## 2. IAM - Identity and Access Management
@@ -139,9 +144,15 @@ title: AWS Certified Cloud Practitioner CLF-CO2
 
 </details>
 
-### IAM MFA (Mutil-Factor Authentication)
+### IAM MFA (Multi-Factor Authentication)
 - Adds a second layer of security by requiring both a password (something you know) and an MFA device (something you own).
 - AWS Console -> Account settings -> Edits
+
+### Type of MFA
+- Soft Token Multi-Factor Authentication (MFA) device: This is a made-up option and has been added as a distractor. 🙂‍↕️
+- Hardware Multi-Factor Authentication (MFA) device: A hardware device that generates a six-digit numeric code
+- U2F security key: USB
+- Virtual Multi-Factor Authentication (MFA) device: Software app (ex: Google Authentication)
 
 ### AWS Access Keys, CLI, and SDK & Hands On
 - Access Methods: Management Console, CLI, and SDK.
@@ -409,6 +420,9 @@ Act as virtual firewalls for EC2 instances, controlling **inbound and outbound**
     - Stop the instance to ensure integrity.
     - Create an AMI from an EC2 instance, AWS creates **EBS snapshots** of the instance’s volumes behind the scenes. 
     - Use the AMI to launch new EC2 instances, even in other AZs.
+- Requirement:
+    - The Amazon Machine Image (AMI) must be in the same region as that of the Amazon EC2 instance to be launched. 
+    - If the Amazon Machine Image (AMI) exists in a different region, you can copy that Amazon Machine Image (AMI) to the region where you want to launch the EC2 instance.
 #### AMI Hands On
 - [See Demo: Creating and Launching](https://youtu.be/RR9b0g_Ghrw?si=cYVdJVlMUpcSJ9Pz)
 
@@ -657,9 +671,24 @@ Act as virtual firewalls for EC2 instances, controlling **inbound and outbound**
 * **S3 Glacier Classes**:
   * **Glacier Instant Retrieval**: Millisecond access, 90-day minimum.
   * **Glacier Flexible Retrieval**: 1 min to 12 hrs access, 90-day minimum.
-  * **Glacier Deep Archive**: 12–48 hrs access, 180-day minimum, **lowest cost**.
+  * **Glacier Deep Archive**: 12–48 hrs access, 180-day minimum, **lowest cost**. Retain data sets for 7-10 years or longer.
   > Minimum storage duration: you’re billed for the full 90 or 180 days even if you delete the object early.
 * **S3 Intelligent-Tiering**: Auto-moves data across tiers (frequent, infrequent, archive) **based on access patterns**; small monitoring fee, no retrieval fee.
+
+### Comparison: S3 Standard, S3 Standard-IA, S3 One Zone-IA
+| Feature                  | **S3 Standard**        | **S3 Standard-IA**                  | **S3 One Zone-IA**                                                    |
+| ------------------------ | ---------------------- | ----------------------------------- | --------------------------------------------------------------------- |
+| **Availability Zones**   | 3+ AZs                 | 3+ AZs                              | **1 AZ only**                                                         |
+| **Durability**           | 99.999999999% (11 9’s) | 99.999999999%                       | 99.999999999%                                                         |
+| **Availability**         | 99.99%                 | 99.9%                               | **99.5%**                                                             |
+| **Access Frequency**     | Frequent               | Infrequent                          | Infrequent                                                            |
+| **Retrieval Time**       | Instant                | Instant                             | Instant                                                               |
+| **Cost**                 | Highest                | Lower                               | **Lowest (20% cheaper than Standard-IA)**                             |
+| **Use Case Suitability** | Active data            | Infrequent access but critical data | Infrequent access and **non-critical data** that can be **recreated** |
+
+#### Main Difference:
+- S3 One Zone-IA stores your data in just one AZ, so it costs less but is less resilient to AZ failure.
+- Other classes (like Standard and Standard-IA) replicate data across at least 3 AZs, giving you higher availability and fault tolerance.
 
 ### S3 Lifecycle Rules
 - Click in your S3 -> Management.
@@ -739,13 +768,15 @@ Here’s a concise summary of the four topics:
 <details>
     <summary>Read Replicas</summary> 
 - <img src="https://blog.kakaocdn.net/dn/6CbTE/btsFt3jiJlk/OWNFQ5olLsIufgD3gymKm1/img.png" width="400" height="200"/>
+
+- **Improves database scalability**
 - Scale read-heavy apps by adding up to 15 replicas; writes go to the main DB only.
 </details>
 
 <details>
     <summary>Multi-AZ</summary>
 - <img src="https://miro.medium.com/v2/resize:fit:1400/1*LShRzZE-hC8CdcoE0l_FrA.png" width="400" height="200"/>
-- Adds high availability by syncing to a standby in a different AZ with automatic failover.
+- **Adds high availability** by syncing to a standby in a different AZ with automatic failover.
 - The failure DB is a passive, won't be accessible unless issue occur with main DB
 - Can only have | other AZ as failover
 </details>
@@ -969,16 +1000,17 @@ Here’s a concise summary of the four topics:
 
 ### Deployments - AWS Systems Manager (SSM) <img src="https://cloud-icons.onemodel.app/aws/Architecture-Service-Icons_01312023/Arch_Management-Governance/64/Arch_AWS-Systems-Manager_64@5x.png" width="35" height="35"/>
 - A **hybrid operations** management tool for AWS and on-premises servers.
-- Helps automate tasks like patching, running commands, and storing configurations.
-- Core Features: Run Command, Patch Manager, Parameter Store, Session Manager, Fleet Manager, and SSM Agent.
+- Helps **automate** tasks like patching, running commands, and storing configurations.
+- **Centralized** tool for monitoring, managing, and troubleshooting **AWS resources**. **Gives operational insights** to quickly detect and resolve issues affecting applications.
+- Create logical groups of resources. Able to select a resource group and view its recent API activity.
 
-#### Session Manager Highlights 
-- No SSH keys needed, no open port 22.
-- Secure CLI access to EC2/Linux/macOS/Windows.
+
+#### Feature Systems Manager - Session Manager Highlights 
+- Allows **secure shell** (SSH-like) or PowerShell access to EC2 instances/Linux/macOS/Windows — **without opening ports**, using bastion hosts, or requiring public IPs.
 - Needs IAM role (AmazonSSMManagedInstanceCore) + SSM Agent.
 - Sessions can be logged to S3 or CloudWatch.
 
-#### Parameter Store Highlights
+#### Feature Systems Manager - Parameter Store Highlights
 - Store config and secrets as string or encrypted string.
 - Supports versioning and access control with IAM.
 - Fully serverless and scalable.
@@ -1165,7 +1197,7 @@ Here’s a concise summary of the four topics:
   * **CodeGuru Profiler**: Identifies expensive or inefficient runtime code in production.
 
 
-### AWS Health Dashboard
+### AWS Health Dashboard - Service Health
 
 * **Service Health**: Shows global AWS service status by region.
 * **Account Health**: Personalized view of events affecting **your account/resources**.
@@ -1173,7 +1205,7 @@ Here’s a concise summary of the four topics:
   * Real-time alerts
   * Scheduled maintenance notifications
   * Event logs for historical tracking
-* Can be automated via **EventBridge** and **SNS**
+* Service health offers the possibility to subscribe to an RSS feed to be notified of interruptions to each service
 
 ---
 ## 13. VPC & Networking
@@ -1502,7 +1534,9 @@ Here’s a concise summary of the four topics:
 * Offers consolidated billing, shared usage discounts, and centralized policy control using Service Control Policies (SCPs). 
 * **Service Control Policies** (SCPs) centrally manage all users and roles permissions in your AWS Organization
 * Accounts can be organized via Organizational Units (OUs). 
-* SCPs restrict account actions but don’t apply to the master account.
+* Best Practices:
+    * **SCPs restrict** account actions but don’t apply to the master account.
+    * Create AWS **accounts per department**
 
 
 ### AWS Control Tower
@@ -1539,7 +1573,7 @@ Here’s a concise summary of the four topics:
 
 ### Compute Optimizer
 
-* Uses ML and CloudWatch metrics to recommend better resource configurations (EC2, EBS, Lambda, Auto Scaling) for cost savings and performance.
+* Uses ML and CloudWatch metrics to delivers recommendations for better resource configurations. For (**EC2, EBS, Lambda, Auto Scaling**), cost savings and performance.
 
 ### Billing and Costing Tools
 
@@ -1751,6 +1785,7 @@ Four tiers:
 
 ### AWS Step Functions
 
+* <img src="https://imgix.datadoghq.com/img/knowledge-center/aws-step-functions/etl-workflow-sample.png?auto=format&fit=max&w=847&dpr=2" height="240"/>
 * Serverless visual workflow builder
 * Supports sequencing, parallelism, error handling, conditions
 * Integrates with AWS services like Lambda, EC2, API Gateway
@@ -1780,34 +1815,34 @@ A set of best practices for designing and running workloads on AWS. It includes 
 <details>
     <summary>Operational Excellence</summary>
 * **Operational Excellence** – Monitor, automate, improve continuously.
-<img src="http://brandedwhitespace.com/OPERATIONAL_EXCELENCE_files/image002.gif" />
+<img src="https://tridentsys.net/content/images/2020/07/image-59.png" />
 
 </details>
 <details>
     <summary>Security</summary>
 * **Security** – Protect data/systems using least privilege, traceability, encryption, and automation.
-<img src="http://brandedwhitespace.com/OPERATIONAL_EXCELENCE_files/image006.gif" />
+<img src="https://tridentsys.net/content/images/2020/07/image-60.png" />
 
 </details>
 
 <details>
     <summary>Reliability</summary>
 * **Reliability** – Recover from failures, auto-scale, automate changes, and plan for DR.
-<img src="http://brandedwhitespace.com/OPERATIONAL_EXCELENCE_files/image008.gif" />
+<img src="https://tridentsys.net/content/images/2020/07/image-61.png" />
 
 </details>
 
 <details>
     <summary>Performance Efficiency</summary>
 * **Performance Efficiency** – Use resources efficiently, adopt serverless, and experiment with newer tech.
-<img src="http://brandedwhitespace.com/OPERATIONAL_EXCELENCE_files/image012.gif" />
+<img src="https://tridentsys.net/content/images/2020/07/image-62.png" />
 
 </details>
 
 <details>
     <summary>Cost Optimization</summary>
 * **Cost Optimization** – Pay only for what you use, tag resources, use spot/reserved instances.
-<img src="http://brandedwhitespace.com/OPERATIONAL_EXCELENCE_files/image014.gif" />
+<img src="https://tridentsys.net/content/images/2020/07/image-63.png" />
 
 </details>
 
