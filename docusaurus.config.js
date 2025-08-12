@@ -54,6 +54,12 @@ const config = {
     locales: ['en'],
   },
 
+  markdown: {
+    mermaid: true,
+  },
+
+  themes: ['@docusaurus/theme-mermaid'],
+
   presets: [
     [
       'classic',
@@ -106,6 +112,12 @@ const config = {
             position: 'right',
           },
         ],
+      },
+      mermaid: {
+        theme: {
+          light: 'neutral', // Light mode style
+          dark: 'forest',   // Dark mode style
+        },
       },
       footer: {
         style: 'dark',

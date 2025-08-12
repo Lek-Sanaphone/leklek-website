@@ -39,6 +39,7 @@ title: 31271 Database Fundamentals
   * **Attributes**: individual data fields (e.g., name, DOB)
   * **Relationships**: how entities relate (e.g., a member rents a book)
 
+---
 
 # 2. Structured Query Language (SQL) - Data Definition Language (DDL) and Data Manipulation Language (DML)
 
@@ -213,3 +214,216 @@ SELECT * FROM Order_T WHERE CustomerID = 1;
 SELECT COUNT(*) FROM Order_T WHERE CustomerID = 1;
 ```
 
+---
+
+# 3. Data Modeling Part II
+
+
+## 3.1 Modeling Relationships
+
+
+### 1. Relationship Types vs. Relationship Instances
+
+* **Relationship Type:** General pattern showing how two or more entities are related (e.g., "Instructor teaches Subject").
+* **Relationship Instance:** Specific example of the relationship in the database (e.g., "Fahimeh teaches Database Fundamentals").
+* Relationship type appears as **lines** in an ERD; instances are **rows in related tables**.
+
+**Example**
+
+```mermaid
+erDiagram
+    INSTRUCTOR ||--o{ SUBJECT : teaches
+```
+
+
+### 2. Degree of Relationships
+
+* **Degree:** Number of entity types involved in the relationship.
+
+  * **Unary:** One entity related to itself.
+  * **Binary:** Two entities involved.
+  * **Ternary:** Three entities involved.
+
+**Example**
+<img src="https://media.cheggcdn.com/media/e76/e76594f9-1098-4a48-94a8-f707635e18ef/chegg14-8.png" />
+
+
+### 3. Cardinality of Relationships
+
+* **Cardinality:** Number of entity instances that can or must be associated.
+
+  * **One-to-One (1:1):** Each record relates to only one in the other table.
+  * **One-to-Many (1\:M):** One record relates to many others.
+  * **Many-to-Many (M\:N):** Many records relate to many others.
+* **Minimum cardinality:** Optional (0) or mandatory (1+).
+* **Maximum cardinality:** Maximum allowed links.
+
+**Example**
+
+```mermaid
+erDiagram
+    PERSON ||--|| PASSPORT : owns
+    INSTRUCTOR ||--o{ SUBJECT : teaches
+    STUDENT }o--o{ COURSE : enrolls
+```
+
+
+### 4. Multiple Relationships Between Entities
+
+* Two entities can have more than one type of relationship at the same time.
+* Example: A professor can **teach courses** and also be **qualified to teach** other courses.
+* May include additional rules, like minimum numbers.
+
+**Example**
+
+```mermaid
+erDiagram
+    PROFESSOR ||--o{ COURSE : teaches
+    PROFESSOR ||--o{ COURSE : qualifiedFor
+```
+
+
+### 5. Relationships with Attribute(s)
+
+* A relationship can have its own attributes.
+* Example: "DateCompleted" in the relationship between Employee and Course.
+* These attributes describe **the association itself**, not the entities.
+
+**Example**
+
+```mermaid
+erDiagram
+    EMPLOYEE ||--o{ ENROLLMENT : completes
+    COURSE   ||--o{ ENROLLMENT : includes
+    ENROLLMENT {
+        date DateCompleted
+    }
+```
+
+
+### 6. Associative Entity – Combination of Relationship and Entity
+
+* Converts an **M\:N relationship** into **two 1\:M relationships**.
+* Acts as both a relationship and an entity with attributes.
+* Usually has a **composite primary key** from the related entities.
+
+**Example**
+
+```mermaid
+flowchart LR
+  subgraph L["Before: M:N Relationship"]
+    E1[EMPLOYEE] ---|M:N| C1[COURSE]
+  end
+
+  L -->|Transform| R
+
+  subgraph R["After: Two 1:M via Associative Entity"]
+    E2[EMPLOYEE] ---|1:M| CERT[CERTIFICATE]
+    C2[COURSE]  ---|1:M| CERT
+  end
+```
+
+
+
+### 7. Multivalued Attributes Can be Represented as Relationships
+
+* If an attribute can have multiple values, store it in a separate related table.
+* Example: Employee skills.
+
+**Example**
+
+
+```mermaid
+erDiagram
+    EMPLOYEE ||--o{ EMPLOYEE_SKILL : has
+    SKILL    ||--o{ EMPLOYEE_SKILL : describes
+
+    EMPLOYEE {
+        int EmployeeID PK
+        string Name
+    }
+    SKILL {
+        string SkillCode PK
+        string SkillTitle
+        string SkillType
+    }
+    EMPLOYEE_SKILL {
+        int EmployeeID PK
+        string SkillCode PK
+    }
+
+```
+
+### 8. Weak and Strong Entities – Identifying Relationship
+
+* **Strong Entity:** Can exist independently; has its own PK.
+* **Weak Entity:** Depends on a strong entity’s PK for identification; **cannot exist without it**.
+* **Identifying Relationship:** Double line; connects strong to weak entity.
+* Weak entity PK (Composite Key) = Strong entity PK + its own partial key.
+
+**Example**
+
+```mermaid
+erDiagram
+    EMPLOYEE ||--o{ DEPENDENT : has
+
+    EMPLOYEE {
+        int EmployeeID "PK"
+        string EmployeeName
+        date BirthDate
+    }
+
+    DEPENDENT {
+        int EmployeeID "PK, FK"
+        string DependentName "PK"
+        date DateOfBirth
+    }
+
+```
+
+
+## 3.2 Notations
+
+* **Crow’s Foot Notation** is commonly used in ERDs:
+  * Boxes = Entities.
+  * Lines = Relationships.
+  * Symbols show cardinality (e.g., one, many).
+* **Solid line:** Normal relationship.
+* **Double line:** Identifying relationship (weak and strong entities).
+* **Attributes:** Shown inside entity boxes; PKs underlined.
+
+**Example**
+
+```mermaid
+erDiagram
+    CUSTOMER ||--o{ ORDER : places
+    EMPLOYEE ||--o{ DEPENDENT : "Identifying (Double Line)"
+    EMPLOYEE ||--o{ DEPARTMENT : "Non-identifying (Single Line)"
+
+    CUSTOMER {
+        int CustomerID PK
+        string CustomerName
+    }
+    ORDER {
+        int OrderID PK
+        date OrderDate
+        int CustomerID FK
+    }
+
+    EMPLOYEE {
+        int EmployeeID "PK"
+        string EmployeeName
+    }
+
+    DEPENDENT {
+        int EmployeeID "PK, FK"
+        string DependentName "PK"
+        date DateOfBirth
+    }
+
+    DEPARTMENT {
+        int DepartmentID "PK"
+        string DepartmentName
+    }
+
+```

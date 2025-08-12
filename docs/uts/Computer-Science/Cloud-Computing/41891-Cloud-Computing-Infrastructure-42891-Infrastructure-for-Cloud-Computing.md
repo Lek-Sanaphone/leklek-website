@@ -145,8 +145,9 @@ Manages virtual and physical resources. Divided into 3 layers:
 - High-speed network providing block-level storage to multiple servers.
 
 ### Storage Virtualization
-- Abstracts/Hide the complexity of physical storage devices and presents logical storage units to users or systems.
-- 2 Main Technologies: 
+- <img src="https://www.interviewbit.com/blog/wp-content/uploads/2022/05/Storage-Virtualization-877x1024.png" height="220"/>
+- Abstracts/Hide the complexity of physical storage devices and treating all storage media as a **single pool of storage**.
+- 2 Main Storage Virtualization Technologies: 
     - **Block-Level Virtualization**
     - **File-level Virtualization**
 - Three Methods:
@@ -297,6 +298,65 @@ Manages virtual and physical resources. Divided into 3 layers:
 ---
 # 3. Cloud Architecture and Management Mechanisms
 ## 3.1 Lecture
+### Infrastructure of Cloud Service Provider
+#### 1. Broadband Networks & Internet Architecture
+- Broadband Networks & Internet Architecture: 
+    - Internet Service Providers (ISP): Use the ISPs backbone as Cloud Service Provider base
+    - Connectionless Packet Switching (Datagram Networks): Divided data into packages (limited size)
+    - Router-Based Interconnectivity: Direct packages to correct address
+- Data Center Technology:
+- Virtualization Technology:
+- Web & Service Technology:
+#### 2. Data Center Technology
+- Facilities: (racks, power, cooling, etc)
+- Computing Hardware: (Server, blade servers, etc)
+- Storage Hardware: (Hard Disk Arrays, SAN, NAS)
+- Network Hardware: (load balancers and accelerator, LAN Fabric, etc)
+#### 3. Virtualization Technology
+- Server: Physical Server -> Virtual Server
+- Storage: Physical Storage -> Virtual Storage
+- Network: Physical Router and Switch -> VLANS
+- Power: Physical (Uninterruptible Power Supply) UPS -> Virtual UPS
+#### 4. Web & Service Technology
+- **Web Technology**: Web technologies for implementation and management
+- **Service Technology**: Service technologies (SOAP, REST, WSDL) form the foundation of cloud computing.
+
+### Cloud Infrastructure Mechanisms
+- **Logical Network Perimeter**: Network isolation for security.
+- **Virtual Server**: Software-based emulation of a physical server.
+- **Cloud Storage Device**: Storage designed for cloud provisioning.
+- **Cloud Usage Monitor**: Software that collects usage data.
+- **Resource Replication**: Creation of multiple identical resource instances.
+- **Ready-made Environment**: Preconfigured development or runtime environments.
+
+### Cloud Management Mechanisms
+- **Remote Administration System**: Central control panel that lets you manage your cloud resources remotely.
+- **Resource Management System**: Tools for internal and external resource administration, ensuring your computing power, storage, and network are used efficiently.
+- **Service Level Agreement (SLA) Management System**: Monitors uptime/downtime (eg. avaliability and reliability) against service agreements.
+- **Billing Management System**: Tracks usage, calculates fees, and issues invoices.
+
+### Cloud Security Mechanisms
+- Encryption
+- Hashing
+- Digital Signatures
+- Public Key Infrastructure (PKI)
+- Identity and Access Management (IAM)
+- Single Sign-On (SSO)
+- Cloud-Based Security Groups
+- Hardened Virtual Server Images
+
+### Fundamental Cloud Architectures
+- **Workload Distribution Architecture**: Balancing load across redundant instances.
+- **Resource Pooling Architecture**: Shared resources for multiple consumers.
+- **Dynamic Scalability Architecture**: Automatic horizontal scaling of resources.
+- **Service Load Balancing Architecture**: Distributes service requests among instances.
+
+### Hosts, Clusters and Resource Pools
+- Hosts, Clusters, Resource Pools: Grouping and managing computing resources.
+### VCenter Management Server Architecture
+- VCenter Management Server: Centralized management with access control, core and distributed services, plug-ins, interfaces.
+### VMotion
+- Migrates running VMs between physical hosts without downtime by transferring state data and resuming execution.
 ## 3.2 Labs
 ---
 # 4. : Cloud Virtualisation and NaaS

@@ -151,6 +151,11 @@ title: 31282 Systems Testing and Quality Management 32571 Enterprise Software Te
 - Verification – Confirms that the software meets specified requirements
 - Validation – Ensures the developed software meets user needs and expectations
 
+Relational:
+- Verification without Validation = Perfect implementation of the wrong solution
+- Validation without Verification = Right idea, broken execution
+- Both Together = Quality software that actually helps users
+
 #### V-model
 | Development Phase     | Corresponding Test Phase |
 | --------------------- | ------------------------ |
@@ -163,15 +168,31 @@ title: 31282 Systems Testing and Quality Management 32571 Enterprise Software Te
 
 ### Types, Techniques, and Levels of Testing
 
-#### Overview:
-- <img src="https://miro.medium.com/v2/resize:fit:1078/1*r6wYRG2gMjvs3aMTf3zfJw.png" height="220" />
+<img src="https://miro.medium.com/v2/resize:fit:1078/1*r6wYRG2gMjvs3aMTf3zfJw.png" height="420" />
 
-#### Testing Types:
+<details>
+  <summary>Static and Dynamic Testing</summary>
+
 - **Static Testing** – Conducted without executing the program (e.g., inspections, analyses, documenting).
 - **Dynamic Testing** – Involves executing the program to observe outputs.
+</details>
 
-#### Levels of Testing based on system abstraction:
-- **[Unit Testing](#unit-testing-techniques)** (On: Code) – Individual components are tested independently to ensure their quality. Focus to detect error on:
+<details>
+  <summary>Functional and Non-Functional Testing</summary>
+
+- **Functional**: What the system does
+  - Login functionality
+  - Calculation accuracy
+  - User registration
+  - Data processing
+- **Non-Functional**: How the system performs
+  - Speed, security, usability, reliability
+</details>
+
+<details>
+  <summary>Levels of Testing based on system abstraction</summary>
+  
+- **Unit Testing** (On: Code) – Individual components are tested independently to ensure their quality. Focus to detect error on:
     - Data structure
     - Program logic and program structure
     - Interface
@@ -189,20 +210,29 @@ title: 31282 Systems Testing and Quality Management 32571 Enterprise Software Te
 behavior and performance.
 - **Acceptance Testing** (On: What users
 really need) – Confirms the software meets customer needs and expectations. 
+</details>
 
-#### (Unit) Testing Techniques:
+<details>
+  <summary>(Unit) Testing Techniques</summary>
+
 - **Black Box** – Based on input-output behavior without internal code knowledge.
 - **White Box** – Focuses on internal code paths and structures.
 - **Grey Box** – Partial knowledge of internal code is used.
+</details>
+
+### Testing in Software Development Lifecycle
+- A software process is a framework that guides the planning, development, testing, and delivery of software.
+- Common models include:
+  - Waterfall (sequential stages)
+  - Agile (iterative and incremental)
+  - V-Model (verification and validation aligned)
+  - DevOps (continuous integration and delivery)
 
 
 ###  Software Processes and Their Role in SQA
 - Software development includes:
     - Requirements → Specification → Design → Code → Testing → Maintenance
 - Testing is a **continuous** activity throughout the lifecycle:
-    - The development of code (unit testing)
-    - The integration of the units into subsystems (integration testing)
-    - The acceptance of the first version of the software system (system testing)
 - Core Activities:
     - Specification: Define requirements
     - Development: Build the product
@@ -211,11 +241,146 @@ really need) – Confirms the software meets customer needs and expectations.
 - Common Process Models:
     - Waterfall, Prototyping, Spiral, Iterative
 
-### Specification and Requirement Engineering
-- Define what the client wants and ensure it is:
-    - Clear, complete, consistent, testable
-    - Approved and traceable
-- Common Traps:
-    - Hidden Evidences, Implicit, Ambiguous, Imprecise (inaccurate), Incomplete, Inconsistency, and Untestability
-- Solutions:
-    - Formal/specification methods, prototyping, reviews and audits
+### Software Process Models
+<details>
+  <summary>1. Waterfall Model</summary>
+
+- Concept: Sequential phases with sign-off before moving to the next stage.
+- Phases:
+  1. Requirements definition
+  2. System/software design
+  3. Implementation & unit testing
+  4. Integration & system testing
+  5. Operation & maintenance
+- Advantages: Structured, easy to manage, quality control at each stage.
+- Drawbacks:
+  - Early freezing of requirements/design leads to mismatches with user needs.
+  - Inflexible partitioning can produce unusable systems.
+  - Requirement gathering is difficult and prone to change.
+</details>
+
+<details>
+  <summary>2. Prototyping Model</summary>
+
+- Concept: Iterative creation of partial system versions to refine requirements.
+- Process: Requirements gathering → Quick design → Build prototype → Customer evaluation → Design refinement → Full development.
+- Advantages: Improves requirement accuracy, engages users early.
+- Drawbacks:
+  - Prototypes often discarded (wasted work).
+  - Incomplete prototypes may miss critical requirements.
+  - Risk of over-refinement ("creeping excellence").
+- Variation: Evolutionary Prototyping – Gradually evolve prototype into final system.
+</details>
+
+<details>
+  <summary>3. Spiral Model</summary>
+
+- Concept: Combines waterfall with continuous risk analysis and iteration.
+- Four Steps per Cycle:
+  1. Determine objectives, constraints, alternatives.
+  2. Assess/reduce risks.
+  3. Develop and validate.
+  4. Review and plan next iteration.
+- Advantages: Strong risk management, adaptable to project needs, high-quality results.
+- Drawbacks:
+  - Heavy documentation and meetings (slow progress).
+  - More of a “meta-model” than a strict development method.
+  - Requires experienced team for risk analysis.
+</details>
+
+<details>
+  <summary>4. Iterative Development Model</summary>
+
+- Concept: Build software in subsets, each adding critical features.
+- Process:
+  - Start with key requirements and architecture.
+  - Develop subset product → Get feedback → Refine design and requirements → Add next subset.
+- Advantages: Adapts to evolving customer needs, improves design through feedback.
+- Drawbacks:
+  - Works best with small teams.
+  - Requires early architecture decisions, which are hard to change later.
+</details>
+
+## 3. Static Testing, RBT, and FMEA
+
+### Static Testing
+- Reviews and analyses software documentation or code without execution, aiming to identify issues early when they are easier and cheaper to fix.
+<details>
+  <summary>Manual Methods</summary>
+
+- Informal reviews – casual peer review.
+- Walkthroughs – presentation for feedback.
+- Technical reviews – specialist checks.
+- Inspections – formal, checklist-driven review.
+- Audits – compliance verification.
+</details>
+<details>
+  <summary>Automated Methods</summary>
+
+- Static Analysis – detects errors, vulnerabilities, quality issues.
+- Lint Checks – enforce coding standards.
+- Formal Methods – mathematical correctness proofs.
+</details>
+<details>
+  <summary>When Used, Focus Areas, Common Requirement Defects</summary>
+  
+- When Used: Throughout design, documentation, and development phases before dynamic testing.
+- Focus Areas: Requirements, design documents, source code, and compliance with legal/security standards.
+- Common Requirement Defects: Incompleteness, ambiguity, inconsistency, untestability, unfeasibility.
+
+</details>
+
+### Risk-Based Testing (RBT)
+- Testing that focuses on areas of highest risk to reduce overall project risk.
+<details>
+  <summary>Risk Types & Benefit</summary>
+  
+- Risk Types:
+  - Product risk – quality issues causing failures.
+  - Project risk – factors affecting project success (e.g., staffing, delays).
+
+- Benefits: Prioritises testing, supports contingency planning, improves productivity, and reduces costs.
+</details>
+
+### Failure Modes and Effects Analysis (FMEA)
+- Systematic technique to identify, prioritise, and mitigate potential failures before they occur.
+- Failure Modes are the ways in which a design/ process/ system/ software might fail.
+- Effects are ways these failures can lead to risks, e.g., waste, defects or harm.
+
+<details>
+  <summary>Perform FMEA: Process Steps</summary>
+
+1. Define **scope**.
+2. Identify **functions**.
+3. Identify **potential failure** modes.
+4. Identify **consequences**.
+5. Rate severity (determine how **serious** the effect is).
+6. Calculate **Risk Priority Number (RPN = Priority × Severity)**.
+7. Identify **root causes**.
+8. Recommend **actions**.
+</details>
+
+- Risk priority number (RPN) is used to quantify the overall ranking of risks (potential failure).
+
+<details>
+  <summary>Failure Mode Types & Risk Categories</summary>
+
+- Failure Mode Types: Loss of function, unintended function, delayed function, poor performance, incorrect value, support system failures.
+- Risk Categories: System functionality, UI, transaction processing, performance, security, compliance, infrastructure, etc. 
+</details>
+
+<details>
+  <summary>Potential Actions & Benefit</summary>
+
+- Potential Actions: Remove requirement, add controls, quarantine risk.
+- Benefits:
+  - No expensive tools required.
+  - Flexible for any project size.
+  - Helps prioritise changes.
+  - Supports building quality into products.
+</details>
+
+
+### Relationship Between Static Testing & FMEA
+- Static testing ensures clear, complete requirements.
+- FMEA extends this by anticipating and ranking potential failures to guide dynamic testing priorities.

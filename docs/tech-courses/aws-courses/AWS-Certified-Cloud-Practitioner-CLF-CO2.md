@@ -799,7 +799,7 @@ Here’s a concise summary of the four topics:
 ### Amazon DynamoDB <img src="https://svgmix.com/uploads/133ab8-aws-dynamodb.svg" width="35" height="35"/> & DynamoDB Accelerator (DAX)
 * **Fully managed, serverless NoSQL key-value database** with **single-digit millisecond latency**.
 * Scales automatically to **millions of requests/second** and stores **trillions of rows**.
-* Key/Value Database
+* Schemaless: Each item can have different attributes. Not every item has to have all attributes (Null).
 * No joins or foreign keys — all data lives in a single table format.
 * **DynamoDB Accelerator - DAX**: Optional in-memory cache for DynamoDB (microsecond read latency).
 
@@ -953,26 +953,26 @@ Here’s a concise summary of the four topics:
 ---
 ## 9. Deployments & Managing Infrastructure at Scale
 
-### Deployments - CloudFormation <img src="https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbIlimm%2FbtrG0CLPqUx%2FAAAAAAAAAAAAAAAAAAAAACe355p_RkyvzpMpVq6Tu07RAP_4NibR1iTObQmf3Tip%2Fimg.jpg%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1753973999%26allow_ip%3D%26allow_referer%3D%26signature%3DOZOvppUX%252BCnXrXY3UGxN6svKhV8%253D" width="35" height="35"/>
+### Provisioning - CloudFormation <img src="https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbIlimm%2FbtrG0CLPqUx%2FAAAAAAAAAAAAAAAAAAAAACe355p_RkyvzpMpVq6Tu07RAP_4NibR1iTObQmf3Tip%2Fimg.jpg%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1753973999%26allow_ip%3D%26allow_referer%3D%26signature%3DOZOvppUX%252BCnXrXY3UGxN6svKhV8%253D" width="35" height="35"/>
 
 * **Infrastructure as Code (IaC)**: Define AWS resources in YAML/JSON.
 * **Declarative**: You say *what* you want; CFN figures out *how* to create/update/delete it.
 * **Best for**: Repeating architecture across accounts or regions.
 * Similar tool: Terraform
 
-### Developer Services - CDK (Cloud Development Kit) <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMvUpo_hGOHq-qAZOqUY2NN7-CLCDoZlX8y2X2or9GkzpYDt8AasUN0ByYIrXITwgqDtI&usqp=CAU" width="35" height="35"/>
+### Provisioning - CDK (Cloud Development Kit) <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMvUpo_hGOHq-qAZOqUY2NN7-CLCDoZlX8y2X2or9GkzpYDt8AasUN0ByYIrXITwgqDtI&usqp=CAU" width="35" height="35"/>
 * <img src="https://miro.medium.com/v2/resize:fit:1400/1*wBGOirOjFXGjhIPOfd3v1g.png" width="600" height="150" />
 * **Define infrastructure using code** (Python, JS, etc.).
 * CDK → Compiles to CloudFormation template.
 * **Best for**: Developers who prefer real code over YAML.
 
-### Deployments - Elastic Beanstalk <img src="https://www.cdnlogo.com/logos/a/70/aws-elastic-beanstalk.svg" width="35" height="35"/>
+### Provisioning - Elastic Beanstalk <img src="https://www.cdnlogo.com/logos/a/70/aws-elastic-beanstalk.svg" width="35" height="35"/>
 
 * **PaaS for web apps**: Deploy your code, AWS handles the infrastructure. Limited to programming language and docker
 * Supports multiple platforms (Node.js, Python, Java, Docker).
 * **Best for**: Quick deployments with minimal infrastructure management.
 
-### Deployments - CodeDeploy <img src="https://i0.wp.com/mistwire.com/wp-content/uploads/2021/09/Arch_AWS-CodeDeploy_64%405x.png?ssl=1" width="35" height="35"/>
+### Application deployment - CodeDeploy <img src="https://i0.wp.com/mistwire.com/wp-content/uploads/2021/09/Arch_AWS-CodeDeploy_64%405x.png?ssl=1" width="35" height="35"/>
 
 * **Automated deployments** to EC2 & on-prem servers. (**Hybrid**)
 * Requires CodeDeploy Agent installed.
@@ -988,7 +988,7 @@ Here’s a concise summary of the four topics:
 * **Build service**: Compile code, run tests, create deployable packages.
 * **Fully managed**, serverless, pay-as-you-go.
 
-### Developer Services - CodePipeline <img src="https://d4.alternativeto.net/XUyleBBHdmrOqoZO9GnEOB_lvWrHbyVnpHvNo5P5G8A/rs:fit:280:280:0/g:ce:0:0/exar:1/YWJzOi8vZGlzdC9pY29ucy9hd3MtY29kZXBpcGVsaW5lXzIzNTIzNi5wbmc.png" width="35" height="35"/>
+### Application deployment - CodePipeline <img src="https://d4.alternativeto.net/XUyleBBHdmrOqoZO9GnEOB_lvWrHbyVnpHvNo5P5G8A/rs:fit:280:280:0/g:ce:0:0/exar:1/YWJzOi8vZGlzdC9pY29ucy9hd3MtY29kZXBpcGVsaW5lXzIzNTIzNi5wbmc.png" width="35" height="35"/>
 * <img src="https://miro.medium.com/v2/resize:fit:1400/1*6tcbMASoHXM6MSDPIk_J0Q.png" height="100" width="420" />
 * **CI/CD orchestration**: Connect CodeCommit → CodeBuild → CodeDeploy.
 * **Best for**: Automating code integration & delivery processes.
@@ -998,7 +998,7 @@ Here’s a concise summary of the four topics:
 * **Secure artifact repo** (npm, pip, Maven, etc.).
 * Store software packages/dependencies on AWS.
 
-### Deployments - AWS Systems Manager (SSM) <img src="https://cloud-icons.onemodel.app/aws/Architecture-Service-Icons_01312023/Arch_Management-Governance/64/Arch_AWS-Systems-Manager_64@5x.png" width="35" height="35"/>
+### Configuration management - AWS Systems Manager (SSM) <img src="https://cloud-icons.onemodel.app/aws/Architecture-Service-Icons_01312023/Arch_Management-Governance/64/Arch_AWS-Systems-Manager_64@5x.png" width="35" height="35"/>
 - A **hybrid operations** management tool for AWS and on-premises servers.
 - Helps **automate** tasks like patching, running commands, and storing configurations.
 - **Centralized** tool for monitoring, managing, and troubleshooting **AWS resources**. **Gives operational insights** to quickly detect and resolve issues affecting applications.
@@ -1014,6 +1014,14 @@ Here’s a concise summary of the four topics:
 - Store config and secrets as string or encrypted string.
 - Supports versioning and access control with IAM.
 - Fully serverless and scalable.
+
+### Configuration management - AWS OpsWorks
+- Managed configuration management service that runs Chef and Puppet.
+- Automates how servers are configured, deployed, and managed across EC2 instances or on-premises servers.
+- Supports hybrid environments.
+- Best for: teams already using Chef/Puppet and wanting AWS to manage the control servers.
+
+
 ---
 ## 10. Leveraging the AWS Global Infrastructure
 
@@ -1023,7 +1031,7 @@ Here’s a concise summary of the four topics:
 * AWS global infrastructure includes:
   * **Regions**: Independent geographies.
   * **Availability Zones (AZs)**: Isolated data centers within a region.
-  * **Edge Locations**: For caching content via CloudFront.
+  * **Edge Locations**: For cache **copies** of the content (images, videos, files) via CloudFront.
 * Benefits: Reduced latency, improved fault tolerance, and disaster recovery support.
 
 ### Amazon Route 53 (DNS + Routing Policies) <img src="https://cloud-icons.onemodel.app/aws/Architecture-Service-Icons_01312023/Arch_Networking-Content-Delivery/64/Arch_Amazon-Route-53_64@5x.png" width="35" height="35"/>
@@ -1072,7 +1080,8 @@ Here’s a concise summary of the four topics:
 ### AWS Wavelength <img src="https://miro.medium.com/v2/resize:fit:530/1*Ccgza3OWc4K2hEAQUARkXw.png" width="35" height="35"/>
 
 * Deploy AWS services (e.g., EC2, VPC) **at the 5G edge** within telecom providers' infrastructure.
-* Enables **ultra-low latency** for mobile/IoT use cases (e.g., smart cities, AR/VR, live video, gaming).
+* Enables **ultra-low latency** for mobile/IoT that optimize with 5G. Use cases (e.g., smart cities, AR/VR, live video, gaming).
+* Not the best choice if the game isn't primarily targeting mobile 5G users.
 * Keeps user traffic **within the telecom network**, enhancing speed and privacy.
 
 ### AWS Local Zones <img src="https://cloud-icons.onemodel.app/aws/Architecture-Service-Icons_01312023/Arch_Compute/64/Arch_AWS-Local-Zones_64@5x.png" width="35" height="35"/>
@@ -1403,7 +1412,10 @@ Here’s a concise summary of the four topics:
 * Find software vulnerabilities in **EC2, ECR Images, and Lambda functions.**
 * Uses **CVE database** for vulnerability checks.
 * Findings integrate with **Security Hub** and **EventBridge**.
-* Automate security
+* Features:
+    * Automate security assessments
+    * Analyze against unintended network accessibility
+    * Inspect running operating systems (OS) against known vulnerabilities
 * **Exam Tip:** Inspector performs **continuous vulnerability assessment** for EC2, ECR, Lambda.
 
 
@@ -1596,7 +1608,14 @@ Here’s a concise summary of the four topics:
 ### Trusted Advisor
 
 * Provide a real time guidance to help user provision their aws resources.
-* Performs checks across 6 categories "**security, cost optimization, performance, fault tolerance, service limits, and operational excellence**". Full features require Business or Enterprise support plans.
+* Performs checks across 6 categories:
+    * **Security** – detecting vulnerabilities
+    * **Cost optimization** - finding idle/unused/unattached resources
+    * **Performance** – improving speed and efficiency
+    * **Fault tolerance** – improving reliability
+    * **Service limits** – warning about usage nearing limits
+    * **Operational excellence**
+* Full features require Business or Enterprise support plans.
 
 
 ### AWS Support Plans
