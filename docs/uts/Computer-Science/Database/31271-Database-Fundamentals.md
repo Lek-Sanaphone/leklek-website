@@ -4,7 +4,7 @@ description: This course builds core skills in database
 title: 31271 Database Fundamentals
 ---
 # Database Fundamentals - Summary
-# 1. Introduction to DBMS and Data Modeling
+# 1. Introduction to DBMS and Data Modeling Part I
 
 ## Introduction to Database Concepts
 

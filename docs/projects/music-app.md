@@ -4,7 +4,7 @@ title: Music App
 sidebar_label: Music App
 ---
 
-The **Music App** is a React Native mobile application that allows users to play music with custom playback effects like:
+<!-- The **Music App** is a React Native mobile application that allows users to play music with custom playback effects like:
 
 - 🎧 Slowed Reverb
 - 🚀 Nightcore
@@ -22,4 +22,6 @@ The **Music App** is a React Native mobile application that allows users to play
 You can add images like this:
 
 ```md
-![App Screenshot](/img/music-app.png)
+![App Screenshot](/img/music-app.png) -->
+
+In-Progess :)

@@ -242,6 +242,15 @@ Manages virtual and physical resources. Divided into 3 layers:
             - Right-click the VM > Settings
             - Go to Network Adapter
             - Set to: `Custom: vmnet6` (for internal lab network)
+
+    <details>
+    <summary>Touble-shooting: If web browser is not showing</summary>
+    <img src="https://www.thomasmaurer.ch/wp-content/uploads/2015/04/VMware-ESXi-6.0-Troubleshooting-Options.png"/>
+    - Select f2 in vm then select the 'Reset System Configuration' option to reset then f11
+    - Then Login:`root`, then `enter` no password
+    - Lastly, configure the IPv4 of each
+    </details>
+
     </details>
 
     <details>
@@ -256,8 +265,8 @@ Manages virtual and physical resources. Divided into 3 layers:
         - <img src="https://us1.discourse-cdn.com/spiceworks/optimized/4X/d/6/1/d614135e55fbf8311206531723c1a8c4f6b69b3d_2_651x500.png" />
         - Open a web browser (preferably Firefox).
         - In the address bar, enter the IP address of your ESXi host:
-            - For ESXi01: https://172.20.20.51/
-            - For ESXi02: https://172.20.20.52/
+            - For ESXi01: http://172.20.20.51/
+            - For ESXi02: http://172.20.20.52/
         - Click “Accept the risk and continue” (bypass SSL warning).
         - Login with: Username: root, Password: VMware1!
         ---
@@ -304,9 +313,6 @@ Manages virtual and physical resources. Divided into 3 layers:
     - Internet Service Providers (ISP): Use the ISPs backbone as Cloud Service Provider base
     - Connectionless Packet Switching (Datagram Networks): Divided data into packages (limited size)
     - Router-Based Interconnectivity: Direct packages to correct address
-- Data Center Technology:
-- Virtualization Technology:
-- Web & Service Technology:
 #### 2. Data Center Technology
 - Facilities: (racks, power, cooling, etc)
 - Computing Hardware: (Server, blade servers, etc)
@@ -358,6 +364,102 @@ Manages virtual and physical resources. Divided into 3 layers:
 ### VMotion
 - Migrates running VMs between physical hosts without downtime by transferring state data and resuming execution.
 ## 3.2 Labs
+
+<details>
+    <summary>Main purpose of Lab</summary>
+
+```mermaid
+flowchart LR
+    A[ESXi01] --- C[Shared VMFS Datastore]
+    B[ESXi02] --- C
+    D[iSCSI Storage Appliance - FreeNAS 172.20.20.50] --> C
+
+    subgraph Goal
+        C --> E[Enable both ESXi hosts to access the same shared storage via iSCSI and VMFS]
+    end
+```
+
+- The purpose of this lab is to configure ESXi hosts to connect to an existing iSCSI storage appliance and create a shared VMFS datastore for use by multiple hosts
+
+</details>
+
+<details>
+    <summary>iSCSI (VMFS) on ESXi</summary>
+    
+    <details>
+    <summary>Step 1 - Prepare/Setup the environment</summary>
+    - Open VMware Workstation, Open a virtual machine
+    - Lab .vmx files: ESXi 1, ESXi 2, FreeNAS iSCSI
+    - Configure the setting of each:
+        - Network Adapter: `custom vmnet6`
+    - Start VMs
+    </details>
+
+    <details>
+    <summary>Step 2 - Setup FreeNAS iSCSI</summary>
+    - Enter `1` for `Configue Network Interface`
+    - Purpose: Configue IPv4:
+        - Select an interface: `1` which is `em0`
+        - Delete interface: `n`
+        - Remove the current setting of this interface: `n`
+        - Configure interface for DHCP: `n`
+        - Configure IPv4: `y`
+            - IPv4 Address: `172.20.20.50`
+            - IPv4 Netmask: `24`
+        - Configure IPv6: `n`
+    </details>
+
+    <details>
+    <summary>Step 3 - Set up ESXi 1 & 2</summary>
+    - Login with: Username: root, Password: VMware1!
+    - IP Configue, Select the ipv4 option
+    - ESXi01: 172.20.20.51, Gateway: 172.20.20.2
+    - ESXi02: 172.20.20.52, Gateway: 172.20.20.2
+    ---
+    - For ESXi01: http://172.20.20.51/
+    - For ESXi02: http://172.20.20.52/
+    - Click “Accept the risk and continue” (bypass SSL warning).
+    - Login with: Username: root, Password: VMware1!
+
+    <details>
+    <summary>Touble-shooting: If web browser is not showing</summary>
+    <img src="https://www.thomasmaurer.ch/wp-content/uploads/2015/04/VMware-ESXi-6.0-Troubleshooting-Options.png"/>
+    - Select f2 in vm then select the 'Reset System Configuration' option to reset then f11
+    - Then Login:`root`, then `enter` no password
+    - Lastly, configure the IPv4 of each
+    </details>
+    </details>
+
+    <details>
+    <summary>Step 4 - Setup EXSi 1 & 2 to connect with FreeNAS and Create datastore</summary>
+    - <img src="https://www.nakivo.com/wp-content/uploads/2016/12/adding_a_software_iscsi_adapter_for_connecting_network_storage_to_an_esxi_host.webp" />
+    - <img src="https://www.nakivo.com/wp-content/uploads/2016/12/configuring_esxi_network_storage_-_adding_an_iscsi_target.webp"/>
+    - On web (for both), Click in Storage -> Adapter -> Software iSCSI -> vmhba64
+    - Configure: `Enable`, `add static` and `add dynamic target` targeting to the FreeNAS
+        - Click to add address: 172.20.20.50
+    ---
+    - Create datastore:
+        - VMFS
+        - Set Name & Link to FreeNAS ISCSI Disk for both
+
+    </details>
+
+    <details>
+    <summary>Step 5 - Assign License & Create VM</summary>
+    - Add [Free license key](https://gist.github.com/Nyquist-CABJ/da70399eee8bdce0043858614ab22885)
+    - Create VM (Same as Lab 2):
+        - Only select your datastore as the storage
+        - Edit Settings:
+        - Attach the TinyCore-current.iso from the local datastore (ISO folder).
+        - Check the “Connect” box for the CD/DVD drive and Save.
+    ---
+    - Boot the VM (Everything working, close all running vms)
+    </details>
+</details>
+
+
+
+
 ---
 # 4. : Cloud Virtualisation and NaaS
 ## 4.1 Lecture

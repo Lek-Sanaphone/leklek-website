@@ -3,6 +3,7 @@ id: AWS-Certified-Solutions-Architect-Associate-SAA-C03
 description: Reference from Adrian Cantrill (cantrill)
 title: AWS Certified Solutions Architect Associate SAA-C03
 ---
+Tips: [Create multiples AWS Account using 1 Email](https://youtu.be/hnien_pKs4g?si=-wxAnnH3NpHf9Hag)
 
 ## 1. Cloud, Networking and Technical Fundamentals
 ### Cloud Computing
