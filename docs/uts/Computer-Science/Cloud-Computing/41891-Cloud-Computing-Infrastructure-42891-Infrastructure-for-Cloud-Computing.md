@@ -143,6 +143,7 @@ Manages virtual and physical resources. Divided into 3 layers:
 -  File-level storage shared over a network to multiple clients.
 #### Storage Area Network (SAN)
 - High-speed network providing block-level storage to multiple servers.
+- Centralizes Storage, Supports Scalability, Improves Availability & Reliability, Enables Advanced Storage Features
 
 ### Storage Virtualization
 - <img src="https://www.interviewbit.com/blog/wp-content/uploads/2022/05/Storage-Virtualization-877x1024.png" height="220"/>
