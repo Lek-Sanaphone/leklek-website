@@ -427,3 +427,184 @@ erDiagram
     }
 
 ```
+
+# 4. Data Modeling Part III
+
+## Supertypes and Subtypes
+* **Supertype**: general entity with common attributes.
+* **Subtype**: subgroup with distinct attributes or relationships.
+* **Attribute inheritance**: subtypes inherit all supertype attributes.
+* Rule: create subtypes only if specific attributes/relationships exist.
+* PK of supertype = also PK (and FK) in each subtype.
+
+### Example Cases
+```mermaid
+erDiagram
+    VEHICLE {
+        int Vehicle_ID PK
+        string Vehicle_Name
+        int Price
+        int Engine_Displacement
+    }
+
+    CAR {
+        int No_Of_Passengers
+    }
+
+    TRUCK {
+        int Capacity
+        string Cab_Type
+    }
+
+    MOTORCYCLE {
+        string Helmet_ID FK
+    }
+
+    HELMET {
+        string Helmet_ID PK
+        string Helmet_Size
+    }
+
+    VEHICLE ||--o{ CAR : is_a
+    VEHICLE ||--o{ TRUCK : is_a
+    VEHICLE ||--o{ MOTORCYCLE : is_a
+    MOTORCYCLE ||--|| HELMET : allocated
+```
+* Vehicles: CAR, TRUCK, MOTORCYCLE share attributes → VEHICLE supertype.
+
+```mermaid
+erDiagram
+    EMPLOYEE {
+        int Employee_Number PK
+        string Employee_Name
+        string Address
+        date Date_Hire
+    }
+
+    HOURLY_EMPLOYEE {
+        int Hourly_Rate
+    }
+
+    SALARIED_EMPLOYEE {
+        int Annual_Salary
+        float Stock_Option
+    }
+
+    CONSULTANT {
+        int Contract_Number
+        float Billing_Rate
+    }
+
+    EMPLOYEE ||--o{ HOURLY_EMPLOYEE : is_a
+    EMPLOYEE ||--o{ SALARIED_EMPLOYEE : is_a
+    EMPLOYEE ||--o{ CONSULTANT : is_a
+
+```
+* EMPLOYEE: Hourly, Salaried, Consultant → separate subtypes to avoid nulls in a single table.
+
+
+## Relationships and Subtypes
+
+```mermaid
+flowchart TD
+    PAT["PATIENT (supertype)"]
+    OUT["OUTPATIENT"]
+    RES["RESIDENT_PATIENT"]
+    DOC["DOCTOR"]
+
+    PAT --> OUT
+    PAT --> RES
+    PAT -- "treated by" --> DOC
+```
+* If all subtypes share a relationship → define at **supertype level**.
+
+```mermaid
+flowchart TD
+    VEH["VEHICLE (supertype)"]
+    MOTO["MOTORCYCLE (subtype)"]
+    HEL["HELMET"]
+
+    VEH --> MOTO
+    MOTO -- "allocated" --> HEL
+```
+* If only some subtypes have unique relationships → define at **subtype level**.
+
+---
+
+## 6. Generalization vs Specialization
+
+* **Generalization** (bottom-up): combine similar entity sets into a more general supertype
+* **Specialization** (top-down): create subtypes from a supertype.
+  * Top-down process: start from a supertype and define one or more subtypes that capture distinct attributes/relationships.
+
+```mermaid
+erDiagram
+    PART {
+        string Part_No PK
+        string Part_Name
+    }
+
+    MANUFACTURED_PART {
+        string Production_Line
+    }
+
+    PURCHASED_PART {
+        string Import_Code
+    }
+
+    SUPPLIER {
+        string Supplier_ID PK
+        string Sup_Name
+        string Sup_Phone_No
+        string Sup_Address
+    }
+
+    SUPPLIES {
+        string Part_No FK
+        string Supplier_ID FK
+        date Supply_Date
+        float Unit_Price
+        PK "Part_No, Supplier_ID, Supply_Date"
+    }
+
+    PART ||--o{ MANUFACTURED_PART : is_a
+    PART ||--o{ PURCHASED_PART : is_a
+    PURCHASED_PART ||--o{ SUPPLIES : supplied_by
+    SUPPLIER ||--o{ SUPPLIES : supplies
+
+```
+* Example: PART specialized into MANUFACTURED PART and PURCHASED PART.
+* Issues: multivalued attributes and data duplication → solved with **associative entities** (e.g., SUPPLIES linking PART and SUPPLIER).
+
+---
+
+## 7. Constraints in Supertype/Subtype Relationships
+
+* **Completeness Constraint**:
+
+  * Total specialization → every supertype instance must belong to a subtype.
+    * Every supertype entity must be in at least one subtype.
+    * Example: Every EMPLOYEE must be either Hourly, Salaried, or Consultant.
+    * No employee exists outside these three.
+  * Partial specialization → some may not belong to any subtype.
+    * Some supertype entities may not belong to any subtype.
+    * Example: VEHICLE supertype with subtypes CAR and TRUCK.
+    * A MOTORCYCLE might exist but not have special attributes → it stays only in VEHICLE.
+* **Disjointness Constraint**:
+
+  * Disjoint → instance belongs to only one subtype.
+    * Example: An employee is either Hourly or Salaried or Consultant — but not two at once.
+  * Overlapping → instance may belong to multiple subtypes.
+    * Example: An employee can be both Salaried and a Consultant at the same time.
+* **Subtype Discriminator**:
+
+  * Attribute that decides subtype membership.
+  * Can be simple (disjoint) or composite (overlapping).
+  * Simple discriminator (for disjoint cases)
+    * A single attribute in the supertype indicates the subtype.
+    * Example: `Employee_Type ∈ {H, S, C}` tells us if EMPLOYEE is Hourly, Salaried, or Consultant.
+  * Composite discriminator (for overlapping cases)
+    * Multiple boolean attributes indicate membership in subtypes.
+    * Example: `H? S? C?` with Y/N values.
+    * `YNY` = employee is Hourly and Consultant.
+    * `NYN` = employee is only Salaried.

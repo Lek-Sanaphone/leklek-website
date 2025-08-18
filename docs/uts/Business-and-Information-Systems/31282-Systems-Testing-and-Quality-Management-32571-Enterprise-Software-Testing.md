@@ -384,3 +384,95 @@ really need) – Confirms the software meets customer needs and expectations.
 ### Relationship Between Static Testing & FMEA
 - Static testing ensures clear, complete requirements.
 - FMEA extends this by anticipating and ranking potential failures to guide dynamic testing priorities.
+
+## 4. Black-box Testing
+### (Dynamic) Software Testing Life Cycle
+1. Define test objectives.
+2. Design test cases.
+3. Develop test scripts.
+4. Run test scripts.
+5. Evaluate results.
+6. Generate feedback and change system.
+7. Regression testing.
+
+### Systematic Testing
+* Explicit discipline for creating, executing, and evaluating tests.
+* Recognizes complete testing is impossible; uses chosen criteria.
+* Must include rules for test creation, completeness measure, and stopping point.
+
+### Black-box Testing
+* Based on functional specifications (inputs, actions, outputs).
+* Occurs throughout the life cycle, requires fewer resources than white-box testing.
+* Supports unit, load, availability testing; can be automated.
+
+**Advantages:** independent of software internals, early detection, automation friendly.
+
+
+### Black-box Methods
+```mermaid
+flowchart TD
+    A[Black-box Testing] --> B[Functionality Coverage]
+    A --> C[Input Coverage]
+    A --> D[Output Coverage]
+
+    %% Functionality Coverage
+    B --> B1[Partition requirements]
+    B --> B2["Design simple test cases (one per requirement)"]
+    B --> B3["Systematic but limited - assumes independent requirements"]
+
+    %% Input Coverage
+    C --> C1["Exhaustive testing (usually impractical)"]
+    C --> C2["Input partitioning - Equivalence Classes (valid/invalid)"]
+    C2 --> C2a["Cover each EC at least once"]
+    C --> C3["Shotgun (random inputs)"]
+    C --> C4["Robustness - Boundary Value Analysis"]
+
+    %% Output Coverage
+    D --> D1["Exhaustive outputs (sometimes feasible)"]
+    D --> D2["Output partitioning (Equivalence Classes)"]
+    D --> D3["Drawback - hard to design inputs for outputs"]
+
+```
+
+### a. Functionality Coverage
+
+* Partition functional specs into small requirements.
+* Create simple test cases for each requirement.
+* Systematic but treats requirements as independent (not full acceptance testing).
+
+### b. Input Coverage
+
+* Ensures all possible inputs are handled.
+* **Methods:**
+  * Exhaustive: test all inputs (impractical for large domains).
+  * Input partitioning: group into equivalence classes (valid/invalid).
+  * Shotgun: random inputs.
+  * Robustness: boundary value analysis.
+* **Examples:**
+  * Partition inputs into valid/invalid ranges.
+  * Create minimal test cases for each partition.
+
+#### c. Robustness Testing
+* Ensures program doesn’t crash on unexpected inputs.
+* Focus on **boundary values** (e.g., empty file, stack full/empty).
+* More systematic than shotgun.
+
+#### d. Input Coverage Review
+* Exhaustive impractical, input partitioning practical.
+* Shotgun + partitioning increases confidence.
+* Robustness complements other methods.
+
+
+### 6. Output Coverage
+
+* Tests based on possible outputs (instead of inputs).
+* Harder: requires mapping inputs to outputs.
+* Effective in finding problems but often impractical.
+
+**Methods:**
+
+* Exhaustive output coverage (test every possible output, feasible in some cases).
+* Output partitioning: group outputs into equivalence classes (e.g., number of values, zeros present).
+* Drawback: finding inputs to trigger specific outputs is time-consuming.
+
+
