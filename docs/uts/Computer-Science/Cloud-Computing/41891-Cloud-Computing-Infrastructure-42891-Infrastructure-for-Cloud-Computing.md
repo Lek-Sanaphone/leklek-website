@@ -405,6 +405,7 @@ flowchart LR
         - Remove the current setting of this interface: `n`
         - Configure interface for DHCP: `n`
         - Configure IPv4: `y`
+            - Interface name [em0]: `em0`
             - IPv4 Address: `172.20.20.50`
             - IPv4 Netmask: `24`
         - Configure IPv6: `n`
@@ -442,6 +443,11 @@ flowchart LR
     - Create datastore:
         - VMFS
         - Set Name & Link to FreeNAS ISCSI Disk for both
+        ---
+        - Fail to create datastore:
+            - Remove the default VM(s) and delete the default datastore (desy-vmfs1)
+            - Now it should work
+    - Both should be able to see the new create storage(s) as both are connected to same FreeNas
 
     </details>
 
@@ -464,7 +470,184 @@ flowchart LR
 ---
 # 4. : Cloud Virtualisation and NaaS
 ## 4.1 Lecture
+
+### Building an IaaS Environment
+
+* Core resources: virtual servers, cloud storage, and virtual networks.
+* Standardized configurations include hardware, OS, processors, memory, and virtualization layers.
+* All cloud services rely on interconnected networks, primarily through the Internet’s backbone ISPs.
+
+### Internet Architecture
+
+* **Tier-1 ISPs**: Global backbones interconnecting multinational networks.
+* **Tier-2 ISPs**: Regional/national providers.
+* **Tier-3 ISPs**: Local/organizational access networks.
+* Together, they form the “network of networks,” interconnected by routers and backbones that enable remote provisioning of cloud resources.
+
+### Network Virtualization
+
+* Enables multiple isolated virtual networks to share the same physical substrate.
+* Each virtual network consists of virtual nodes and links, independent from hardware.
+* VMware concepts:
+
+  * **vNIC** emulates physical NICs in software.
+  * **vSwitch** forwards frames between virtual and physical interfaces, with optional bandwidth/security controls.
+  * **Virtual ports, Uplink ports, Uplinks** bridge virtual and physical networks.
+    * Virtual ports: Logical connection points on a vSwitch for VMs and other virtual/physical devices.
+    * Uplink ports: vSwitch ports bound to physical adapters, bridging the virtual network to the physical network.
+    * Uplinks:
+
+* Diagram VMware data-plane placement:
+    * vNIC/vPort/vSwitch/pNIC map how VM traffic reaches the physical network
+```mermaid
+graph LR
+  VM1[VM] -- vNIC --> vPort1((Virtual Port))
+  vPort1 --> vSwitch[vSwitch]
+  vSwitch -- Uplink Port --> pNIC[pNIC/Uplink]
+  pNIC --> PHY[Physical Network]
+```
+
+### Data Center Network Design & Overlay Network
+
+* Traditional racks connect servers to **Top-of-Rack (ToR) switches**.
+#### Challenges with virtualization:
+* **Isolation**: preventing cross-VM security risks.
+* By default, VMs can talk to each other; you must segment workloads (e.g., finance vs. engineering) and protect sensitive domains.
+* **Connectivity**: ensuring communication across data centers using routable IPs.
+* Within one DC, L2/MAC identification works; across DCs you need L3/IP that is globally routable—introducing addressing, routing, and multi-site constraints
+
+#### Solution: Network virtualization with tunneling protocols.
+* <img src="https://community.cisco.com/t5/image/serverpage/image-id/104874i734DAC7EAED3CB7D?v=v2" height="300" />
+* **Overlay network protocols** - Packet encapsulation methods: **VXLAN**, **NVGRE**, **GRE**.
+    * VXLAN creates scalable virtual networks over physical infrastructure.
+    * Overlay networks provide logical network topologies decoupled from physical networks.
+* Virtual overlays encapsulate tenant Layer 2 frames inside routable Layer 3 packets (e.g., VXLAN, NVGRE, GRE), providing isolation and scalable multi-tenant connectivity over existing IP fabrics.
+
+```mermaid
+sequenceDiagram
+    participant VM_A as VM-A (Tenant X)
+    participant vSW_A as vSwitch/ESXi-A
+    participant IP_Fabric as IP Underlay (L3)
+    participant vSW_B as vSwitch/ESXi-B
+    participant VM_B as VM-B (Tenant X)
+
+    VM_A->>vSW_A: L2 frame (dst=VM-B MAC)
+    vSW_A->>IP_Fabric: Encapsulate (VXLAN/NVGRE/GRE)
+    IP_Fabric-->>vSW_B: Routed L3 packet (overlay payload)
+    vSW_B->>VM_B: Decapsulate → original L2 frame delivered
+```
+* Brief: The tenant L2 frame is wrapped (encapsulated) in an L3 packet, routed across the underlay, then unwrapped at the destination host—preserving L2 semantics without stretching the physical L2 domain.
+
+* Overlay Solve:
+    * Isolation: Each tenant gets its own virtual network (VNI/VSID), co-existing yet isolated on shared hardware. 
+    * Connectivity: Overlays ride on routable L3 underlays, enabling cross-rack and cross-DC reachability without extending L2 domains.
+
+### Business Model and NaaS
+
+* Roles:
+
+  * **Infrastructure Providers (InP)** manage physical resources.
+  * **Service Providers (SP)** create virtual networks.
+  * **Users (U)** consume services.
+  * **Brokers (B)** mediate between InP, SP, and users.
+* **NaaS** delivers networking capabilities on demand, extending the cloud service model.
+
+
+
 ## 4.2 Labs
+
+<details>
+<summary>Main purpose of Lab</summary>
+
+```mermaid
+flowchart LR
+  VCSA["vCenter Server"]
+  ESXi01["ESXi01 Host"]
+  ESXi02["ESXi02 Host"]
+  STORAGE["FreeNAS Storage"]
+
+  VCSA --> ESXi01
+  VCSA --> ESXi02
+
+  ESXi01 <-->|vMotion| ESXi02
+  ESXi01 --- STORAGE
+  ESXi02 --- STORAGE
+```
+
+- Introdue vCenter, vCenter manages both hosts.
+- Both hosts connect to shared storage.
+- Perform vMotion, vMotion allows VMs to move between hosts.
+</details>
+
+<details>
+    <summary>vCenter Server and VM migration</summary>
+
+<details>
+        <summary>Step 1 - Set up 4 vm: ESXi 1, ESXi 2, VCSA7.0, FreeNAS iSCSI</summary>
+
+- Copy all files in Cloud_Computing/Master to your student_id folder
+- Initial set up like in Lab 3, `IPv4`, `Subnet`, `Network Config`
+    - All configure network need to be vmnet6
+- VCSA7.0 is set IPv4: `172.20.20.94` and correct subnet by default
+
+</details>
+
+<details>
+    <summary>Step 2 - Start the VCSA7</summary>
+
+- Go to the web (Managment Portal) -> https://vcsa.vsphere.local:5480
+    - <img src="https://masteringvmware.com/wp-content/uploads/2018/07/vcsa-appliance-management-login.jpg" />
+    - Login with user `root` password: `VMware1!`
+    - Go to the `Services` section: Tick the `VMware vCenter Server` then start if it haven't start
+
+- Login to the vcsa machine Administration portal: `https:// vcsa.vsphere.local:443` or `https://172.20.20.94`
+    - Click on the given option: LAUNCH VSPHERE CLIENT (HTML5)
+        - <img src="https://higherlogicdownload.s3.amazonaws.com/BROADCOM/VMW_images/91839i225017775C88F234.jpg"/>
+    - Login with the credentials: Username: `administrator@vsphere.local` Password: `VMware1!`
+        - <img src="https://vcloud-lab.com/files/images/061c725a-cbd4-43e0-8377-3214987bfce7.png"/>
+</details>
+
+<details>
+    <summary>Step 3 - Login to the webpage of ESXi 1 and 2</summary>
+    - Remove the first dynamic and static and add the FreeNAS ipv4 to both
+    - Create your datastore from FreeNAS storage. 
+        - Only 1 would be fine, both ESXi will be able to see both as both are connect to the FreeNAS 
+    - Create VM in each ESXi 1 & 2. 
+        - Let one vm store in local storage (default datastore1) of ESXi 
+        - And the other one store in your FreeNAS datastore
+</details>
+
+<details>
+    <summary>Step 4 - Verify Licensing for vCenter and hosts</summary>
+
+    - The required licenses have been installed in the provided files. No further action is required for this
+task.
+    - Remove the exist host if have
+    - Add VM host to the vsphere: right click in Datacenter-my `add Host` (In the image is it name as SA-Datacenter)
+        - <img src="https://www.virtualizationhowto.com/wp-content/uploads/2018/10/VMware-vSphere-6.7-Update-1-Available-for-Download.png"/>
+    - Enter your VMs IPv4 to the box, repeat for both
+        - So vCenter manages both hosts
+        - <img src="https://esxsi.com/wp-content/uploads/2018/04/windows_vcenter67_19.png"/>
+        - User name: `root`, Password: `VMware1!`
+        - Next -> License 3 -> Disabled -> Next -> Finish
+</details>
+
+<details>
+    <summary>Step 5 - Vmotion</summary>
+
+    - In vsphere: right click in the VM (VM that is store in ESXi local storage) that you want to migrate
+        1. But first (right left in VM) Edit Setting, change the CD/DVD drive 1 from `Datastore ISO File` to `Client Device`
+        2. Right click, Migrate
+            - <img src="https://www.codyhosterman.com/wp-content/uploads/2022/07/StoragevMotionStep1.png" />
+            - Change storage only -> select the storage that is share in the FreeNas -> finish
+            - Change compute resource only -> next -> next -> finish
+    - Now VM in ex: `172.20.20.51` (the VM you choose to store in local ESXi) will then be migrate to `172.20.20.52` ESXi
+</details>
+
+</details>
+
+
+
 ---
 # 5. Data centre Fundamentals: Virtualisation for Data Centres
 ## 5.1 Lecture

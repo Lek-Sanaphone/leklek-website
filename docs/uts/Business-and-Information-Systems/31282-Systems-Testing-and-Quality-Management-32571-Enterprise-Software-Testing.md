@@ -387,6 +387,7 @@ really need) – Confirms the software meets customer needs and expectations.
 
 ## 4. Black-box Testing
 ### (Dynamic) Software Testing Life Cycle
+0. Software artifact
 1. Define test objectives.
 2. Design test cases.
 3. Develop test scripts.
@@ -463,7 +464,7 @@ flowchart TD
 * Robustness complements other methods.
 
 
-### 6. Output Coverage
+### C. Output Coverage
 
 * Tests based on possible outputs (instead of inputs).
 * Harder: requires mapping inputs to outputs.

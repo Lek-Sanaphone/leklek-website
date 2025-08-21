@@ -30,7 +30,7 @@ title: 31271 Database Fundamentals
 * It establishes **relationships** between tables (e.g., Rentals refer to both Member and Book).
 * In ERDs, FKs are **implied by lines**, not listed as attributes.
 
-### **4. Entity Relationship Diagrams (ERD)**
+### 4. Entity Relationship Diagrams (ERD)
 
 * **Graphical representation** of a database model.
 * Composed of:
@@ -221,9 +221,9 @@ SELECT COUNT(*) FROM Order_T WHERE CustomerID = 1;
 
 ## 3.1 Modeling Relationships
 
-
-### 1. Relationship Types vs. Relationship Instances
-
+### Relationship 
+<details>
+<summary>1. Relationship Types vs. Relationship Instances</summary>
 * **Relationship Type:** General pattern showing how two or more entities are related (e.g., "Instructor teaches Subject").
 * **Relationship Instance:** Specific example of the relationship in the database (e.g., "Fahimeh teaches Database Fundamentals").
 * Relationship type appears as **lines** in an ERD; instances are **rows in related tables**.
@@ -234,10 +234,10 @@ SELECT COUNT(*) FROM Order_T WHERE CustomerID = 1;
 erDiagram
     INSTRUCTOR ||--o{ SUBJECT : teaches
 ```
+</details>
 
-
-### 2. Degree of Relationships
-
+<details>
+<summary>2. Degree of Relationships</summary>
 * **Degree:** Number of entity types involved in the relationship.
 
   * **Unary:** One entity related to itself.
@@ -247,9 +247,10 @@ erDiagram
 **Example**
 <img src="https://media.cheggcdn.com/media/e76/e76594f9-1098-4a48-94a8-f707635e18ef/chegg14-8.png" />
 
+</details>
 
-### 3. Cardinality of Relationships
-
+<details>
+<summary>3. Cardinality of Relationships</summary>
 * **Cardinality:** Number of entity instances that can or must be associated.
 
   * **One-to-One (1:1):** Each record relates to only one in the other table.
@@ -266,10 +267,10 @@ erDiagram
     INSTRUCTOR ||--o{ SUBJECT : teaches
     STUDENT }o--o{ COURSE : enrolls
 ```
+</details>
 
-
-### 4. Multiple Relationships Between Entities
-
+<details>
+<summary>4. Multiple Relationships Between Entities</summary>
 * Two entities can have more than one type of relationship at the same time.
 * Example: A professor can **teach courses** and also be **qualified to teach** other courses.
 * May include additional rules, like minimum numbers.
@@ -281,10 +282,10 @@ erDiagram
     PROFESSOR ||--o{ COURSE : teaches
     PROFESSOR ||--o{ COURSE : qualifiedFor
 ```
+</details>
 
-
-### 5. Relationships with Attribute(s)
-
+<details>
+<summary>5. Relationships with Attribute(s)</summary>
 * A relationship can have its own attributes.
 * Example: "DateCompleted" in the relationship between Employee and Course.
 * These attributes describe **the association itself**, not the entities.
@@ -300,10 +301,25 @@ erDiagram
     }
 ```
 
+</details>
 
-### 6. Associative Entity – Combination of Relationship and Entity
+<details>
+<summary></summary>
+</details>
+
+
+
+
+
+
+
+### Associative Entity – Combination of Relationship and Entity
+<details>
+<summary>M:N Relationship -> Two 1:M relationships</summary>
 
 * Converts an **M\:N relationship** into **two 1\:M relationships**.
+  * Relational databases do not support M:N relationships directly.
+  * Must break it down into two 1:M relationships using an associative entity
 * Acts as both a relationship and an entity with attributes.
 * Usually has a **composite primary key** from the related entities.
 
@@ -322,37 +338,22 @@ flowchart LR
     C2[COURSE]  ---|1:M| CERT
   end
 ```
+</details>
 
 
-
-### 7. Multivalued Attributes Can be Represented as Relationships
+### Multivalued Attributes Can be Represented as Relationships
+<details>
+<summary>Multivalued Attributes</summary>
 
 * If an attribute can have multiple values, store it in a separate related table.
-* Example: Employee skills.
+* Simple Multivalued Attributes:
+  * <img src="https://files.transtutors.com/book/qimg/83f6f99e-3de1-4a93-8949-57881d4015d1.png" />
+* Composite Multivalued Attributes:
+  * <img src="https://files.transtutors.com/book/qimg/b1c66302-14e2-4fa6-b7f2-839e0ad2e0d4.png"/>
 
-**Example**
+</details>
 
 
-```mermaid
-erDiagram
-    EMPLOYEE ||--o{ EMPLOYEE_SKILL : has
-    SKILL    ||--o{ EMPLOYEE_SKILL : describes
-
-    EMPLOYEE {
-        int EmployeeID PK
-        string Name
-    }
-    SKILL {
-        string SkillCode PK
-        string SkillTitle
-        string SkillType
-    }
-    EMPLOYEE_SKILL {
-        int EmployeeID PK
-        string SkillCode PK
-    }
-
-```
 
 ### 8. Weak and Strong Entities – Identifying Relationship
 
@@ -429,182 +430,84 @@ erDiagram
 ```
 
 # 4. Data Modeling Part III
+## Supertypes, Subtypes, Relationship
 
-## Supertypes and Subtypes
+### Supertypes and Subtypes
 * **Supertype**: general entity with common attributes.
 * **Subtype**: subgroup with distinct attributes or relationships.
 * **Attribute inheritance**: subtypes inherit all supertype attributes.
 * Rule: create subtypes only if specific attributes/relationships exist.
 * PK of supertype = also PK (and FK) in each subtype.
 
-### Example Cases
-```mermaid
-erDiagram
-    VEHICLE {
-        int Vehicle_ID PK
-        string Vehicle_Name
-        int Price
-        int Engine_Displacement
-    }
+#### Example Cases
+<details>
+<summary>Vehicles: CAR, TRUCK share attributes → VEHICLE supertype</summary>
 
-    CAR {
-        int No_Of_Passengers
-    }
-
-    TRUCK {
-        int Capacity
-        string Cab_Type
-    }
-
-    MOTORCYCLE {
-        string Helmet_ID FK
-    }
-
-    HELMET {
-        string Helmet_ID PK
-        string Helmet_Size
-    }
-
-    VEHICLE ||--o{ CAR : is_a
-    VEHICLE ||--o{ TRUCK : is_a
-    VEHICLE ||--o{ MOTORCYCLE : is_a
-    MOTORCYCLE ||--|| HELMET : allocated
-```
-* Vehicles: CAR, TRUCK, MOTORCYCLE share attributes → VEHICLE supertype.
-
-```mermaid
-erDiagram
-    EMPLOYEE {
-        int Employee_Number PK
-        string Employee_Name
-        string Address
-        date Date_Hire
-    }
-
-    HOURLY_EMPLOYEE {
-        int Hourly_Rate
-    }
-
-    SALARIED_EMPLOYEE {
-        int Annual_Salary
-        float Stock_Option
-    }
-
-    CONSULTANT {
-        int Contract_Number
-        float Billing_Rate
-    }
-
-    EMPLOYEE ||--o{ HOURLY_EMPLOYEE : is_a
-    EMPLOYEE ||--o{ SALARIED_EMPLOYEE : is_a
-    EMPLOYEE ||--o{ CONSULTANT : is_a
-
-```
-* EMPLOYEE: Hourly, Salaried, Consultant → separate subtypes to avoid nulls in a single table.
+<img src="https://gateoverflow.in/?qa=blob&qa_blobid=12782612434912197914" />
+</details>
 
 
-## Relationships and Subtypes
+### Relationships and Subtypes
 
-```mermaid
-flowchart TD
-    PAT["PATIENT (supertype)"]
-    OUT["OUTPATIENT"]
-    RES["RESIDENT_PATIENT"]
-    DOC["DOCTOR"]
+<details>
+<summary>All subtypes share a relationship & Only some subtypes have unique relationships</summary>
 
-    PAT --> OUT
-    PAT --> RES
-    PAT -- "treated by" --> DOC
-```
 * If all subtypes share a relationship → define at **supertype level**.
-
-```mermaid
-flowchart TD
-    VEH["VEHICLE (supertype)"]
-    MOTO["MOTORCYCLE (subtype)"]
-    HEL["HELMET"]
-
-    VEH --> MOTO
-    MOTO -- "allocated" --> HEL
-```
+  * All `PATIENT` is cared for `RESPONSIBLE PHYSICIAN`
 * If only some subtypes have unique relationships → define at **subtype level**.
+  * `RESIDENT PATIENT` is (only) assigned to `BED`
+<img src="https://theneuroflux.wordpress.com/wp-content/uploads/2013/03/constraint1.jpg" />
+</details>
 
----
 
-## 6. Generalization vs Specialization
+### Generalization vs Specialization
 
 * **Generalization** (bottom-up): combine similar entity sets into a more general supertype
+  * `Car, Truck -> Vehicle`
 * **Specialization** (top-down): create subtypes from a supertype.
   * Top-down process: start from a supertype and define one or more subtypes that capture distinct attributes/relationships.
 
-```mermaid
-erDiagram
-    PART {
-        string Part_No PK
-        string Part_Name
-    }
+<details>
+<summary>Specialization to MANUFACTURED PART and PURCHASED PART</summary>
 
-    MANUFACTURED_PART {
-        string Production_Line
-    }
-
-    PURCHASED_PART {
-        string Import_Code
-    }
-
-    SUPPLIER {
-        string Supplier_ID PK
-        string Sup_Name
-        string Sup_Phone_No
-        string Sup_Address
-    }
-
-    SUPPLIES {
-        string Part_No FK
-        string Supplier_ID FK
-        date Supply_Date
-        float Unit_Price
-        PK "Part_No, Supplier_ID, Supply_Date"
-    }
-
-    PART ||--o{ MANUFACTURED_PART : is_a
-    PART ||--o{ PURCHASED_PART : is_a
-    PURCHASED_PART ||--o{ SUPPLIES : supplied_by
-    SUPPLIER ||--o{ SUPPLIES : supplies
-
-```
+<img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgkgYi93rouA2BQ4LLOgbvKcCrA6DgAcyeedZLzNli2Qzxw1aobbymEMAxuvclwK7DBXBd25JVWkgt9U3RNCDFtjYEfSPGj3GAS3N_qiVY24CeUpyc1SRhWsgMs2pPj70JUqgbhDOoukdg/s459/specilization.png" />
 * Example: PART specialized into MANUFACTURED PART and PURCHASED PART.
 * Issues: multivalued attributes and data duplication → solved with **associative entities** (e.g., SUPPLIES linking PART and SUPPLIER).
+</details>
 
----
 
-## 7. Constraints in Supertype/Subtype Relationships
+### Constraints in Supertype/Subtype Relationships
 
-* **Completeness Constraint**:
+<details>
+<summary>Completeness Constraint</summary>
 
-  * Total specialization → every supertype instance must belong to a subtype.
-    * Every supertype entity must be in at least one subtype.
-    * Example: Every EMPLOYEE must be either Hourly, Salaried, or Consultant.
-    * No employee exists outside these three.
-  * Partial specialization → some may not belong to any subtype.
-    * Some supertype entities may not belong to any subtype.
-    * Example: VEHICLE supertype with subtypes CAR and TRUCK.
-    * A MOTORCYCLE might exist but not have special attributes → it stays only in VEHICLE.
-* **Disjointness Constraint**:
+Determines whether every instance of a supertype must belong to a subtype.
 
-  * Disjoint → instance belongs to only one subtype.
-    * Example: An employee is either Hourly or Salaried or Consultant — but not two at once.
-  * Overlapping → instance may belong to multiple subtypes.
-    * Example: An employee can be both Salaried and a Consultant at the same time.
-* **Subtype Discriminator**:
+* **Total Specialization (Double Line)**: Every supertype instance must be in at least one subtype.
+  * <img src="https://theneuroflux.wordpress.com/wp-content/uploads/2013/03/constraint1.jpg?w=600" />
+* **Partial Specialization (Single Line)**: Some supertype instances may not belong to any subtype.
+  * <img src="https://theneuroflux.wordpress.com/wp-content/uploads/2013/03/constraint2.jpg?w=598" />
+</details>
 
-  * Attribute that decides subtype membership.
-  * Can be simple (disjoint) or composite (overlapping).
-  * Simple discriminator (for disjoint cases)
-    * A single attribute in the supertype indicates the subtype.
-    * Example: `Employee_Type ∈ {H, S, C}` tells us if EMPLOYEE is Hourly, Salaried, or Consultant.
-  * Composite discriminator (for overlapping cases)
-    * Multiple boolean attributes indicate membership in subtypes.
-    * Example: `H? S? C?` with Y/N values.
-    * `YNY` = employee is Hourly and Consultant.
-    * `NYN` = employee is only Salaried.
+<details>
+<summary>Disjointness Constraint</summary>
+
+Determines whether a supertype instance can belong to one or more subtypes at the same time.
+
+* **Disjoint Rule**: A supertype instance can be a member of only one subtype.
+  * <img src="https://theneuroflux.wordpress.com/wp-content/uploads/2013/03/constraint3.jpg?w=600" />
+* **Overlap Rule**: A supertype instance can belong to multiple subtypes.
+  * <img src="https://theneuroflux.wordpress.com/wp-content/uploads/2013/03/constraint4.jpg?w=596" />
+</details>
+
+<details>
+<summary>Subtype Discriminator</summary>
+
+An attribute of the supertype used to decide which subtype(s) an instance belongs to.
+
+* **Disjoint Case**: A simple attribute with alternative values (e.g., Type = \{Car, Truck\}).
+  * <img src="https://theneuroflux.wordpress.com/wp-content/uploads/2013/03/constraint5.jpg?w=600"/>
+* **Overlap Case**: A composite attribute (set of Boolean flags) where each flag shows whether the instance belongs to that subtype (e.g., Is_Student = Y/N, Is_Employee = Y/N).
+  * <img src="https://theneuroflux.wordpress.com/wp-content/uploads/2013/03/constraint6.jpg?w=597"/>
+
+</details>
