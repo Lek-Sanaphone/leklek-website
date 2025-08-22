@@ -222,7 +222,7 @@ graph TD
 #### Limitations of Layer 3
 
 * Provides only **basic delivery** (no sessions, no reliability).
-* Packets can arrive **out of order**.
+* Packets can arrive **out of order**. No flow control, leading to possible congestion and packet drops.
 * Cannot distinguish between multiple application streams on the same devices.
 * These gaps are solved by **Layer 4 protocols** (TCP/UDP).
 
@@ -231,10 +231,97 @@ graph TD
 <details>
 <summary>Layer 4 & 5</summary>
 
-</details>
+#### Layer 4 (Transport Layer) Functions
+
+* Adds **TCP** (reliable, ordered, connection-oriented) and **UDP** (fast, connectionless, less reliable).
+* Introduces **segments**, encapsulated in IP packets.
+* Provides **multiplexing** via **source/destination ports**.
+* Ensures **ordering** with sequence numbers and acknowledgements.
+* Implements **flow control** using window size.
+* Uses **checksums** for error detection.
+* Can prioritize data with the **urgent pointer**.
+
+#### TCP Architecture
+
+* **Client-server model** with **ephemeral ports** (client) and **well-known ports** (server, e.g., 443).
+* **Bidirectional communication**: each direction has its own source/destination port pair.
+* Segments provide a **reliable stream** despite packet unreliability at Layer 3.
+
+#### TCP Three-Way Handshake
+
+1. **SYN**: client sends initial sequence number.
+2. **SYN-ACK**: server responds with its own sequence number and acknowledges client’s.
+3. **ACK**: client acknowledges server’s sequence number.
+
+* After this, both sides are synchronized and ready to exchange data reliably.
+
+#### Sessions and State
+
+* A **session** is the ongoing, stateful communication between client and server.
+* Managed via TCP sequence numbers, acknowledgements, and connection state.
+
+#### Stateless vs Stateful Firewalls
+
+* **Stateless (e.g., AWS NACLs)**: Require explicit rules for both directions (outbound and inbound).
+* **Stateful (e.g., AWS Security Groups)**: Track TCP connection state—allowing return traffic automatically once an initial connection is permitted.
 
 </details>
 
+</details>
+
+
+<details>
+    <summary>Network Address Translation (NAT)</summary>
+
+#### Purpose of NAT
+
+* Solves the **IPv4 address shortage** by allowing multiple private devices to share fewer public IPs.
+* Translates **private IP addresses ↔ public IP addresses** so private devices can access the internet.
+* Provides **basic security benefits** by hiding internal private addresses.
+* Not required in IPv6 (sufficient address space).
+
+#### Types of NAT
+
+**1. Static NAT (One-to-One)**
+
+* Permanent mapping between a private IP and a specific public IP.
+* Used when a device (e.g., server) must always be reachable on the same public IP.
+* Example: AWS Internet Gateway.
+
+**2. Dynamic NAT (Many-to-Many, from a pool)**
+
+* Private IPs are temporarily mapped to available public IPs from a pool.
+* Allocation happens only when needed.
+* If the pool is exhausted, new connections fail.
+* Suitable when public IPs are fewer than private devices, but not all need internet simultaneously.
+
+**3. Port Address Translation (PAT) / NAT Overload (Many-to-One)**
+
+* Most common (e.g., home routers, AWS NAT Gateway).
+* Many private devices share **one public IP**.
+* Differentiates sessions using **unique source ports**.
+* Maintains a NAT translation table with mappings:
+
+  * (Private IP, Private Port) → (Public IP, Public Port).
+* Return traffic is correctly routed back using this table.
+* Limitation: **inbound connections cannot be initiated** directly to private devices (no entry in NAT table).
+
+#### Key Points
+
+* NAT operates only with **IPv4** (IPv6 removes the need).
+* Ensures private devices can access public services like Netflix or APIs.
+* Static = fixed mapping, Dynamic = temporary pool mapping, PAT = many devices share one public IP via ports.
+* Widely used in **business networks, home routers, and cloud (AWS NAT Gateway/Instance)**.
+
+</details>
+
+<details>
+    <summary></summary>
+</details>
+
+<details>
+    <summary></summary>
+</details>
 ## 1. Cloud, Networking and Technical Fundamentals
 ### Cloud Computing
 
