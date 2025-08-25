@@ -477,3 +477,46 @@ flowchart TD
 * Drawback: finding inputs to trigger specific outputs is time-consuming.
 
 
+## 5. White-box Testing
+
+### Whitebox Testing & Code Injection
+<details>
+  <summary>Whitebox Testing</summary>
+
+- Category: test perform in a lower level, concentrates on actual code, done by Developers or Testers
+- Uses knowledge of a program’s internal structure to verify its logic, flow, and functionality by systematically covering code paths.
+
+</details>
+
+<details>
+  <summary>Testing Types</summary>
+
+- **Code Coverage**: Tests ensure every method, statement, or branch runs at least once.
+- **Mutation Testing**: Creates modified code versions to check if tests detect changes.
+- **Data Coverage**: Focuses on testing the program’s data handling rather than control flow.
+</details>
+
+<details>
+  <summary>Code Injection</summary>
+
+- Make code testing more efficient; generate copy of the code to test.
+- Common approaches include:
+  - Action Instrumentation: Logs execution for coverage.
+  - Performance Instrumentation: Records time and resource usage.
+  - Assertion Injection: Validates program state at runtime.
+  - Fault Injection: Simulates failures to test fault handling.
+</details>
+
+
+### Whitebox Testing Techniques
+<details>
+  <summary>Code Coverage Methods</summary>
+
+1. **Statement Coverage:** Ensures every line of code executes at least once.
+2. **Basic Block Coverage:** Ensures each block of statements that always execute together is tested.
+3. **Decision Coverage:** Ensures each decision (e.g., if/else, switch) is evaluated both true and false.
+4. **Condition Coverage:** Ensures each condition within a decision is tested for both true and false.
+5. **Loop Coverage:** Ensures loops are tested with zero, one, two, and many iterations.
+6. **Path Coverage:** Ensures all possible execution paths in the control-flow graph are tested.
+
+</details>

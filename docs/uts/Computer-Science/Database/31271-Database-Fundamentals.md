@@ -355,7 +355,7 @@ flowchart LR
 
 
 
-### 8. Weak and Strong Entities – Identifying Relationship
+### Weak and Strong Entities – Identifying Relationship
 
 * **Strong Entity:** Can exist independently; has its own PK.
 * **Weak Entity:** Depends on a strong entity’s PK for identification; **cannot exist without it**.
@@ -477,6 +477,17 @@ erDiagram
 
 
 ### Constraints in Supertype/Subtype Relationships
+
+<details>
+  <summary>Disjoint vs Overlap and Total vs Partial Specialization</summary>
+
+- Disjoint vs Overlap:
+  - **Disjoint (D)**: An entity can belong to only one subtype. Example: A Vehicle is either a Car or a Truck, not both.
+  - **Overlap (O)**: An entity can belong to multiple subtypes. Example: A Person could be both a Student and an Employee.
+- Total vs Partial Specialization:
+  - **Total specialization (T)**: Every entity in the supertype must belong to at least one subtype. Example: Every Employee must be either a SalariedEmployee or an HourlyEmployee.
+  - **Partial specialization (P)**: Some entities in the supertype may not belong to any subtype. Example: A Vehicle may be a Car, or a Truck, or just a Vehicle with no subtype.
+</details>
 
 <details>
 <summary>Completeness Constraint</summary>

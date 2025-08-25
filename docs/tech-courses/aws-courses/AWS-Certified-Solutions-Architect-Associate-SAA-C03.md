@@ -316,12 +316,146 @@ graph TD
 </details>
 
 <details>
+    <summary>IP Address Space & Subnetting</summary>
+
+
+#### IPv4 Address Classes
+
+1. **Class A** (0.0.0.0 – 127.255.255.255)
+
+   * 128 networks, each with \~16.7 million addresses.
+   * Historically allocated to large organizations (e.g., Apple, Ford, US Military).
+
+2. **Class B** (128.0.0.0 – 191.255.255.255)
+
+   * 16,384 networks, each with \~65,536 addresses.
+   * Used by medium-to-large organizations.
+
+3. **Class C** (192.0.0.0 – 223.255.255.255)
+
+   * Over 2 million networks, each with 256 addresses.
+   * Common for small businesses.
+
+4. **Class D** (224.0.0.0 – 239.255.255.255)
+
+   * Reserved for multicast.
+
+5. **Class E** (240.0.0.0 – 255.255.255.255)
+
+   * Experimental use.
+
+
+#### Private IPv4 Address Ranges (RFC 1918)
+
+1. **10.0.0.0 – 10.255.255.255**
+
+   * Single Class A block (\~16.7 million addresses).
+   * Widely used in cloud platforms.
+
+2. **172.16.0.0 – 172.31.255.255**
+
+   * Sixteen Class B networks (\~65,536 addresses each).
+   * Default range for AWS VPCs.
+
+3. **192.168.0.0 – 192.168.255.255**
+
+   * 256 Class C networks (256 addresses each).
+   * Common in home and small office networks.
+
+**Key Note**: Private ranges cannot be routed on the internet and require Network Address Translation (NAT).
+
+
+#### IPv6 Addressing
+
+* **Need for IPv6**: IPv4 addresses are nearly exhausted due to rapid device growth and cloud services.
+* **Scale**: IPv6 provides **340 undecillion addresses** (3.4 × 10³⁸).
+
+
+#### Subnetting Concepts
+
+* **Definition**: Subnetting divides a larger network into smaller networks, each with its own prefix length.
+* **CIDR (Classless Inter-Domain Routing)**: Introduced prefixes (e.g., `/16`, `/24`) to describe subnet size.
+* **Principles**:
+
+  * Larger prefix number = smaller subnet.
+  * Example: `10.0.0.0/16` can be split into two `/17` networks, each covering half the range.
+  * Repeated subdivision can produce multiple smaller subnets.
+
+</details>
+
+<details>
+    <summary>Distributed Denial of Service (DDOS) Attacks</summary>
+
+#### Categories of DDoS Attacks
+
+1. **Application Layer Attacks (Layer 7)**
+
+   * Examples: HTTP floods.
+   * **Method**: Attackers exploit computational imbalance—simple client requests trigger expensive server responses.
+   * **Impact**: Servers become overloaded, leading to performance degradation or failure.
+
+2. **Protocol-Based Attacks (Layer 3/4)**
+
+   * Examples: SYN floods.
+   * **Method**: Exploit the TCP three-way handshake by sending spoofed SYN packets.
+   * **Impact**: Server holds connections in half-open state, consuming memory and network resources, preventing legitimate users from connecting.
+
+3. **Volumetric/Amplification Attacks**
+
+   * Examples: DNS amplification.
+   * **Method**: Small requests (with spoofed victim IP) trigger disproportionately large responses from third-party servers to the victim.
+   * **Impact**: Saturates the victim’s network bandwidth, making services inaccessible even if servers remain operational.
+
+</details>
+
+<details>
+    <summary>VLANS, TRUNKS & Q-in-Q</summary>
+
+#### What VLANs Solve
+- A VLAN (Virtual Local Area Network) is a logical separation of devices on the same physical switch.
+- Using VLANs, one switch can host multiple isolated networks.
+- Each VLAN creates its own broadcast domain, so broadcasts don’t leak into other groups.
+- Distinguish by VLAN ID (eg. Finance = VLAN 20, Game Testers = VLAN 10, Sales = VLAN 30)
+#### 802.1Q-Capable Switch (Managed Switch/VLAN Tagging)
+- <img src="https://cdn.networklessons.com/wp-content/uploads/2014/07/8021q-frame-headers.png" />
+- Standard that makes VLANs work.
+- It modifies the Ethernet frame to add a VLAN tag (12 bits) → supports up to 4096 VLANs.
+- How it works:
+    - Devices connected to a switch don’t see VLAN tags.
+    - Switches add/remove tags internally to know which VLAN traffic belongs to.
+- **Access and Trunk ports** apply when switch supports VLANs (via IEEE 802.1Q standard)
+
+#### Access Ports vs Trunk Ports
+- <img src="https://study-ccna.com/wp-content/uploads/2020/04/access_and_trunk_ports.jpg" />
+- Access Port
+    - Belongs to a single VLAN.
+    - Strips off the VLAN tag before sending frames to the end device.
+    - End devices (PCs, printers, phones) don’t need to understand VLAN tags.
+- Trunk Port
+    - Carries multiple VLANs across a single link (usually switch-to-switch, or switch-to-router/firewall).
+    - Frames keep their 802.1Q VLAN tags while traveling over the trunk.
+    - The receiving device must also understand 802.1Q.
+- Benefit: Access + Trunk ports allow VLANs to work across a network of switches instead of being stuck on just one switch.
+
+#### Q-in-Q (802.1ad, VLAN Stacking)
+- <img src="https://www.megaport.com/blog/q-in-q-questions-answered-2.jpg" />
+- Problem: What if you and your service provider both use VLANs? IDs might conflict (e.g., both use VLAN 1337).
+- Solution: Q-in-Q = add a second VLAN tag
+- VLAN in VLAN, Outer envelope = provider’s VLAN. Inner envelope = your VLAN.
+
+#### Key
+- 802.1Q define (VLANS)
+- 802.1AD define (nested QinQ VLANS)
+</details>
+
+<details>
     <summary></summary>
 </details>
 
 <details>
     <summary></summary>
 </details>
+
 ## 1. Cloud, Networking and Technical Fundamentals
 ### Cloud Computing
 
