@@ -520,5 +520,88 @@ An attribute of the supertype used to decide which subtype(s) an instance belong
   * <img src="https://theneuroflux.wordpress.com/wp-content/uploads/2013/03/constraint5.jpg?w=600"/>
 * **Overlap Case**: A composite attribute (set of Boolean flags) where each flag shows whether the instance belongs to that subtype (e.g., Is_Student = Y/N, Is_Employee = Y/N).
   * <img src="https://theneuroflux.wordpress.com/wp-content/uploads/2013/03/constraint6.jpg?w=597"/>
+  * Example: 
+    * Employee_Type ∈ {H, S, C} tells us if EMPLOYEE is Hourly, Salaried, or Consultant
+    * Example: H? S? C? with Y/N values.
+    * YNY = employee is Hourly and Consultant.
+    * NYN = employee is only Salaried.
 
 </details>
+
+# 5. Convert ERD to Relations
+## Relational Model
+### Components of relational model
+
+- **Data Structure**: Tables (relations), rows, and columns.
+- **Data Manipulation**: SQL operations (queries, inserts, updates).
+- **Data Integrity**: Rules to maintain accuracy (primary key, foreign key, constraints).
+
+### Relations (Table)
+
+- A relation = named table with rows and columns.
+- Requirements to qualifty table as relation:
+  - Unique table name.
+  - Atomic attribute values (no multivalued/composite).
+  - Unique rows.
+  - Unique column names.
+  - Order of rows/columns irrelevant.
+
+### Integrity Constraints
+- **Domain Constraint**: Values in a column must come from the same domain (e.g., Student_ID must be 4-digit integer).
+- **Entity Integrity**: PK must not be null.
+- **Referential Integrity**: FK must match a valid PK value in another table.
+
+#### Referential Integrity Rules (for deletes):
+1. **Restrict** – prevent deleting parent if child rows exist.
+2. **Cascade** – delete child rows automatically when parent is deleted.
+3. **Set-to-Null** – set FK to null when parent is deleted (not allowed for weak/mandatory entities).
+
+## Transforming ERD into Relations
+
+<details>
+  <summary>Mapping ERD to Relations</summary>
+
+- Simple attributes → direct columns.
+- Composite attributes → break into component columns.
+- Multivalued attributes → new table with FK back to main entity.
+</details>
+
+<details>
+  <summary>Mapping Binary Relationships</summary>
+
+- 1:M → PK of “one” side becomes FK in “many” side.
+- 1:1 → PK of mandatory side becomes FK in optional side.
+- M:N → Create new relation (associative entity) with composite PK from both sides.
+</details>
+
+<details>
+  <summary>Mapping Ternary (and n-ary) Relationships</summary>
+
+- Create relation for each entity + one associative relation.
+- Associative relation’s PK often includes multiple FKs (sometimes add surrogate key to simplify).
+</details>
+
+<details>
+  <summary>Mapping Weak Entities</summary>
+
+- Weak entity becomes its own table.
+- PK = Partial identifier + PK of strong entity (as FK).
+- FK cannot be null (mandatory).
+</details>
+
+<details>
+  <summary>Mapping Unary Relationships</summary>
+
+- 1:1 or 1:N → Recursive FK in the same table.
+- M:N → Separate associative table with two FKs referencing same entity.
+</details>
+
+<details>
+  <summary>Mapping Supertype/Subtype Relationships</summary>
+
+- One table for supertype, one for each subtype.
+- Supertype PK = PK for subtypes.
+- Discriminator attribute indicates subtype category.
+- Subtype relations hold only their specific attributes.
+</details>
+

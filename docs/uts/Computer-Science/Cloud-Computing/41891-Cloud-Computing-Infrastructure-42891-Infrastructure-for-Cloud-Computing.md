@@ -551,6 +551,8 @@ sequenceDiagram
   * **Users (U)** consume services.
   * **Brokers (B)** mediate between InP, SP, and users.
 * **NaaS** delivers networking capabilities on demand, extending the cloud service model.
+    * Focus On: Network Virtualization, Optimize the network and computing resources
+    * laaS, PaaS, and SaaS rely on NaaS
 
 
 
@@ -651,6 +653,105 @@ task.
 ---
 # 5. Data centre Fundamentals: Virtualisation for Data Centres
 ## 5.1 Lecture
+### Data Center
+<details>
+    <summary>Data Center</summary>
+
+- A data center is a facility that houses critical computing resources under controlled environments and central management. 
+- These resources include servers, applications, storage systems, operating systems, and networking equipment
+</details>
+
+<details>
+    <summary>Goals</summary>
+
+- **Business Continuity**: Keep operations running without major interruptions.
+- **Security**: Protect data and systems from threats.
+- **Consolidation**: Merge servers, storage, and applications to reduce cost and complexity.
+- **Scalability and Performance**: Ensure growth and efficiency.
+- **Manageability**: Simplify administration and monitoring.
+</details>
+
+<details>
+    <summary>Facilities</summary>
+
+- To ensure performance, data centers need:
+    - Sufficient power and cooling systems
+    - Proper cabling, temperature, and humidity control
+    - Fire and smoke detection systems
+    - Physical security (restricted access, surveillance)
+    - Rack space, raised floors, modularity, and flexibility
+</details>
+
+### Data Center Architecture
+- **Three-Layer Model**: Separates resources into compute, storage, and network layers.
+- **Dedicated Resources**: Each layer can have its own dedicated equipment.
+- **Consolidation & Virtualisation**: Resources at each layer (compute, storage, network) can be pooled and shared instead of kept separate
+
+### Virtualising a Data Center
+- Virtualisation allows multiple workloads to run on a single host and makes it easy to clone machines for testing, development, or disaster recovery.
+- Benefits: 
+    - Reduced costs and heat
+    - Faster deployment and migration
+    - Better disaster recovery and testing
+    - Flexibility and no vendor lock-in
+
+#### Types of Virtualisation
+<details>
+    <summary>Network Virtualisation</summary>
+
+- **Definition**: Combines multiple physical network resources (switches, routers, links) into one logical unit, or splits a physical network into multiple isolated logical networks.
+- **How it works**: It abstracts networking functions so administrators can manage networks as software-defined entities rather than hardware.
+- **Technologies & Standards**:
+    - VLANs (802.1q) – divide a physical LAN into multiple logical segments.
+    - VXLAN (Virtual Extensible LAN) – allows creation of logical networks across large-scale data centers.
+    - NVGRE (Network Virtualization using GRE) – encapsulates traffic to create isolated virtual networks.
+</details>
+
+<details>
+    <summary>Storage Virtualisation</summary>
+    
+- **Definition**: Abstracts physical storage devices into logical pools that can be managed centrally and allocated flexibly.
+- **Levels**:
+    - Block-level virtualisation – abstracts disk blocks below the file system; often used in SANs (Storage Area Networks).
+    - File-level virtualisation – abstracts files/directories above the block level, typically over NFS or SMB.
+- **How it works**: The virtualisation layer maps logical storage (what users see) to actual physical storage (disks).
+</details>
+
+<details>
+    <summary>Processing Virtualisation</summary>
+    
+- **Definition**: Abstracts physical CPU and memory resources so that multiple virtual machines (VMs) can run on a single physical server, or multiple physical servers can be combined to act as one.
+- **How it works**: A hypervisor (e.g., VMware ESXi, Xen, KVM) sits between hardware and OS, slicing compute resources for VMs.
+- **Capabilities**:
+    - Partitioning: one server split into many VMs.
+    - Aggregation: combine servers into a grid/cluster.
+</details>
+
+<details>
+    <summary>Application Virtualisation</summary>
+
+- **Definition**: Separates applications from the underlying OS, allowing them to run on different environments without modification.
+- **How it works**: Uses an abstraction layer or framework so the application doesn’t directly depend on the OS.
+- **Technologies**:
+    - Java Virtual Machine (JVM) – Java programs run anywhere with a JVM installed.
+    - Microsoft App-V – packages applications so they run in isolated environments.
+- **Advanced features**:
+    - Automatic recovery (restart app if it fails).
+    - Load balancing (distribute traffic across multiple app instances).
+    - Scalability (spin up new app instances when demand increases).
+</details>
+
+<details>
+    <summary>Access Virtualisation</summary>
+
+- **Definition**: Provides users with access to applications and data from any device, without requiring direct compatibility between the device and the application.
+- **How it works**: Uses protocols or special software to translate between app and device.
+- **Technologies**:
+    - Microsoft Remote Desktop Protocol (RDP).
+    - Citrix ICA.
+    - Virtual Desktop Infrastructure (VDI).
+</details>
+
 ## 5.2 Labs
 ---
 # 6. Management of Data Centre
