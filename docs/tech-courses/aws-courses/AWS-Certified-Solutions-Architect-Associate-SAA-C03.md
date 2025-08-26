@@ -6,6 +6,8 @@ title: AWS Certified Solutions Architect Associate SAA-C03
 Tips: [Create multiples AWS Account using 1 Email](https://youtu.be/hnien_pKs4g?si=-wxAnnH3NpHf9Hag)
 
 ## 0. Cloud, Networking and Technical Fundamental
+
+
 <details>
 <summary>OSI 7-Layer Networking Model</summary>
 <details>
@@ -271,6 +273,9 @@ graph TD
 
 
 <details>
+    <summary>Networking</summary>
+
+<details>
     <summary>Network Address Translation (NAT)</summary>
 
 #### Purpose of NAT
@@ -449,11 +454,328 @@ graph TD
 </details>
 
 <details>
-    <summary></summary>
+    <summary>Decimal to Binary Conversion IPv4</summary>
+
+<details>
+    <summary>Decimal to Binary Conversion (Complex Direction)</summary>
+
+1. Approach:
+    - Convert each octet (0–255) individually.
+    - Use a binary position value table: 128, 64, 32, 16, 8, 4, 2, 1.
+2. Rules:
+    - Rule 1: If the decimal value < binary position → write 0.
+    - Rule 2: If the decimal value ≥ binary position → write 1, subtract the binary position value from the decimal, and continue.
+3. Examples:
+    - 133 → 10000101.
+    - 33 → 00100001.
+    - Students practice converting 33 (third octet) and 7 (last octet).
+    - Final IP (133.33.33.7) in binary: 10000101.00100001.00100001.00000111.
 </details>
 
 <details>
-    <summary></summary>
+    <summary>Binary to Decimal Conversion (Easier Direction)</summary>
+
+1. Process:
+    - Break the 32-bit binary into four octets.
+    - For each octet, add the decimal values corresponding to binary 1 positions.
+2. Example:
+    - 10000101 → 128 + 4 + 1 = 133.
+    - 00100001 → 32 + 1 = 33.
+    - 00000111 → 4 + 2 + 1 = 7.
+3. Result:
+    - The binary IP converts back into the dotted decimal form.
+</details>
+
+</details>
+
+<details>
+    <summary>SSL & TLS</summary>
+
+Here’s a concise, topic-based summary of the video content you provided:
+
+### TLS/SSL Overview
+
+* **SSL vs TLS**
+  * SSL = Secure Sockets Layer (older, less secure).
+  * TLS = Transport Layer Security (newer, secure replacement).
+  * Both provide privacy and integrity between client and server.
+* **Core Functions of TLS**
+  * **Encryption (Privacy):** Protects communications so only client/server can read data.
+  * **Authentication (Identity Verification):** Ensures the server is the one it claims to be.
+  * **Integrity:** Detects and prevents alteration of data in transit.
+
+### TLS Handshake Process
+1. **Cipher Suite Agreement**
+   * Client sends *Client Hello* with supported cipher suites, TLS version, session ID.
+   * Server responds with *Server Hello*, selecting a cipher suite and sending its certificate (with public key).
+2. **Authentication**
+   * Server certificate is validated against trusted Certificate Authorities (CA).
+   * Checks include: CA signature, expiration, revocation status, and domain match.
+   * Client tests encryption using the server’s public key to ensure server holds the private key.
+3. **Key Exchange**
+   * Client generates a pre-master key, encrypts it with server’s public key, and sends it.
+   * Server decrypts using its private key.
+   * Both derive a *master secret*, used to create session keys.
+   * Session keys enable efficient symmetric encryption for ongoing communication.
+
+### Key Takeaways
+
+* TLS uses **asymmetric encryption** initially, then switches to **symmetric encryption** for performance.
+* Server identity is verified using **CA-issued certificates**.
+* Final result: a secure, encrypted channel for client-server communication (e.g., HTTPS).
+
+
+</details>
+
+<details>
+    <summary>Border Gateway Protocol (BGP)</summary>
+
+### Purpose and Basics
+
+* **BGP**: Routing protocol controlling data flow between networks.
+* Used by AWS services such as **Direct Connect** and **dynamic VPNs**.
+* Operates between **Autonomous Systems (AS)**—self-managed networks identified by **AS Numbers (ASN)**.
+* Runs over **TCP port 179**, providing reliability but requiring manual configuration of peering.
+
+
+### Autonomous Systems and ASNs
+
+* **ASNs**: 16-bit numbers (0–65,535).
+  * Public: Allocated by IANA.
+  * Private: 64,512–65,534 (used in private peering).
+* BGP views an AS as a black box—concerned only with **routes in/out**, not internal routing.
+
+
+### BGP Operation
+* **Path-vector protocol**: Advertises only the **best path** (ASPATH) to destinations.
+* **iBGP**: Routing inside an AS.
+* **eBGP**: Routing between ASes (focus for AWS).
+* Each AS shares routes with peers, building a distributed routing topology—this underpins the internet.
+
+
+### Example Topology (Brisbane, Adelaide, Alice Springs)
+
+* Each site has its own ASN and IP range.
+* Links:
+  * Brisbane ↔ Adelaide (1 Gb fiber).
+  * Adelaide ↔ Alice Springs (1 Gb fiber).
+  * Brisbane ↔ Alice Springs (5 Mb satellite).
+* **Routing tables**: Initially list only local networks. After peering, each learns paths to others with ASPATH details.
+* **Multiple paths**: BGP prefers the shortest path (fewest AS hops).
+
+
+### Path Control – ASPATH Pre-Pending
+
+* BGP ignores link speed/latency, focusing only on path length.
+* Example: Alice Springs can make its **satellite link** look worse by artificially adding extra ASNs (ASPATH pre-pending).
+* This forces Brisbane to route traffic via Adelaide’s faster fiber link instead of the slower satellite.
+
+
+### Key Takeaways
+
+* BGP builds a **dynamic routing map** of interconnected networks.
+* **Shortest path wins** (based on AS hops, not performance).
+* Supports **high availability** by automatically rerouting if a path fails.
+* Core protocol behind the **internet** and hybrid networking solutions in **AWS**.
+
+</details>
+
+<details>
+    <summary>Stateful vs. stateless firewalls</summary>
+
+
+### TCP/IP Refresher
+* **TCP** (Layer 4): Adds ports and error correction on top of IP.
+* **Connection structure**:
+  * **Request**: Client → Server (ephemeral port → well-known port, e.g., 443).
+  * **Response**: Server → Client (well-known port → ephemeral port).
+* **Direction depends on perspective**: same packet flow may be outbound for client, inbound for server.
+
+### Stateless Firewalls
+
+* Treat **request and response** as separate flows.
+* Require **two rules** for each connection: one for request, one for response.
+* Responses use **ephemeral ports**, forcing wide port ranges to be opened.
+* Higher admin overhead and greater security risk.
+
+### Stateful Firewalls
+
+* Track the **state of connections** and link requests to responses automatically.
+* Only the **request rule** needs to be defined; response is implicitly allowed.
+* Do **not** require opening large ephemeral port ranges.
+* Lower admin effort, fewer errors, more secure.
+
+### Key Takeaways
+
+* Every TCP connection has **two parts**: request and response.
+* **Stateless firewalls**: need explicit rules for both parts.
+* **Stateful firewalls**: more intelligent, handle responses automatically, more secure and easier to manage.
+
+
+</details>
+
+<details>
+    <summary>Jumbo Frames</summary>
+
+### Consideration
+- All devices in the path must support jumbo frames, otherwise fragmentation occurs.
+- Not all AWS services/paths support jumbo frames.
+
+### Standard vs. Jumbo Frames
+| Feature                   | Standard Frames              | Jumbo Frames                     |
+| ------------------------- | ---------------------------- | -------------------------------- |
+| Max Size                  | 1,500 bytes                  | \~9,000 bytes (AWS TGW: 8,500)   |
+| Efficiency                | Higher overhead ratio        | Lower overhead ratio             |
+| Frames Needed (same data) | More frames (less efficient) | Fewer frames (more efficient)    |
+| Use Case                  | General networking           | High-performance, demanding apps |
+
+### AWS Jumbo Frame Support
+| AWS Service / Path           | Jumbo Frames Support            |
+| ---------------------------- | ------------------------------- |
+| **Within a single VPC**      | ✅ Supported (9,000 bytes)       |
+| **Same-region VPC Peering**  | ✅ Supported                     |
+| **Inter-region VPC Peering** | ❌ Not supported                 |
+| **VPN Connections**          | ❌ Not supported                 |
+| **Internet Gateway**         | ❌ Not supported                 |
+| **Direct Connect**           | ✅ Supported                     |
+| **Transit Gateway**          | ✅ Supported (up to 8,500 bytes) |
+
+</details>
+
+<details>
+    <summary>Application Layer Firewalls (Layer 7)</summary>
+
+## Background
+* **Layer 3 & 4 firewalls**:
+  * See IPs, ports, flags, packets, and segments.
+  * Treat request/response as separate flows.
+  * Cannot inspect application data.
+* **Layer 5 firewalls**:
+  * Add session awareness (link request and response together).
+  * Still no visibility into Layer 7 (application data opaque).
+
+## Layer 7 Firewall Capabilities
+
+* Understands **application protocols** (e.g., HTTP, HTTPS, SMTP).
+* Terminates encrypted connections (e.g., HTTPS → inspects HTTP in plaintext).
+* Creates a new secure connection to the backend server (transparent to client/server).
+* Can **inspect, block, replace, or tag** Layer 7 content.
+
+### Example Use Cases
+
+* Filter/allow based on **protocol elements**: headers, DNS names, content type, connection rates.
+* Protect against **protocol-specific attacks** or malformed traffic.
+* Content control:
+  * Allow cat images, block malware/spam/adult content.
+  * Replace restricted content (e.g., adult images → kitten pictures).
+* Application blocking (e.g., Facebook, Dropbox).
+
+
+### Key Points
+
+* Retains all features of L3–L5 firewalls.
+* Adds **granular, content-aware security** at the application layer.
+* Effectiveness depends on which protocols the firewall supports.
+
+
+</details>
+
+<details>
+    <summary>IPsec VPN</summary>
+
+
+### IPsec
+
+<img src="https://miro.medium.com/v2/resize:fit:1198/1*qfap1vIu7yWm21YmlnYwRQ.png"/>
+
+* **Purpose**: Secure tunnels over the internet → authentication, encryption, integrity.
+* **Use Cases**: Site-to-site, AWS VPN, hybrid networks.
+* **Trigger**: “Interesting traffic” starts a tunnel.
+
+### Phases
+
+1. **IKE Phase 1**
+   * Purpose: Authenticate peers and establish secure channel.
+   * Methods: Pre-shared keys or certificates.
+   * Uses Diffie-Hellman exchange to derive a shared symmetric key.
+   * Result: Phase 1 tunnel / Security Association (SA).
+
+2. **IKE Phase 2**
+   * Purpose: Negotiate encryption methods and set up tunnel for data transfer.
+   * Builds on Phase 1 tunnel.
+   * Creates IPsec keys for bulk encryption.
+   * Result: Phase 2 tunnel / IPsec SA pair (one for each direction).
+
+---
+
+## VPN Types
+
+* **Route-based**:
+    * Matches traffic by prefix (e.g., 192.168.0.0/24).
+    * One SA pair (phase 2 tunnel) for all traffic between sites.
+    * Simpler setup, less flexible.
+
+* **Policy-based**: 
+    * Matches traffic by rules/policies.
+    * Different SAs per traffic type (e.g., infra, CCTV, finance).
+    * More complex, more flexible security.
+
+---
+
+**Key Point**: Phase 1 = identity + key exchange, Phase 2 = data encryption. Route-based = simple; Policy-based = granular.
+
+
+</details>
+
+<details>
+    <summary>Fiber Optic Cables</summary>
+
+### Basics
+
+* **Fiber vs Copper**:
+  * Copper → electrical signals.
+  * Fiber → light through glass/plastic core.
+* Advantages: **higher speeds, longer distances, EMI resistant, consistent performance**.
+* Widely used in LAN, metro, and global networks; adoption increasing.
+
+
+### Structure
+
+* **Core**: Tiny glass/plastic strand (carries light).
+* **Cladding**: Surrounds core; lower refractive index → keeps light inside by reflection.
+* **Buffer**: Coating/strength material for protection.
+* **Jacket**: Outer visible layer, color-coded (indicates cable type).
+
+
+### Fiber Types
+* <img src="https://images.ctfassets.net/aoyx73g9h2pg/2akZ34C0SwKh3lRZg3u0M5/bbdbf30bbe3d7f6939a78d50df925a28/Single-Mode-vs-Multimode-Fiber-Diagram.jpg"/>
+* **Single-Mode (SMF)**
+  * Core: \~8–9 microns, usually yellow jacket.
+  * Light path nearly straight → minimal distortion.
+  * Uses **lasers**, longer distances, high speeds (10 Gbps+ over km).
+  * Cable cheap, optics expensive (but prices falling).
+* **Multi-Mode (MMF)**
+  * Core: larger (e.g., 50–62.5 microns), orange/aqua jacket.
+  * Multiple light paths → faster over short distances but more distortion at long distances.
+  * Uses **LED optics**, cheaper, shorter runs.
+  * Standards: OM2, OM3, OM4, etc.
+
+
+### Transceivers (SFP / Mini-GBIC)
+
+* Plug into networking equipment to convert **light ↔ data**.
+* Must match fiber type (SMF or MMF) on both ends.
+* Common standards: **1000BASE-LX, 10GBASE-LR, 100GBASE-LR4** (used in AWS Direct Connect).
+
+---
+
+**Key Point**:
+* **Single-mode** = long distance, high speed, higher optic cost.
+* **Multi-mode** = short distance, cost-effective, simpler.
+* Both rely on transceivers matched to cable type and connector.
+
+</details>
+
 </details>
 
 ## 1. Cloud, Networking and Technical Fundamentals

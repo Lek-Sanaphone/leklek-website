@@ -521,7 +521,7 @@ An attribute of the supertype used to decide which subtype(s) an instance belong
 * **Overlap Case**: A composite attribute (set of Boolean flags) where each flag shows whether the instance belongs to that subtype (e.g., Is_Student = Y/N, Is_Employee = Y/N).
   * <img src="https://theneuroflux.wordpress.com/wp-content/uploads/2013/03/constraint6.jpg?w=597"/>
   * Example: 
-    * Employee_Type ∈ {H, S, C} tells us if EMPLOYEE is Hourly, Salaried, or Consultant
+    * Employee_Type ∈ `{H, S, C}` tells us if EMPLOYEE is Hourly, Salaried, or Consultant
     * Example: H? S? C? with Y/N values.
     * YNY = employee is Hourly and Consultant.
     * NYN = employee is only Salaried.
@@ -546,7 +546,36 @@ An attribute of the supertype used to decide which subtype(s) an instance belong
   - Unique column names.
   - Order of rows/columns irrelevant.
 
+#### Relational Model Concepts Correspond to E-R Model
+
+<details>
+  <summary>Entity to Relation</summary>
+
+* Relations (tables) correspond with entity types and with many-to-many relationship types.
+* Rows correspond with entity instances and with many-to-many relationship instances.
+* Columns correspond with attributes.
+
+**Entity types**
+```mermaid
+classDiagram
+    class Instructor {
+        Ins_ID
+        Ins_F_Name
+        Ins_L_Name
+    }
+```
+**Relations (tables)**
+
+| Ins_ID | Ins_F_Name | Ins_L_Name |
+|--------|------------|------------|
+| 12548  | Danna      | Ramezani   |
+| 45476  | Ricky      | Brown      |
+| 14475  | Jack       | Cooper     |
+</details>
+
 ### Integrity Constraints
+
+#### 3 Types of Constraints
 - **Domain Constraint**: Values in a column must come from the same domain (e.g., Student_ID must be 4-digit integer).
 - **Entity Integrity**: PK must not be null.
 - **Referential Integrity**: FK must match a valid PK value in another table.
@@ -562,28 +591,34 @@ An attribute of the supertype used to decide which subtype(s) an instance belong
   <summary>Mapping ERD to Relations</summary>
 
 - Simple attributes → direct columns.
+  - <img src="https://i-blog.csdnimg.cn/blog_migrate/fbf3cc49fb60a4f8fa32e8fb8765f70a.png"/>
 - Composite attributes → break into component columns.
+  - <img src="https://i-blog.csdnimg.cn/blog_migrate/128424bf2fe998853b5b253de5727910.png"/>
 - Multivalued attributes → new table with FK back to main entity.
+  - <img src="https://files.transtutors.com/book/qimg/f757f365-ad9e-4f07-93f2-7ffac8c55ec1.png"/>
 </details>
 
 <details>
   <summary>Mapping Binary Relationships</summary>
 
 - 1:M → PK of “one” side becomes FK in “many” side.
+  - <img src="https://i-blog.csdnimg.cn/blog_migrate/2a1d908a6119eb69374c4e357a6346c8.png"/>
 - 1:1 → PK of mandatory side becomes FK in optional side.
+  - <img src="https://i-blog.csdnimg.cn/blog_migrate/519428077bbb8a4448ba13bfd31bb7fb.png" />
 - M:N → Create new relation (associative entity) with composite PK from both sides.
+  * <img src="https://i-blog.csdnimg.cn/blog_migrate/ca6a3a380e001117905fa59f6fedb38a.png"/>
 </details>
 
 <details>
   <summary>Mapping Ternary (and n-ary) Relationships</summary>
-
+- <img src="https://i-blog.csdnimg.cn/blog_migrate/13d8a0b29a868602738ec8339737c69d.png"/>
 - Create relation for each entity + one associative relation.
 - Associative relation’s PK often includes multiple FKs (sometimes add surrogate key to simplify).
 </details>
 
 <details>
   <summary>Mapping Weak Entities</summary>
-
+- <img src="https://i-blog.csdnimg.cn/blog_migrate/85069529693a23d356385aa05164329c.png"/>
 - Weak entity becomes its own table.
 - PK = Partial identifier + PK of strong entity (as FK).
 - FK cannot be null (mandatory).
@@ -592,6 +627,7 @@ An attribute of the supertype used to decide which subtype(s) an instance belong
 <details>
   <summary>Mapping Unary Relationships</summary>
 
+- <img src="https://i-blog.csdnimg.cn/blog_migrate/3ddee3ffcc596de4f7cab7a50aa1f26a.png"/>
 - 1:1 or 1:N → Recursive FK in the same table.
 - M:N → Separate associative table with two FKs referencing same entity.
 </details>
@@ -604,4 +640,3 @@ An attribute of the supertype used to decide which subtype(s) an instance belong
 - Discriminator attribute indicates subtype category.
 - Subtype relations hold only their specific attributes.
 </details>
-
