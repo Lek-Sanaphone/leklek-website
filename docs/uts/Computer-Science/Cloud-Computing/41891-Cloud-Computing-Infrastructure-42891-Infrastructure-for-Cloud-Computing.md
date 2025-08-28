@@ -753,26 +753,155 @@ task.
 </details>
 
 ## 5.2 Labs
+
+<details>
+    <summary>Main purpose of Lab</summary>
+
+```mermaid
+flowchart TB
+    subgraph ESXi_Host
+        vSwitch0["vSwitch0"]
+
+        subgraph PortGroup1["Port Group: VM Network (No VLAN)"]
+            VM1["VM1 (192.168.1.10)"]
+        end
+
+        subgraph PortGroup2["Port Group: Production (VLAN 100)"]
+            VM2["VM2 (192.168.1.11)"]
+        end
+    end
+
+    VM1 <--X--> VM2
+    note["❌ Different VLANs → Cannot Ping"]
+```
+
+- Understand vSphere networking basics: Learn what vSwitches, Port Groups, and VLAN IDs are.
+- Deploy and manage VMs: Deploy from an OVF/OVA template.
+- Explore VLAN segmentation: See how Port Groups with VLAN IDs isolate traffic. Test communication between VMs in same/different VLANs.
+- Practice vMotion: Move VMs between ESXi hosts and discover network prerequisites for migration.
+- Restore connectivity: Fix networking by placing VMs into correct Port Groups or VLANs.
+
+ </details>
+
+ <details>
+    <summary>vSwitches and Port groups</summary>
+    
+ <details>
+    <summary>Step 1 - Set up</summary>
+    
+- Power on: ‘ESXi01’, ‘ESXi02’, ‘VCSA’ and ‘iSCSI’ and ‘OpenWRT’. Configure network to vmnet6. Configure the IPv4 of each VMs ([See Lab 4](#42-labs))
+- Set up the web configuration:
+    - https://172.20.20.51/ - [Add License 7](https://gist.github.com/CHSuworatrai/dcc0c625183202b2065aeab623356d50)
+    - https://172.20.20.52/ - [Add License 7](https://gist.github.com/CHSuworatrai/dcc0c625183202b2065aeab623356d50)
+    - https://vcsa.vsphere.local:5480 - Setup can be see in [Lab4](#42-labs),  ensure the `VMware vCenter Server` is Started in `Services`
+    - https://172.20.20.94/ - user: `administrator@vsphere.local` password: `VMware1!`
+
+ </details>
+
+  <details>
+    <summary>Step 2 - Create VM using OVF file</summary>
+
+- Configure the `Adapter/Software iSCSI` of ESXi 1 and 2 to make it connect to FreeNAS 
+- In both ESXi: Create 1-2 VMs with option deploy with ovf using `TinyCore_Script.ovf` and `TinyCore_Script.vmdk`
+    - Select `Deploy a virtual machine from an OVF or OVA file`
+    - Select the storage as `Datastore1`
+    - Keep default setting
+
+ </details>
+
+<details>
+    <summary>Step 3 - Add host to vsphere datacenter -> 172.20.20.94</summary>
+    
+- See lab 4, Migrate all VMs storage in both EXSi-> change the `storage only` -> desy-vmfs1
+ </details>
+
+<details>
+    <summary>Step 4 - Change your VMs network connectivity</summary>
+
+<img src="https://masteringvmware.com/wp-content/uploads/2016/03/vswitch-create-9.jpg"/>
+
+1. On the VCSA web browser, select any ESXi host.
+2. Go to Configure tab -> Networking -> Virtual switches.
+3. On this page click Add Networking, select 'Virtual Machine Port Group for Standard' Switch option and click Next.
+4. Select the existing standard switch vSwitch0.
+5. Name the network label as ‘Production’ and assign a VLAN ID as 100 to the portgroup.
+
+ </details>
+
+ <details>
+    <summary>Step 5 - vMotion</summary>
+- <img src="https://o.quizlet.com/WvjM3X8HTpVUDB8NAAPfow.jpg"/>
+- Motion your VMs to your other host. Just Drag and Drop:
+    - Change both xompute resource and storage
+    - Select the other sub-datacenter that is different from the one that it is in
+    - keep desy-vmfs1
+    ---
+    - Select networks: this one you can change the Destination Network to 'Production' but note that you need to change for rest of VMs if you want all vm in that VLAN to be able to ping each other
+    - But keep default as dev is fine, all vm will be able to ping each other anyway
+    - If it is in a different VLAN then it can't ping each other
+    ---
+    - Test by ensuring all VMs are started -> to go terminal -> ping command
+ </details>
+
+ </details>
+
+    
+
 ---
 # 6. Management of Data Centre
 ## 6.1 Lecture
 ## 6.2 Labs
+
+<details>
+    <summary>Main purpose of Lab</summary>
+
+ </details>
+
+ <details>
+    <summary>Resources</summary>
+    
+ </details>
+
 ---
 # 7. Quiz 1
 ## 7.1 Lecture
 ## 7.2 Labs
+
+<details>
+    <summary>Main purpose of Lab</summary>
+
+ </details>
+
+ <details>
+    <summary>Resources, HA and DRS</summary>
+    
+ </details>
+
 ---
 # 8. Security and Compliance in the Cloud
 ## 8.1 Lecture
 ## 8.2 Labs
+
+<details>
+    <summary>Main purpose of Lab</summary>
+
+ </details>
+
+ <details>
+    <summary>ESXi Install and Host Profile</summary>
+    
+ </details>
+
 ---
 # 9. No Lecture
 ## 9.1 Lecture
 ## 9.2 Labs
+
 ---
 # 10. Public/Private Cloud Comparison and Review and Discussion
 ## 10.1 Lecture
 ## 10.2 Labs
+
 ---
 # 11. Quiz 2
 ## 11.1 Lecture
