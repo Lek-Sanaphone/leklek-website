@@ -683,19 +683,86 @@ task.
 </details>
 
 ### Data Center Architecture
+```mermaid
+graph TD
+
+subgraph DataCenter["Data Center Architecture"]
+    NetworkLayer["Network Layer"]
+    ComputeLayer["Compute Layer"]
+    StorageLayer["Storage Layer"]
+end
+
+subgraph Virtualization["Virtualization Layers"]
+    NetVirt["Network Virtualization"]
+    StorageVirt["Storage Virtualization"]
+    ComputeVirt["Compute Virtualization"]
+    ProcVirt["Processing Virtualization"]
+    AppVirt["Application Virtualization"]
+    AccessVirt["Access Virtualization"]
+end
+
+NetworkLayer --> NetVirt
+ComputeLayer --> ComputeVirt
+StorageLayer --> StorageVirt
+ComputeVirt --> ProcVirt
+AppVirt --> AccessVirt
+
+```
+
+<details>
+    <summary>Data Center Architecture (3 Layers)</summary>
+
 - **Three-Layer Model**: Separates resources into compute, storage, and network layers.
+
+1. Network Layer
+    - Connects data center to the internet.
+    - Provides security & reliable access.
+    - Uses LAN switches to connect users to resources.
+2. Compute Layer
+    - Provides processing resources (servers).
+    - Runs user applications.
+    - Servers interconnected with switches.
+3. Storage Layer
+    - Stores application data.
+    - Uses disk drives, storage switches, and transport platforms.
+    - Supports replication between data centers.
+---
 - **Dedicated Resources**: Each layer can have its own dedicated equipment.
 - **Consolidation & Virtualisation**: Resources at each layer (compute, storage, network) can be pooled and shared instead of kept separate
+</details>
+
 
 ### Virtualising a Data Center
-- Virtualisation allows multiple workloads to run on a single host and makes it easy to clone machines for testing, development, or disaster recovery.
-- Benefits: 
-    - Reduced costs and heat
-    - Faster deployment and migration
-    - Better disaster recovery and testing
-    - Flexibility and no vendor lock-in
 
-#### Types of Virtualisation
+<details>
+    <summary>Virtualization: Why It Matters</summary>
+
+- Virtualisation allows multiple workloads to run on a single host and makes it easy to clone machines for testing, development, or disaster recovery.
+---
+- **Efficiency**: Better hardware utilization.
+- **Cost reduction**: Fewer servers needed.
+- **Downtime reduction**: Faster recovery with snapshots.
+- **Deployment speed**: Minutes instead of hours/days.
+- **Testing environments**: Easy to clone and roll back.
+- **Disaster recovery**: Snapshots allow fast failover.
+- **Cloud enablement**: Without virtualization, there’s no cloud.
+</details>
+
+<details>
+    <summary>Benefits of Virtualization</summary>
+
+- Reduced hardware & electricity costs.
+- Faster redeployment of systems.
+- Easier maintenance.
+- Better disaster recovery.
+- Vendor independence (no lock-in).
+- Less heat buildup.
+- Smooth migration to the cloud.
+</details>
+
+<details>
+    <summary>Types of Virtualisation</summary>
+
 <details>
     <summary>Network Virtualisation</summary>
 
@@ -750,6 +817,18 @@ task.
     - Microsoft Remote Desktop Protocol (RDP).
     - Citrix ICA.
     - Virtual Desktop Infrastructure (VDI).
+</details>
+
+</details>
+
+<details>
+    <summary>Key Considerations in Virtualizing Data Centers</summary>
+
+- Adequate electrical power & cooling.
+- Proper security facilities.
+- Disaster recovery planning (multiple sites).
+- Staff skills and new support tools.
+- Some workloads (e.g., high I/O apps, hardware-dependent tasks) may not be virtualized.
 </details>
 
 ## 5.2 Labs
