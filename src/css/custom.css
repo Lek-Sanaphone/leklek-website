@@ -51,3 +51,129 @@
 
   --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.05);
 }
+
+
+/* ------------------ */
+
+/* --- Docs Assistant (solid theme, no blur) --- */
+.docs-assistant {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 9999;
+}
+
+.docs-assistant__toggle {
+  width: 60px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #fff; /* white border like in your screenshot */
+  background: #555; /* medium gray */
+  color: #fff;
+  font-size: 20px; /* make emoji a bit smaller */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.docs-assistant__toggle:hover {
+  background: #666; /* slightly lighter gray when hovered */
+  transform: scale(1.05);
+}
+
+.docs-assistant__toggle:active {
+  background: #444; /* darker when clicked */
+  transform: scale(0.95);
+}
+
+/* window */
+.docs-assistant__window {
+  width: 360px;
+  height: 520px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  /* Solid surface that matches cards/navbar */
+  background: var(--ifm-background-surface-color, var(--ifm-background-color));
+  box-shadow: var(--ifm-global-shadow-md);
+  /* remove blur */
+}
+
+/* sticky header/footer for readability */
+.docs-assistant__header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 12px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--ifm-background-surface-color, var(--ifm-background-color));
+}
+
+/* chat body */
+.docs-assistant__body {
+  padding: 12px;
+  height: 100%;
+  overflow: auto;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ifm-font-color-base);
+}
+
+/* message spacing */
+.docs-assistant__body .msg {
+  margin: 10px 0;
+}
+.docs-assistant__body .role {
+  font-weight: 600;
+  color: var(--ifm-font-color-base);
+}
+
+/* links */
+.docs-assistant__body a {
+  color: var(--ifm-color-primary);
+  text-decoration: underline;
+}
+
+/* input row (sticky) */
+.docs-assistant__inputRow {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--ifm-background-surface-color, var(--ifm-background-color));
+}
+
+.docs-assistant__input {
+  flex: 1;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: var(--ifm-background-color);
+  color: var(--ifm-font-color-base);
+}
+
+.docs-assistant__send {
+  border: 1px solid var(--ifm-color-primary);
+  background: var(--ifm-color-primary);
+  color: var(--ifm-color-primary-contrast, #fff);
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+/* mobile */
+@media (max-width: 480px) {
+  .docs-assistant__window {
+    width: min(94vw, 420px);
+    height: 60vh;
+  }
+}

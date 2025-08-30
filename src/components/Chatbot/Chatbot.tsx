@@ -15,10 +15,12 @@ export default function Chatbot() {
 
   async function send() {
     if (!input.trim() || busy) return;
+
     const question = input.trim();
     setMsgs((m) => [...m, { role: "user", content: question }]);
     setInput("");
     setBusy(true);
+
     try {
       const r = await fetch(WORKER_CHAT_URL, {
         method: "POST",
@@ -28,23 +30,27 @@ export default function Chatbot() {
 
       const data = (await r.json()) as ChatResp;
 
-      // Coerce unknown → string[], then dedupe
+      // normalize & dedupe sources to string[]
       const sources: string[] = Array.isArray(data.sources)
         ? Array.from(new Set((data.sources as unknown[]).map(String)))
         : [];
 
-      const srcs = sources.length
-        ? "\n\nSources:\n" + sources.map((s) => `• ${s}`).join("\n")
-        : "";
+      const srcBlock =
+        sources.length > 0
+          ? "\n\nSources:\n" + sources.map((s) => `• ${s}`).join("\n")
+          : "";
 
       setMsgs((m) => [
         ...m,
-        { role: "assistant", content: (data.answer || "…") + srcs },
+        { role: "assistant", content: (data.answer || "…") + srcBlock },
       ]);
     } catch {
       setMsgs((m) => [
         ...m,
-        { role: "assistant", content: "Sorry, I couldn’t reach the assistant." },
+        {
+          role: "assistant",
+          content: "Sorry, I couldn’t reach the assistant.",
+        },
       ]);
     } finally {
       setBusy(false);
@@ -52,35 +58,15 @@ export default function Chatbot() {
   }
 
   return (
-    <div style={{ position: "fixed", right: 16, bottom: 16, zIndex: 9999 }}>
+    <div className="docs-assistant">
       {open && (
-        <div
-          style={{
-            width: 360,
-            height: 520,
-            background: "#fff",
-            border: "1px solid #ddd",
-            borderRadius: 12,
-            overflow: "hidden",
-            boxShadow: "0 6px 24px rgba(0,0,0,.12)",
-          }}
-        >
-          <div style={{ padding: 12, borderBottom: "1px solid #eee", fontWeight: 600 }}>
-            Docs Assistant
-          </div>
-          <div
-            style={{
-              padding: 12,
-              height: 400,
-              overflow: "auto",
-              fontSize: 14,
-              whiteSpace: "pre-wrap",
-              lineHeight: 1.4,
-            }}
-          >
+        <div className="docs-assistant__window">
+          <div className="docs-assistant__header">Docs Assistant</div>
+
+          <div className="docs-assistant__body">
             {msgs.map((m, i) => (
-              <div key={i} style={{ margin: "8px 0" }}>
-                <b>{m.role === "user" ? "You" : "AI"}:</b>{" "}
+              <div key={i} className="msg">
+                <span className="role">{m.role === "user" ? "You" : "AI"}:</span>{" "}
                 {m.content.split("\n").map((line, j) => (
                   <div key={j}>
                     {line.split(" ").map((word, k) => {
@@ -98,22 +84,32 @@ export default function Chatbot() {
               </div>
             ))}
           </div>
-          <div style={{ display: "flex", gap: 8, padding: 12, borderTop: "1px solid #eee" }}>
+
+          <div className="docs-assistant__inputRow">
             <input
+              className="docs-assistant__input"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && send()}
               placeholder={busy ? "Thinking…" : "Type a question…"}
-              style={{ flex: 1 }}
               disabled={busy}
             />
-            <button onClick={send} disabled={busy}>
+            <button
+              className="docs-assistant__send"
+              onClick={send}
+              disabled={busy}
+            >
               Send
             </button>
           </div>
         </div>
       )}
-      <button onClick={() => setOpen((v) => !v)} style={{ borderRadius: 999, padding: "10px 14px" }}>
+
+      <button
+        className="docs-assistant__toggle"
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Toggle docs assistant"
+      >
         💬
       </button>
     </div>
