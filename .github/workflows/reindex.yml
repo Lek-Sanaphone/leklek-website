@@ -1,0 +1,61 @@
+name: Reindex Docs (after Pages deploy)
+
+on:
+  workflow_run:
+    workflows: ["Deploy to GitHub Pages", "pages-build-deployment"]
+    types: [completed]
+  workflow_dispatch:
+
+jobs:
+  reindex:
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check secrets
+        run: |
+          test -n "${{ secrets.CF_REINDEX_URL }}" || (echo "CF_REINDEX_URL is missing" && exit 1)
+          test -n "${{ secrets.CF_REINDEX_TOKEN }}" || (echo "CF_REINDEX_TOKEN is missing" && exit 1)
+
+      - name: Wait for sitemap to be live (up to ~60s)
+        env:
+          SITEMAP_URL: https://leklek.net/sitemap.xml
+        run: |
+          for i in {1..12}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$SITEMAP_URL")
+            if [ "$code" -eq 200 ]; then
+              echo "Sitemap is reachable."
+              exit 0
+            fi
+            echo "Sitemap not ready yet (HTTP $code). Retrying..."
+            sleep 5
+          done
+          echo "Sitemap still not reachable after waiting."
+          exit 1
+
+      - name: Install jq
+        run: |
+          sudo apt-get update -y >/dev/null
+          sudo apt-get install -y jq >/dev/null
+
+      - name: Reindex sitemap in pages (paged requests)
+        env:
+          REINDEX_URL: ${{ secrets.CF_REINDEX_URL }}
+          REINDEX_TOKEN: ${{ secrets.CF_REINDEX_TOKEN }}
+        run: |
+          set -e
+          cursor="0"
+          limit=8
+          while true; do
+            echo "Reindexing cursor=$cursor limit=$limit"
+            resp=$(curl -sS -X POST "$REINDEX_URL?cursor=$cursor&limit=$limit" \
+              -H "x-reindex-token: $REINDEX_TOKEN" \
+              -H "Content-Type: application/json" \
+              --data '{"reason":"post-deploy"}')
+            echo "$resp"
+            next=$(echo "$resp" | jq -r '.nextCursor // empty')
+            if [ -z "$next" ]; then
+              echo "Reindex complete."
+              break
+            fi
+            cursor="$next"
+          done
