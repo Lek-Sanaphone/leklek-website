@@ -59,7 +59,10 @@ export default function Home() {
             <Link className="button button--primary button--lg" to="/projects">
               View My Projects
             </Link>
-            <Link className="button button--secondary button--lg" to="mailto:youremail@example.com">
+            <Link className="button button--primary button--lg" to="/docs/intro">
+              Note
+            </Link>
+            <Link className="button button--secondary button--lg" to="mailto:lekuniversitylek@gmail.com">
               Contact Me
             </Link>
           </div>
