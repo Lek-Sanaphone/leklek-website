@@ -929,6 +929,78 @@ flowchart TB
 ---
 # 6. Management of Data Centre
 ## 6.1 Lecture
+### Data Center - Background and Designs Standard
+
+<details>
+    <summary>Background Benefit</summary>
+
+- Benefits of data centers: cost and energy savings, reduced downtime, better productivity, improved security, and compliance
+</details>
+
+<details>
+    <summary>Design Standards</summary>
+
+- 4 Standards:
+<details>
+    <summary>Uptime Institute’s Tier Standard (performance-based)</summary>
+
+- Tier I: Basic capacity, single path, planned downtime required.
+- Tier II: Adds redundancy (N+1), still downtime for power path.
+- Tier III: Concurrently maintainable, no shutdown for planned maintenance.
+- Tier IV: Fault tolerant, survives worst unplanned events
+</details>
+
+<details>
+    <summary>TIA-942 Standard</summary>
+
+- IT cable and network-oriented, construction costs vary by tier
+- Similar four-tier model with defined downtime hours:
+    - Tier I: ~28.8 hrs/year
+    - Tier II: ~22 hrs/year
+    - Tier III: ~1.6 hrs/year
+    - Tier IV: ~0.4 hrs/year
+</details>
+
+<details>
+    <summary>Other standards: Energy Star (USA), Data Center Star Audit (Germany)</summary>
+
+- Details not define
+</details>
+
+</details>
+
+### Key management areas, Management challenges, Hardening steps management
+
+<details>
+    <summary>Key Management Areas</summary>
+
+1. Capacity Management – optimize rack space, network, power, cooling with DCIM and CFD tools.
+2. Service Delivery – ensure multi-tenancy, scale, high availability, disaster recovery.
+3. Resource Management – optimize electricity bills, use green energy, temperature-aware strategies.
+    - Metrics: Power Usage Effectiveness (PUE) and DCiE (reciprocal of PUE).
+4. Asset Management – track hardware/software assets, warranties, contracts, automate reporting
+</details>
+
+<details>
+    <summary>Management Challenges</summary>
+
+- Maintaining uptime.
+- Improving utilization of space, power, and connectivity.
+- Reducing operating expenses.
+- Managing energy usage and costs.
+- Improving staff productivity via automation
+</details>
+
+<details>
+    <summary>Hardening Steps</summary>
+
+- Environmental control: temperature, humidity, fire, flood.
+- Physical security: location, surveillance, access control.
+- Disaster recovery: plans, offsite backups.
+- Remote management: logical security requirements.
+- Other measures: staff training, operational procedures
+</details>
+
 ## 6.2 Labs
 
 <details>

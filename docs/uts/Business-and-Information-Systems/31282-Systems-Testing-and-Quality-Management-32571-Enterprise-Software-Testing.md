@@ -520,3 +520,59 @@ flowchart TD
 6. **Path Coverage:** Ensures all possible execution paths in the control-flow graph are tested.
 
 </details>
+
+## 6. Whitebox Testing Techniques
+### Mutation Testing
+<details>
+  <summary>Mutation Testing</summary>
+
+- Purpose: Measures how effective a test suite is by introducing small faults (mutants) into the program.
+- Process:
+  1. Run the original program and fix any issues.
+  2. Create mutants (one change each).
+  3. Run test suite on mutants.
+  4. If results differ → mutant is “killed” (detected). If not → tests are inadequate.
+- Adequacy: Proportion of killed mutants to total mutants.
+</details>
+
+<details>
+  <summary>Systematic Mutation</summary>
+
+- Requires rules for creating mutants and criteria for completion.
+<details>
+  <summary>Common mutation types</summary>
+
+- **Value Mutation**: Change constants or expressions `(e.g., 0 → 1, x → x+1)`.
+- **Decision Mutation**: Invert conditions `(e.g., == → !=, > → <)`.
+- **Statement Mutation**: Delete, swap, or duplicate statements.
+</details>
+
+</details>
+
+### Data Coverage
+
+<details>
+  <summary>Data Coverage</summary>
+
+- Focuses on how data is used and moves through a program
+<details>
+  <summary>Data Flow Coverage</summary>
+
+- Concerned with variable definitions:
+  - Variable definitions: variable is assigned a value
+- Types of Variables:
+  - P-use: Predicate use (e.g., in conditions)
+  - C-use: Computation or output use
+</details>
+
+<details>
+  <summary>Data Flow Testing Strategies</summary>
+
+- **All-Defs**: Every definition reaches at least one use.
+- **All P-Uses**: Every definition reaches all predicate uses.
+- **All C-Uses**: Every definition reaches all computation uses.
+- **All-Uses**: Every definition reaches all predicate and computation uses.
+</details>
+
+</details>
+

@@ -6,7 +6,7 @@ title: 31271 Database Fundamentals
 # Database Fundamentals - Summary
 # 1. Introduction to DBMS and Data Modeling Part I
 
-## Introduction to Database Concepts
+## 1.1 Introduction to Database Concepts
 
 ### 1. Business Rules (BR)
 
@@ -43,7 +43,7 @@ title: 31271 Database Fundamentals
 
 # 2. Structured Query Language (SQL) - Data Definition Language (DDL) and Data Manipulation Language (DML)
 
-## DDL and DML
+## 2.1 DDL and DML
 - **DDL commands**: CREATE, ALTER, DROP, RENAME
 - **DML commands**:  INSERT, DELETE, UPDATE
 
@@ -303,15 +303,6 @@ erDiagram
 
 </details>
 
-<details>
-<summary></summary>
-</details>
-
-
-
-
-
-
 
 ### Associative Entity – Combination of Relationship and Entity
 <details>
@@ -430,7 +421,7 @@ erDiagram
 ```
 
 # 4. Data Modeling Part III
-## Supertypes, Subtypes, Relationship
+## 4.1 Supertypes, Subtypes, Relationship
 
 ### Supertypes and Subtypes
 * **Supertype**: general entity with common attributes.
@@ -529,7 +520,7 @@ An attribute of the supertype used to decide which subtype(s) an instance belong
 </details>
 
 # 5. Convert ERD to Relations
-## Relational Model
+## 5.1 Relational Model
 ### Components of relational model
 
 - **Data Structure**: Tables (relations), rows, and columns.
@@ -585,7 +576,7 @@ classDiagram
 2. **Cascade** – delete child rows automatically when parent is deleted.
 3. **Set-to-Null** – set FK to null when parent is deleted (not allowed for weak/mandatory entities).
 
-## Transforming ERD into Relations
+## 5.2 Transforming ERD into Relations
 
 <details>
   <summary>Mapping ERD to Relations</summary>

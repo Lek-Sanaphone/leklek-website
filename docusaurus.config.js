@@ -85,6 +85,22 @@ const config = {
     ],
   ],
 
+  plugins: [
+    [
+      require.resolve('@easyops-cn/docusaurus-search-local'),
+      {
+        hashed: true,              // better caching on GitHub Pages
+        indexDocs: true,           // index /docs
+        indexBlog: true,           // index /blog if you use it
+        indexPages: true,          // index non-doc pages
+        docsRouteBasePath: ['/'],  // if your docs are served at '/', else use '/docs'
+        language: ['en'],
+        highlightSearchTermsOnTargetPage: true,
+        explicitSearchResultPath: true,
+      },
+    ],
+  ],
+
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
