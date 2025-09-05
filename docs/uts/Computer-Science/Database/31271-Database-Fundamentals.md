@@ -631,3 +631,88 @@ classDiagram
 - Discriminator attribute indicates subtype category.
 - Subtype relations hold only their specific attributes.
 </details>
+
+# 6. Functional Dependencies, and Normalization
+## 6.0 Review Relations:
+- Show the primary key: `Underline it (bold too if want)`
+- Have a composite primary key: `Underline the entire key`
+- Show foreign keys: `Asterisk*`
+- What if it’s a composite FK? (if the PK of the entity you’re getting it from is a composite PK): `Put them around brackets, and asterisk*`, Example: Prescription(DrugNo *, (PatID,PatCID)*,Amount) 
+## 6.1 Functional Dependencies
+$$\text{SubjectID} \implies \text{SubjectDuration, SubjectName}$$
+- Know the exact, specific, single VALUE of SubjectDuration, SubjectName if you know the VALUE of SubjectID
+- Come from business rule and forms
+- Values of Left Side uniquely identifies the values of the Right Side
+### Partial and Transitive Functional Dependencies
+
+## 6.2 Normalising Relation: 1NF, 2NF, 3NF
+### Normal Form
+<details>
+  <summary>A relation is in 1NF (1st Normal Form) if</summary>
+
+- Rule:
+  - No repeating groups or multi-valued attributes.
+  - Every attribute must be atomic (cannot be split further).
+  - No derived attributes.
+- Example (Not in 1NF):
+```scss
+STUDENT(StudentID, Name, Subjects)
+```
+- Subjects might store multiple values like \{Math, Physics, English\}. That breaks 1NF because Subjects is not atomic.
+- Example (1NF):
+```scss
+STUDENT(StudentID, Name, Subject)
+```
+</details>
+
+<details>
+  <summary>A relation is in 2NF (2nd Normal Form) if</summary>
+
+- Rule:
+  - Must already be in 1NF.
+  - Remove **Partial Dependencies**
+    - Partial Dependency: When you have dependencies on only PART of the PK
+      - Can happen if you have a Composite PK  (e.g. PatID, PatCID) 
+    - Every non-key attribute has to be fully functionally dependent on the ENTIRE primary key
+- Example (Not in 2NF):
+  - OrderDate depends only on OrderID.
+  - ProductName depends only on ProductID.
+  - These are partial dependencies.
+```scss
+ORDER_LINE(OrderID, ProductID, OrderDate, ProductName, Quantity)
+PK = (OrderID, ProductID)
+```
+- Convert to 2NF:
+  - Why: Splitting removes redundancy (e.g., product names repeated for every order line).
+```scss
+ORDER(OrderID, OrderDate)
+PRODUCT(ProductID, ProductName)
+ORDER_LINE(OrderID, ProductID, Quantity)
+```
+</details>
+
+<details>
+  <summary>A relation is in 3NF (3rd Normal Form) if</summary>
+
+- Rule:
+  - Must already be in 2NF.
+  - Remove **transitive dependencies**
+    - Transitive Dependency: When you have dependency on a NON-KEY attribute.
+    - We don't want functional dependencies on non-primary-key attributes
+- Example (Not in 3NF):
+  - DeptName depends on DeptID (a non-key attribute). 
+  - This is a transitive dependency.
+
+```scss
+EMPLOYEE(EmpID, EmpName, DeptID, DeptName)
+PK = EmpID
+```
+
+- Convert to 3NF:
+  - Why: Avoids repeating department names for every employee and keeps department data consistent.
+```scss
+EMPLOYEE(EmpID, EmpName, DeptID)
+DEPARTMENT(DeptID, DeptName)
+```
+
+</details>

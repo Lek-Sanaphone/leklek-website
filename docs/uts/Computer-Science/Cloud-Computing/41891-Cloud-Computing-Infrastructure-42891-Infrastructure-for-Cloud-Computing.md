@@ -1006,11 +1006,42 @@ flowchart TB
 <details>
     <summary>Main purpose of Lab</summary>
 
+- Demonstrate Resource Pools:
+    - VMs in same host, but different Resource Pools, can lead to different speed of performance
  </details>
 
  <details>
     <summary>Resources</summary>
-    
+
+<details>
+    <summary>Step 1 - Set up</summary>
+
+- Set everything up (like Lab 5)
+- For openwrt vm-> network adapter 1 to vmnet 6 and network adapter 2 change it to NAT
+- Create 2 VMs in each host with ovf and vmdk file (`Must use ovf and vmdk`)
+</details>
+
+<details>
+    <summary>Step 2 - Creates Resources Pool</summary>
+
+- Login to the vcsa machine Administration portal: `https:// vcsa.vsphere.local:443` or `https://172.20.20.94`
+- Username: `administrator@vsphere.local` Password: `VMware1!`
+- Add VM host to the vsphere: right click in Datacenter-my add Host
+- Creates 2 Resources Pool (Select 1 of the host):
+    - <img src="https://masteringvmware.com/wp-content/uploads/2018/03/resource-pool-1.jpg"/>
+    - Create a new Resource Pool called "Fast" and assign it High share values. (Right click on the host IP -> New Resource Pool)
+    - Create a new Resource Pool called "Slow", and assign it Low share values, and a 500Mhz Limit.
+- Add one VM to the High Pool, and one VM to the Low Pool (make sure both VMs are on same host) (Simply drag and drop the VMs on the respective Resource Pool)
+</details>
+
+<details>
+    <summary>Step 3 - Create CPU Workload on the VMs</summary>
+
+- VMs in both resources pool must be on, observe changes to the VM performance:
+    - Open Terminal window in the virtual machine and run the cpubusy.sh script. On the '$' prompt type the command: '`./cpubusy.sh`'.
+    - You will notice that VMs in the same host will have a difference speed behavior.
+</details>
+
  </details>
 
 ---
