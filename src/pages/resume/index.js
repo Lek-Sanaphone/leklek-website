@@ -35,7 +35,7 @@ export default function Resume() {
             </ul>
           </div>
           <div className={styles.entry}>
-            <h3>Kiattisak International School</h3>
+            <h3>Kiettisak International School</h3>
             <p className={styles.date}>Sep 2022 – Jun 2023</p>
             <p>Graduated with GPA: 3.35</p>
             <ul>
