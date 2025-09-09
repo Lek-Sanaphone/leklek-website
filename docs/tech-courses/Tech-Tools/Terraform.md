@@ -183,6 +183,71 @@ resource "aws_instance" "west_server" {
 
 <details>
     <summary>3. State management</summary>
+
+<details>
+    <summary>Definitions</summary>
+
+1. **What It Is**
+   * The state file is like Terraform’s “notebook.”
+   * It records all resources that Terraform has created, modified, or deleted.
+   * It acts as Terraform’s **database** for keeping track of infrastructure.
+
+2. **Current vs Desired State**
+   * **Desired State** = what you define in your `.tf` configuration files.
+   * **Current State** = what Terraform knows already exists (stored in the state file).
+   * Terraform compares the two and makes changes to bring the current state in line with the desired state.
+
+3. **How It Works in Practice**
+   * At first, the state file is empty because nothing exists.
+   * When you run `terraform apply`, Terraform:
+     1. Creates the infrastructure.
+     2. Updates the state file with details of the created resources (like IDs, attributes, etc.).
+   * If you later change or delete resources in your config, Terraform compares with the state file and applies only the necessary updates.
+
+4. **State File Format**
+   * Stored as **JSON** in `terraform.tfstate`.
+   * Contains metadata (Terraform version, provider info).
+   * Stores details of each resource: type, name, attributes, IDs, and configuration.
+
+5. **Why It’s Important**
+   * Terraform relies on it to know what’s already been provisioned.
+   * Without it, Terraform would not know whether resources already exist and might recreate or duplicate them.
+   * It enables Terraform’s **declarative approach**: always moving the current state toward the desired state.
+
+</details>
+
+<details>
+    <summary>State Sub Command</summary>
+
+* Usage: `terraform state <subcommand> [options] [args]`
+    * List all sub commands: `terraform state -h`
+* `terraform state list`, List resources in the state
+* `terraform state mv`, Move an item in the state
+* `terraform state pull`, Pull current state and output to stdout
+* `terraform state push`, Update remote state from a local state file
+* `terraform state replace-provider`, Replace provider in the state
+* `terraform state rm`, Remove instances from the state
+* `terraform state show`, Show a resource in the state
+    * `terraform state show <specific resources>`, gives information of that resource only
+
+</details>
+
+<details>
+    <summary>**IMPORTANT: State Drift**</summary>
+
+* State Drift: $\color{tomato}\text{Actual Infrastructure} \neq \text{Terraform tfstate}$
+* Occur when someone delete resources manually from the Provider's UI
+* Solution:
+    1. `terraform init` and then `terraform apply` (Recommend)
+        * Init helps to compare the actual infra and current state file
+        * apply create the missing/difference between the two, hence create missing resource(s) + config the state file
+    2. `terraform refresh` (Not Recommend)
+        * If the deletion is intentional
+        * terraform refresh will not change anything in the infra, but it will changes the current state file
+        * However, this command doesn't consider the `resource file`
+
+</details>
+
 </details>
 
 <details>

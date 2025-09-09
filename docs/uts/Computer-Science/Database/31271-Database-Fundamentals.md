@@ -420,6 +420,8 @@ erDiagram
 
 ```
 
+---
+
 # 4. Data Modeling Part III
 ## 4.1 Supertypes, Subtypes, Relationship
 
@@ -518,6 +520,8 @@ An attribute of the supertype used to decide which subtype(s) an instance belong
     * NYN = employee is only Salaried.
 
 </details>
+
+---
 
 # 5. Convert ERD to Relations
 ## 5.1 Relational Model
@@ -632,6 +636,8 @@ classDiagram
 - Subtype relations hold only their specific attributes.
 </details>
 
+---
+
 # 6. Functional Dependencies, and Normalization
 ## 6.0 Review Relations:
 - Show the primary key: `Underline it (bold too if want)`
@@ -716,3 +722,162 @@ DEPARTMENT(DeptID, DeptName)
 ```
 
 </details>
+
+---
+
+# 7. SQL I
+## 7 Simple Query
+
+### Subject Context
+* This lecture follows earlier weeks on ERD, keys, functional dependencies, and normalization.
+* It introduces SQL, focusing on **Data Manipulation Language (DML)** with queries.
+
+### Objectives
+
+* Understand and write simple SQL queries.
+* Learn the structure and order of the `SELECT` statement.
+* Use clauses: `SELECT`, `FROM`, `WHERE`, `ORDER BY`, `GROUP BY`, `HAVING`.
+* Apply aggregate functions.
+* Understand SQL processing order.
+* Work with views.
+
+### The SELECT Statement
+
+#### Structure
+
+```sql
+SELECT column1, column2
+FROM table_name
+WHERE condition
+GROUP BY column1
+HAVING condition
+ORDER BY column1;
+```
+
+* **SELECT** → choose columns or expressions to return.
+* **FROM** → specify tables or views.
+* **WHERE** → filter rows.
+* **GROUP BY** → categorize results.
+* **HAVING** → filter groups (like `WHERE`, but for groups).
+* **ORDER BY** → sort the results.
+
+#### Examples
+
+* `SELECT * FROM product_t;` → returns all rows and columns.
+* `SELECT productdescription, productfinish FROM product_t;` → returns selected columns.
+
+
+### Eliminating Duplicates
+
+* Use `DISTINCT` to remove duplicate values.
+
+```sql
+SELECT DISTINCT productfinish FROM product_t;
+```
+
+### WHERE Clause
+
+* Filters rows using conditions.
+* Supports operators:
+
+  * Comparison: `=, >, <, >=, <=`
+  * Range: `BETWEEN`
+  * Logical: `AND, OR, NOT`
+  * Pattern matching: `LIKE`
+  * Null checking: `IS NOT NULL`
+  * Membership: `IN`
+
+**Examples:**
+
+* `WHERE productstandardprice > 275`
+* `WHERE productdescription LIKE '%Table'`
+* `WHERE customerstate IN ('FL','TX','CA')`
+
+### Boolean Logic
+
+* Operator precedence:
+
+  1. Parentheses `()`
+  2. `NOT`
+  3. `AND`
+  4. `OR`
+* Parentheses can override default precedence.
+
+### ORDER BY
+
+* Sort results ascending (`ASC`, default) or descending (`DESC`).
+* Can sort by multiple columns.
+
+```sql
+ORDER BY customerstate ASC, customername DESC;
+```
+
+### Aggregate Functions
+
+* Summarize data.
+* Common functions: `AVG`, `SUM`, `MIN`, `MAX`, `COUNT`.
+
+**Examples:**
+
+* `SELECT AVG(productstandardprice) FROM product_t;`
+* `SELECT COUNT(*) FROM product_t;`
+
+
+### GROUP BY
+
+* Groups rows by column(s) and applies aggregate functions.
+* **Rule 1:** Columns in `SELECT` must also appear in `GROUP BY` (unless used with aggregates).
+* **Rule 2:** Non-grouped columns must use aggregate functions.
+
+**Example:**
+
+```sql
+SELECT customerstate, COUNT(customerstate)
+FROM customer_t
+GROUP BY customerstate;
+```
+
+### HAVING
+
+* Filters groups after aggregation.
+* Example:
+
+```sql
+SELECT customerstate, COUNT(customerstate)
+FROM customer_t
+GROUP BY customerstate
+HAVING COUNT(customerstate) > 1;
+```
+
+### SQL Statement Processing Order
+
+1. `FROM`
+2. `WHERE`
+3. `GROUP BY`
+4. `HAVING`
+5. `SELECT`
+6. `ORDER BY`
+
+### Views
+
+* Virtual tables created by queries.
+* **Dynamic View:** Not stored on disk, always up to date, but slower.
+* **Materialized View:** Stored on disk, faster but requires refresh.
+
+**Syntax:**
+
+```sql
+CREATE VIEW ViewName AS
+SELECT * FROM product_t;
+```
+
+
+## 7.2 Key Takeaways
+
+* SQL queries are built using structured clauses.
+* `WHERE` filters rows; `HAVING` filters groups.
+* Aggregates summarize data, often with `GROUP BY`.
+* Views provide simplified or customized data access.
+* Always remember the **processing order** of SQL statements.
+
+

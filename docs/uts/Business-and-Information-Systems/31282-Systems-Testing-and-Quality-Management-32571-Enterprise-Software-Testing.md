@@ -301,6 +301,8 @@ really need) – Confirms the software meets customer needs and expectations.
   - Requires early architecture decisions, which are hard to change later.
 </details>
 
+---
+
 ## 3. Static Testing, RBT, and FMEA
 
 ### Static Testing
@@ -384,6 +386,8 @@ really need) – Confirms the software meets customer needs and expectations.
 ### Relationship Between Static Testing & FMEA
 - Static testing ensures clear, complete requirements.
 - FMEA extends this by anticipating and ranking potential failures to guide dynamic testing priorities.
+
+---
 
 ## 4. Black-box Testing
 ### (Dynamic) Software Testing Life Cycle
@@ -476,6 +480,7 @@ flowchart TD
 * Output partitioning: group outputs into equivalence classes (e.g., number of values, zeros present).
 * Drawback: finding inputs to trigger specific outputs is time-consuming.
 
+---
 
 ## 5. White-box Testing
 
@@ -520,6 +525,8 @@ flowchart TD
 6. **Path Coverage:** Ensures all possible execution paths in the control-flow graph are tested.
 
 </details>
+
+---
 
 ## 6. Whitebox Testing Techniques
 ### Mutation Testing
@@ -576,3 +583,87 @@ flowchart TD
 
 </details>
 
+---
+
+## 7. Integration and System Testing
+
+### Integration Testing
+- Software Integration:
+  - Software is built as a collection of subsystems and modules.
+  - Each module is first tested individually (unit testing) and then combined into the complete system.
+  - Integration ensures that combined parts work as one system.
+
+- Integration Testing:
+  - Verifies that modules, subsystems, or applications work together correctly.
+  - Identifies issues such as compatibility errors, performance problems, data corruption, or miscommunication.
+  - Considered complete when:
+    - The system is fully integrated.
+    - All test cases are executed.
+    - Major defects are fixed.
+  - Why it matters: It ensures requirements are met, catches coding and compatibility issues early, and increases confidence in system quality.
+
+<details>
+  <summary>Advantages and Challenges</summary>
+
+- Advantages:
+  - Detect and fix defects early.
+  - Get faster feedback on system health.
+  - Flexible scheduling of fixes during development.
+- Challenges:
+  - Failures can happen in complex ways.
+  - Testing may begin before all parts exist.
+  - Requires stubs (fake modules) or drivers to simulate missing modules.
+</details>
+
+- Granularity in Integration Testing:
+  - **Intra-system testing**: Combining modules within one system (main focus).
+  - **Inter-system testing**: Testing across multiple independent systems.
+  - **Pairwise testing**: Testing two connected systems at a time.
+
+<details>
+  <summary>Integration Strategies</summary>
+
+- Big Bang: All modules are integrated and tested together (at once).
+  - <img src="https://miro.medium.com/v2/resize:fit:1400/0*ep8IWkTiK-bDjjyI.png"/>
+  - Convenient for small systems.
+  - Hard to locate faults, risky for large systems.
+- Incremental Integration: Modules are tested and added one by one.
+  - Early fault detection.
+  - Needs planning, more cost.
+  - Two forms:
+    - Bottom-up: Start from lower-level modules using drivers.
+    - Top-down: Start from top modules using stubs.
+    - Sandwich: Mix of both, testing top and bottom simultaneously until meeting in the middle.
+
+</details>
+
+### System Testing
+- System testing:
+  - Black-box testing of the fully integrated system.
+  - Ensures the system meets customer requirements and is ready for end-users.
+  - Tests both functional (tasks) and non-functional (performance, reliability, usability, security) requirements in realistic environments.
+
+- Scope of System Testing
+  - Covers:
+    - Functional correctness.
+    - Interfaces and communication.
+    - Error handling.
+    - Performance and reliability.
+    - Usability.
+    - Security.
+  - Examples:
+    - E-commerce website (login, cart, payment).
+    - Car systems (engine, brakes, fuel system).
+    - Online shopping site (integration bugs like missing discounts or wrong shipping).
+
+<details>
+  <summary>Pros and Cons of System Testing</summary>
+
+- Advantages:
+  - Detects most faults before acceptance testing.
+  - Builds user and developer confidence.
+  - Tests system in production-like conditions.
+- Disadvantages:
+  - Time-consuming.
+  - Hard to isolate the exact cause of errors.
+</details>
