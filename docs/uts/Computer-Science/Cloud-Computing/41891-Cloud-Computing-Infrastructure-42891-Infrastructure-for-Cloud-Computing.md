@@ -761,7 +761,7 @@ AppVirt --> AccessVirt
 </details>
 
 <details>
-    <summary>Types of Virtualisation</summary>
+    <summary>Types of Virtualisation - Kusnetzky Group Model of Virtualisation</summary>
 
 <details>
     <summary>Network Virtualisation</summary>

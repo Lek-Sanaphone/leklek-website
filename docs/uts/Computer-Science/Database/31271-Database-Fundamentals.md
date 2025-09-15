@@ -639,17 +639,42 @@ classDiagram
 ---
 
 # 6. Functional Dependencies, and Normalization
-## 6.0 Review Relations:
+## Week 5 Review "Relations":
 - Show the primary key: `Underline it (bold too if want)`
 - Have a composite primary key: `Underline the entire key`
 - Show foreign keys: `Asterisk*`
 - What if it’s a composite FK? (if the PK of the entity you’re getting it from is a composite PK): `Put them around brackets, and asterisk*`, Example: Prescription(DrugNo *, (PatID,PatCID)*,Amount) 
+
+## 6.0 Key in Database
+- Super Key: Any set of attributes that uniquely identifies a row.
+  - Example: `{StudentID}, {StudentID, Email}, {StudentID, Name, DOB}`
+- Candidate Key: Minimal super key (no unnecessary attributes).
+  - Example: `{StudentID}, {Email}`
+- Primary Key: Chosen candidate key that uniquely identifies rows. Must be unique and non-null.
+  - Example: `{StudentID}`
+
 ## 6.1 Functional Dependencies
 $$\text{SubjectID} \implies \text{SubjectDuration, SubjectName}$$
 - Know the exact, specific, single VALUE of SubjectDuration, SubjectName if you know the VALUE of SubjectID
 - Come from business rule and forms
 - Values of Left Side uniquely identifies the values of the Right Side
+
 ### Partial and Transitive Functional Dependencies
+- Partial Functional Dependency: depends on part of a composite key.
+  - Definition: When a non-key attribute depends on part of a composite primary key, not the whole key.
+  - Example:
+    `OrderLine(OrderID, ProductID, Quantity, ProductName)`
+    - Primary Key = `(OrderID, ProductID)`
+    - `ProductName` depends only on `ProductID` (part of the key). -> This is a partial dependency.
+- Transitive Functional Dependency: depends on another non-key attribute.
+  - Definition: When a non-key attribute depends on another non-key attribute, not directly on the primary key.
+  - Example:
+    `Order(OrderID, CustomerID, CustomerName)`
+    - Primary Key = `OrderID`
+    - `CustomerName` depends on `CustomerID`, which depends on `OrderID`. -> This is a transitive dependency.
+
+
+
 
 ## 6.2 Normalising Relation: 1NF, 2NF, 3NF
 ### Normal Form
@@ -726,7 +751,7 @@ DEPARTMENT(DeptID, DeptName)
 ---
 
 # 7. SQL I
-## 7 Simple Query
+## 7.1 Simple Query
 
 ### Subject Context
 * This lecture follows earlier weeks on ERD, keys, functional dependencies, and normalization.
@@ -880,4 +905,171 @@ SELECT * FROM product_t;
 * Views provide simplified or customized data access.
 * Always remember the **processing order** of SQL statements.
 
+---
 
+# 8. SQL II
+## 8.1 Formula and Explanation
+
+### INNER JOIN
+
+**Formula:**
+
+```sql
+SELECT *
+FROM TableA
+INNER JOIN TableB
+ON TableA.col = TableB.col;
+```
+
+**Explanation:**
+Returns only rows where values match in both tables.
+
+**Example:** Customers who have placed orders.
+
+```sql
+SELECT c.CustomerID, c.Name, o.OrderID
+FROM Customer c
+INNER JOIN Order o
+ON c.CustomerID = o.CustomerID;
+```
+
+### LEFT OUTER JOIN
+
+**Formula:**
+
+```sql
+SELECT *
+FROM TableA
+LEFT JOIN TableB
+ON TableA.col = TableB.col;
+```
+
+**Explanation:**
+All rows from the **left table** are returned. If there’s no match in the right table, `NULL` fills the missing values.
+
+**Example:** Show all customers, even those with no orders.
+
+```sql
+SELECT c.CustomerID, c.Name, o.OrderID
+FROM Customer c
+LEFT JOIN Order o
+ON c.CustomerID = o.CustomerID;
+```
+
+### RIGHT OUTER JOIN
+
+**Formula:**
+
+```sql
+SELECT *
+FROM TableA
+RIGHT JOIN TableB
+ON TableA.col = TableB.col;
+```
+
+**Explanation:**
+All rows from the **right table** are returned, with `NULL` for missing left-side matches.
+
+**Example:** Show all orders, even if some do not have a customer record.
+
+```sql
+SELECT c.CustomerID, c.Name, o.OrderID
+FROM Customer c
+RIGHT JOIN Order o
+ON c.CustomerID = o.CustomerID;
+```
+
+### FULL OUTER JOIN
+
+**Formula:**
+
+```sql
+SELECT *
+FROM TableA
+FULL OUTER JOIN TableB
+ON TableA.col = TableB.col;
+```
+
+**Explanation:**
+Returns all rows from both tables. Matches are combined; unmatched rows show `NULL`.
+
+**Example:** Show all customers and all orders, matched where possible.
+
+```sql
+SELECT c.CustomerID, c.Name, o.OrderID
+FROM Customer c
+FULL OUTER JOIN Order o
+ON c.CustomerID = o.CustomerID;
+```
+
+### CROSS JOIN (Cartesian Product)
+
+**Formula:**
+
+```sql
+SELECT *
+FROM TableA
+CROSS JOIN TableB;
+```
+
+**Explanation:**
+Pairs every row in the first table with every row in the second. Can generate very large results.
+
+**Example:** Combine every customer with every product.
+
+```sql
+SELECT c.Name, p.ProductName
+FROM Customer c
+CROSS JOIN Product p;
+```
+
+### SELF JOIN
+
+**Formula:**
+
+```sql
+SELECT e.EmployeeID, e.Name, m.Name AS Manager
+FROM Employee e
+INNER JOIN Employee m
+ON e.ManagerID = m.EmployeeID;
+```
+
+**Explanation:**
+A table joins with itself using aliases. Useful for hierarchical data.
+
+**Example:** Employees with their managers.
+
+
+### NATURAL JOIN (not recommended)
+
+**Formula:**
+
+```sql
+SELECT *
+FROM TableA
+NATURAL JOIN TableB;
+```
+
+**Explanation:**
+Automatically joins on columns with the same name. Can cause unexpected results. Explicit `INNER JOIN` is safer.
+
+### UNION
+
+**Formula:**
+
+```sql
+SELECT col1, col2 FROM TableA
+UNION
+SELECT col1, col2 FROM TableB;
+```
+
+**Explanation:**
+Combines the results of two queries. Removes duplicates unless `UNION ALL` is used.
+
+**Example:** List all customer IDs from two different tables.
+
+```sql
+SELECT CustomerID FROM OnlineCustomer
+UNION
+SELECT CustomerID FROM StoreCustomer;
+```
