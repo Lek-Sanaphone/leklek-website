@@ -667,3 +667,60 @@ flowchart TD
   - Time-consuming.
   - Hard to isolate the exact cause of errors.
 </details>
+
+---
+
+## 8. Testing Automation Selenium
+
+### Selenium
+* Selenium is primarily used for automated testing of web applications. 
+* Instead of manually clicking, typing, or navigating in a browser, Selenium scripts simulate these actions automatically.
+
+#### Key Capabilities
+
+* Automates user interactions with web applications (typing, clicking, selecting, navigating).
+* Provides cross-browser and cross-platform compatibility (Chrome, Firefox, Safari, Edge; Windows, macOS, Linux).
+* Offers extensibility through plugins and integrations.
+
+### Types of Tests with Selenium
+
+* **Functional Tests** – Verify new features and functionality.
+* **Regression Tests** – Ensure new code changes don’t break existing features.
+* **Smoke Tests** – Check if a new build is stable for further testing.
+* **Integration Tests** – Validate that modules work together as expected.
+* **Unit Tests** – Developer-written tests for individual code components.
+
+### DOM
+
+* Selenium interacts with HTML elements using the **Document Object Model (DOM)**.
+* Common element locators: ID, name, class name, tag name, CSS selector, XPath, link text, and partial link text.
+* Supports advanced interactions such as handling forms, dropdowns, alerts, and taking screenshots.
+
+#### Example of DOM
+<img src="https://media.geeksforgeeks.org/wp-content/uploads/20241120143259875787/DOM-Tree1.webp" height="300"/>
+
+### How Selenium Interacts with DOM
+
+* Using Selenium, you can locate and manipulate these elements:
+
+#### Example in python
+
+```python
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+
+driver = webdriver.Chrome()
+driver.get("https://example.com")
+
+# Find elements using DOM
+title = driver.find_element(By.ID, "main-title")   # Locate <h1>
+username_box = driver.find_element(By.NAME, "username")  # Locate input field
+submit_button = driver.find_element(By.ID, "submit-btn")  # Locate button
+
+# Interact with elements
+username_box.send_keys("TestUser")
+submit_button.click()
+
+driver.quit()
+```
+* Here, Selenium uses DOM locators (`ID`, `Name`) to find and interact with page elements just like a user would.
