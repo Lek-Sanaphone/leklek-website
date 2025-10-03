@@ -724,3 +724,45 @@ submit_button.click()
 driver.quit()
 ```
 * Here, Selenium uses DOM locators (`ID`, `Name`) to find and interact with page elements just like a user would.
+
+---
+
+## 9. Testing Automation
+### TestCafe
+
+<details>
+  <summary>TestCafe</summary>
+
+* **Overview**:
+  * Node.js-based, open-source framework for end-to-end web application testing.
+  * Released in 2016 as a simpler alternative to Selenium.
+
+* **Architecture**:
+  * Proxy-based model with Node.js server and client-side browser scripts.
+  * Executes directly in browsers, no WebDriver required.
+
+* **Strengths**:
+  * Easy setup and zero configuration.
+  * Cross-browser and cross-platform support (desktop, mobile, cloud).
+  * Parallel test execution and automatic waiting.
+  * Built-in reporting, debugging, and cloud integration.
+
+* **Limitations**:
+  * Only supports JavaScript/TypeScript.
+  * CSS selectors only (XPath requires workarounds).
+  * Requires third-party integrations for mobile testing.
+  * Potential performance issues with large test suites.
+
+* **Setup Process**:
+  * Install Node.js, set up IDE (e.g., VS Code), install TestCafe via npm.
+  * Write scripts using **fixtures**, **tests**, and **hooks**.
+
+* **Core Features**:
+  * **Selectors**: CSS-based element targeting.
+  * **Actions**: Simulate user interactions (click, type, drag, navigate, etc.).
+  * **Assertions**: Validate expected outcomes using `t.expect`.
+
+* **Example**:
+  * Fill out a form → Click submit → Assert greeting message matches expectation.
+
+</details>

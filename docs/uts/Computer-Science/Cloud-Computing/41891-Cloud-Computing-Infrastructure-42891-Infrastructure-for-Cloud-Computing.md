@@ -1047,6 +1047,8 @@ flowchart TB
 ---
 # 7. Quiz 1
 ## 7.1 Lecture
+- No lecture
+
 ## 7.2 Labs
 
 <details>
@@ -1062,6 +1064,54 @@ flowchart TB
 ---
 # 8. Security and Compliance in the Cloud
 ## 8.1 Lecture
+
+### Business Security Requirements
+
+* **Physical security**: biometrics, locks, restricted access.
+* **Data security**: passwords, firewalls, access controls.
+* **Equipment security**: locks, placement, cables.
+* **Document security**: secure storage and electronic backups.
+
+### Cloud Security
+
+* Guided by the **CIA Triad**: Confidentiality, Integrity, Availability.
+* Relies on policies, technologies, and controls to protect systems.
+
+### Security Threats
+
+* Data breaches, compromised credentials, and hacked APIs.
+* Exploited vulnerabilities, malicious insiders, APTs, and DoS attacks.
+* Risks include permanent data loss, inadequate diligence, and shared-technology flaws (e.g., Spectre, Meltdown).
+
+### Threat Modeling
+
+* Steps: identify attackers, assets, threats → rank threats → apply mitigation → design solutions.
+* Frameworks:
+
+  * **STRIDE**: Spoofing, Tampering, Repudiation, Information Disclosure, DoS, Elevation of Privilege.
+  * **DREAD**: Damage, Reproducibility, Exploitability, Affected Users, Discoverability (used for risk rating).
+
+### Mitigation Techniques
+
+* **Spoofing** → authentication, secret protection.
+* **Tampering** → authorization, hashes, digital signatures.
+* **Repudiation** → digital signatures, audit trails.
+* **Information disclosure** → encryption, privacy protocols.
+* **DoS** → filtering, throttling, QoS.
+* **Privilege escalation** → least-privilege principle.
+
+### Virtualization Security Issues
+
+* Vulnerabilities: hypervisors, VM image repositories, VM rollback, virtual networks.
+* Challenges: infrastructure complexity, dynamic environments, VM sprawl.
+* Mitigation: separation, process enforcement, patching, auditing, sprawl management.
+
+### Compliance Standards
+
+* Cloud systems must meet regulations like ISO/IEC 27001, PCI DSS, HIPAA, FISMA, HITECH, FedRAMP.
+* Ensures trust, confidentiality, security, agility, and integration.
+
+
 ## 8.2 Labs
 
 <details>
@@ -1071,24 +1121,95 @@ flowchart TB
 
  <details>
     <summary>ESXi Install and Host Profile</summary>
-    
+
+
  </details>
 
----
-# 9. No Lecture
-## 9.1 Lecture
-## 9.2 Labs
+ 1. Open 5 vms (ESXi1, ESXi2, OPNsense, VCSAv8, TrueNAS) and verify
+
 
 ---
-# 10. Public/Private Cloud Comparison and Review and Discussion
+# 9. Public/Private Cloud Comparison and Review and Discussion
+## 9.1 Lecture
+
+### Private Cloud
+* **Definition**: Cloud resources dedicated to a single organization, managed either on-premises or off-premises.
+* **Usage**: 87% of IT professionals report using on-premises private clouds.
+* **Security Tools**: VPNs (secure communication), firewalls (network protection), and encryption (data protection).
+
+**When to Use**:
+* Business-critical data and applications requiring strict control and security.
+* Industries with regulatory and privacy requirements (e.g., healthcare, finance).
+* Large enterprises capable of running their own advanced cloud data centers.
+
+**Advantages**:
+* Greater control, stronger security, customizable, high performance, regulatory compliance.
+  **Disadvantages**:
+* Higher costs, on-site maintenance, limited scalability.
+
+### Public Cloud
+
+* **Definition**: Cloud services delivered by third-party providers via the internet, shared across multiple customers.
+* **When to Use**:
+  * Standardized workloads (e.g., email).
+  * Application testing and development (PaaS).
+  * SaaS applications with strong vendor security.
+  * Temporary capacity needs, collaboration projects.
+
+**Advantages**:
+* Simplicity, cost savings, scalability, no maintenance, rapid deployment.
+  **Disadvantages**:
+* Less control, potential slower performance, perceived weaker security.
+
+
+### Economic Drivers
+
+**Public Cloud**
+* **Demand-side**: Utility pricing (pay-as-you-go), elasticity (scale quickly).
+* **Supply-side**: Multi-tenancy, standardized components, statistical gains (resource efficiency at scale).
+
+**Private Cloud**
+* Demand-side: Elasticity and utility still expected but limited by capacity.
+* Supply-side: Smaller customer base, fewer economies of scale → less cost-efficient.
+
+
+### Security Issues
+
+* **Public Cloud Risks**:
+  * Loss of control over data, applications, and security policies.
+  * Reliance on provider for privacy, availability, and monitoring.
+  * Multi-tenancy increases risk of data exposure.
+
+* **Private Cloud Risks**:
+  * Smaller economies of scale, higher costs, but stronger control and security.
+
+
+### Hybrid Cloud
+
+* **Definition**: Mix of public and private cloud resources.
+* **Models**:
+  * Public + private elements for one IT function.
+  * Public cloud + traditional non-cloud resources.
+  * Partially dedicated, partially shared resources.
+
+**Advantages**:
+* Flexible, cost-efficient for heavy workloads.
+* Supports global reach and scalability while maintaining security for sensitive data.
+* Common use cases: secure SaaS integration, industry-specific services.
+
+### Key Considerations
+
+* Treat cloud as a commodity: ensure portability of data.
+* Confirm provider’s security, accessibility, and compliance.
+* Plan for performance changes and disaster recovery.
+* Clarify data location, ownership, and business continuity strategies.
+
+## 9.2 Labs
+---
+# 10. Quiz 2
 ## 10.1 Lecture
 ## 10.2 Labs
-
 ---
-# 11. Quiz 2
+# 11. No Lecturer
 ## 11.1 Lecture
 ## 11.2 Labs
----
-# 12. No Lecturer
-## 12.1 Lecture
-## 12.2 Labs

@@ -910,6 +910,14 @@ SELECT * FROM product_t;
 # 8. SQL II
 ## 8.1 Formula and Explanation
 
+### Diagram
+<details>
+  <summary>Diagram of JOIN</summary>
+
+<img src="https://miro.medium.com/1*rY5DNlvy4o8uHVz7Agc-bQ.png"/>
+<img src="https://red9.com/wp-content/uploads/2025/05/sql-joins-visualized-venn-diagram-red9.png"/>
+</details>
+
 ### INNER JOIN
 
 **Formula:**
@@ -1021,6 +1029,24 @@ Pairs every row in the first table with every row in the second. Can generate ve
 SELECT c.Name, p.ProductName
 FROM Customer c
 CROSS JOIN Product p;
+```
+
+#### 2 style of queries for CROSS JOIN
+
+1. Using CROSS JOIN
+```sql
+SELECT s1.stafName, s1.stalname, s1.staCSalary
+FROM staff s1
+CROSS JOIN staff s2
+WHERE s2.staId = 'S632'
+  AND s1.staCSalary > s2.staCSalary;
+```
+2. Using comma (old-style join syntax)
+```
+SELECT s1.stafName, s1.stalname, s1.staCSalary
+FROM staff s1, staff s2
+WHERE s2.staId = 'S632'
+  AND s1.staCSalary > s2.staCSalary;
 ```
 
 ### SELF JOIN
