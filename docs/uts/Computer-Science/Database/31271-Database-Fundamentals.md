@@ -1099,3 +1099,58 @@ SELECT CustomerID FROM OnlineCustomer
 UNION
 SELECT CustomerID FROM StoreCustomer;
 ```
+
+---
+
+# 9. SQL III
+## 9.1 Subquery
+
+### Subquery definition
+* A subquery is a query inside another query. Also called nested queries.
+* Only appear inside from below clauses:
+  * `FROM` → acts like a temporary table.
+  * `WHERE` → used as a condition.
+  * `HAVING` → used to filter groups.
+
+* Types of subqueries
+  * Uncorrelated (simple) → runs once, result is reused by the outer query.
+  * Correlated (advanced, next week) → runs once for every row in the outer query.
+
+### Example of Subquery
+
+* SQL runs the innermost subquery first, then moves outward.
+* Example:
+
+```sql
+SELECT ProductName
+FROM ProductTable
+WHERE ProductPrice = (SELECT MAX(ProductPrice) FROM ProductTable);
+```
+
+  * Step 1: Find highest price.
+  * Step 2: Use that number in the outer query to return the product.
+
+### Subquery operators
+* When a subquery returns multiple values, special operators are needed:
+  * `IN` → checks if a value is in the list (`X IN (subquery)`)
+  * `ANY` → true if at least one value matches (`X = ANY (subquery)`)
+  * `ALL` → must match all values (`X >= ALL (subquery)`)
+
+* Rules to remember:
+  * `IN` = `ANY`
+  * `NOT IN` = `<> ALL`
+  * `ALL`/`ANY` work with comparisons `(<, >, =)`, but `IN` does not.
+
+### Subquery vs. JOIN
+* Use a JOIN → when you need columns from multiple tables at the same time.
+* Use a subquery → when you want to filter using conditions, or find max/min.
+* Subqueries are often simpler and more efficient, but not always.
+
+### What should you take away from Week 9?
+
+* By the end of this week, you should know:
+  * ✅ What an uncorrelated subquery is.
+  * ✅ Which parts of a query (FROM, WHERE, HAVING) can contain subqueries.
+  * ✅ How to handle subqueries that return more than one row (using IN, ANY, ALL).
+  * ✅ The execution order (inside → out).
+  * ✅ When to use a subquery vs. join.
