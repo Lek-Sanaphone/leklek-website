@@ -766,3 +766,95 @@ driver.quit()
   * Fill out a form → Click submit → Assert greeting message matches expectation.
 
 </details>
+
+---
+
+## 10. AI-Assisted Testing
+
+### Behaviour-driven development (BDD) and Cucumber
+
+- BBD:
+  - **Definition**: BDD is a modern software-development approach that helps teams describe what a system should do in simple everyday language.
+  - **Goal**: To make sure developers, testers, and business people all understand the same thing before the software is built.
+  - **How it helps**: Everyone can read the same descriptions (called **scenarios**), so there’s less confusion and fewer bugs.
+  - **Main tool**: **Cucumber** — it reads those descriptions and automatically checks if the program behaves as described.
+
+- Cucumber:
+  - How cucumber works:
+    - You write your test in plain text, such as:
+```vbnet
+Scenario: Breaker guesses a word
+Given the Maker has chosen a word
+When the Breaker makes a guess
+Then the Maker is asked to score
+```
+  - Each Scenario shows a small example of how the system should behave.
+  - Cucumber connects each sentence (“Given…”, “When…”, “Then…”) to code that runs automatically.
+  - After running the tests, Cucumber tells you which scenarios **passed** or **failed**.
+
+### Gherkin Syntax (the Language of Cucumber)
+- Gherkin is a special, easy-to-read format used by Cucumber.
+- Each file (called a feature file) describes one feature of the system.
+- Gherkin uses these main keywords:
+  - **Feature**: a short summary of what’s being tested.
+  - **Scenario**: a single example of a situation to test.
+  - **Given**: what the starting situation is.
+  - **When**: what action happens.
+  - **Then**: what the expected result is.
+  - **And / But**: used to connect extra steps.
+- Feature: Login Function
+```pgsql
+Scenario: Successful login
+  Given the user opens the login page
+  When they enter a valid username and password
+  Then they should see the homepage
+```
+
+### Step Definition (Connecting to Code) and Step Data (Extra Test Information)
+
+- Step Definition:
+  - The sentences in your .feature file don’t run on their own.
+  - Each step is linked to a piece of code called a step definition.
+  - For example (Python):
+```python
+from behave import given, when, then
+
+@given('the user opens the login page')
+def step_impl(context):
+    # Code to open the login page
+    pass
+```
+  - Cucumber finds the right code for each step and runs it during testing.
+
+- Step Data:
+  - Sometimes a step needs extra data, like text or a table:
+  - Text block:
+    - → In Python, you can read it with context.text.
+```python
+"""
+This is a block of text attached to a step.
+"""
+```
+  - Table of data:
+    - → In Python, use context.table to access it.
+```pgsql
+| name   | department   |
+| Barry  | Beer Cans    |
+| Pudey  | Silly Walks  |
+```
+ 
+### How to Start Using Cucumber
+
+- Step 1 – Install Tools
+  - Install Cucumber, a text editor (like VS Code), and a browser automation tool such as Selenium.
+  - Choose a programming language (Python, Java, etc.).
+- Step 2 – Write Scenarios
+  - Create a folder called features, then a file such as tutorial.feature that contains your scenarios written in Gherkin.
+- Step 3 – Write Step Definitions
+  - In a folder called features/steps, create a Python file such as tutorial.py with your code for each step.
+- Step 4 – Run the Tests
+  - Open your terminal, go to your project folder, and type:
+```
+behave
+```
+- Cucumber will run the tests and show which ones passed or failed.
