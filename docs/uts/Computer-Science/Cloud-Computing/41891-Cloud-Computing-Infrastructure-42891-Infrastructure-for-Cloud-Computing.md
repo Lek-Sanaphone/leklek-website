@@ -1204,12 +1204,4 @@ flowchart TB
 * Plan for performance changes and disaster recovery.
 * Clarify data location, ownership, and business continuity strategies.
 
-## 9.2 Labs
----
-# 10. Quiz 2
-## 10.1 Lecture
-## 10.2 Labs
----
-# 11. No Lecturer
-## 11.1 Lecture
-## 11.2 Labs
+
