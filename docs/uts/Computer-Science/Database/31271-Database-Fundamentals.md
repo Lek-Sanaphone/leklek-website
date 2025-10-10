@@ -1154,3 +1154,86 @@ WHERE ProductPrice = (SELECT MAX(ProductPrice) FROM ProductTable);
   * ✅ How to handle subqueries that return more than one row (using IN, ANY, ALL).
   * ✅ The execution order (inside → out).
   * ✅ When to use a subquery vs. join.
+
+---
+
+# 10. SQL IV
+## 10.1 Correlated Subqueries
+
+### Definition
+
+* A **correlated subquery** is a subquery that depends on data from the outer query. 
+* Unlike a simple (uncorrelated) subquery, which runs once and reuses its result, a correlated subquery executes **once for every row** in the outer query.
+
+### Purpose
+
+* Correlated subqueries are used when each row of the main query requires a **different calculation or comparison**.
+* Such as comparing each staff member’s salary with the average salary in their own state.
+
+**Example Comparison:**
+
+1. *Show all staff with a salary above the average staff salary* → uses a **simple subquery** (same average for all).
+2. *Show all staff with a salary above the average salary for the state where they live* → uses a **correlated subquery** (average differs by state).
+
+### Step-by-Step Construction
+
+**Example:** Show all staff with a salary above the average for their state.
+
+1. **Alias the outer table**
+
+   ```sql
+   SELECT StaFName, StaLName, StaSalary, StaState  
+   FROM Staff S1
+   ```
+
+   * The alias `S1` allows the outer table to be referenced inside the subquery.
+
+2. **Create a simple subquery**
+
+   ```sql
+   WHERE StaSalary > (SELECT AVG(StaSalary) FROM Staff)
+   ```
+
+   * Calculates one overall average (not yet correlated).
+
+3. **Add correlation (reference outer table)**
+
+   ```sql
+   WHERE StaSalary > (SELECT AVG(StaSalary)  
+                      FROM Staff  
+                      WHERE StaState = S1.StaState)
+   ```
+
+   * The subquery now recalculates the average salary **for each state** by using `S1.StaState` from the outer query.
+
+**Full example of correlated subqueries**
+```sql
+SELECT 
+    StaFName, 
+    StaLName, 
+    StaSalary, 
+    StaState
+FROM 
+    Staff S1
+WHERE 
+    StaSalary > (
+        SELECT AVG(StaSalary)
+        FROM Staff
+        WHERE StaState = S1.StaState
+    );
+```
+
+### How It Works
+
+* The SQL engine processes each row in the outer table.
+* For each row, it substitutes that row’s state (e.g., `'VIC'`) into the subquery and calculates the average salary for that state.
+* The comparison checks if the staff member’s salary is above the state’s average.
+* This process repeats for every row.
+
+**Example Result:**
+Only staff with salaries higher than their state’s average are returned.
+
+| StaFName | StaLName | StaSalary | StaState |
+| -------- | -------- | --------- | -------- |
+| Jordan   | Tuckson  | 170000    | VIC      |
+
