@@ -127,7 +127,7 @@ const config = {
             position: 'right',
           },
           {
-            href: 'https://resume.leklek.net',
+            href: 'https://resume.leklek.net/LekNammathao_Resume.pdf',
             label: 'Resume',
             position: 'right',
           },
