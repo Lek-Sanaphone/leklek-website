@@ -1,8 +1,8 @@
 [
   {
-    "title": "LekLek Music App",
+    "title": "VMusic",
     "description": "A modern music player built with React Native and Zustand featuring custom playback modes and sleek UI.",
-    "image": "/img/music-app.png",
-    "link": "/docs/projects/music-app"
+    "image": "/img/VMusic/icon.png",
+    "link": "/docs/projects/VMusic"
   }
 ]
