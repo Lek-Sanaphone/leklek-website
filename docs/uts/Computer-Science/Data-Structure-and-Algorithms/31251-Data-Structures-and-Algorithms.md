@@ -7,13 +7,74 @@ title: 31251 Data Structures and Algorithms
 # 1. Intro to C++
 ## 1.1 Lecture
 
-### Introduction to C++ I/O
+### Introduction to C++
 
-The course utilizes the C++ standard library (`std`) for interacting with the console.
+<details>
+    <summary>Output and Input I/O</summary>
 
 * **Output (`std::cout`)**: Stands for "character output" and uses the **insertion operator** (`<<`) to flow data from the program to the console.
 * **Input (`std::cin`)**: Stands for "character input" and uses the **extraction operator** (`>>`) to flow data from the console into a variable.
 * **Type Sensitivity**: The behavior of `std::cin` is dependent on the data type of the variable receiving the input , such as `int` , `float` , or `std::string`.
+
+</details>
+
+<details>
+    <summary>Different between std::cin and std::getline (std::cin, userInput)</summary>
+
+* `std::cin` is used for reading a single word (up to the first whitespace) into a variable.
+* `std::getline` reads an entire line of text, including spaces, into a variable.
+```cpp
+std::string userInput;
+std::cin >> userInput; // Reads a single word
+std::getline(std::cin, userInput); // Reads the entire line
+```
+</details>
+
+<details>
+    <summary>Ways to define int</summary>
+
+* `int x;` - Declares an integer variable named `x` without initialization.
+* `int x = 5;` - Declares and initializes `x` with the value 5.
+* `int x(5);` - Declares and initializes `x` with the value 5 using direct initialization.
+* `int x{5};` - Declares and initializes `x` with the value 5 using uniform initialization (C++11).
+---
+* `int myNumber{3.5}` //this will give an error
+* `int myNumber(3.5)` //no error will change to 3
+* `int myNumber{}` //value is 0
+* `int myNumber()` //value is random
+</details>
+
+<details>
+    <summary>Function</summary>
+
+```cpp
+void myFunction() {
+    // Function body
+}
+
+int main() {
+    myFunction();
+    return 0;
+}
+```
+</details>
+
+<details>
+    <summary>Classes</summary>
+
+```cpp
+class Car {
+    public:
+        std::string brand;
+        int model;
+        void start() {
+            std::cout << "Car started!" << std::endl;
+        }
+    private:
+        int speed;
+};
+```
+</details>
 
 ### Memory Management: Variables, References, and Pointers
 
@@ -33,7 +94,19 @@ Understanding how C++ handles data in RAM is fundamental to Data Structures and 
 #### Pointers
 * A pointer is a variable that stores the **memory address** of another variable.
 * **Address Operator (`&`)**: Used to retrieve the memory address of a variable.
-* **Pointer Declaration (`*`)**: Tells the compiler the variable is a pointer, such as `char *ptr;`.
+* **Pointer Declaration (`*`)**: Tells the compiler the variable is a pointer, such as `char *ptr;`. **This Declaration also apply to the function parameters**
+    ```cpp
+    //variable declaration
+    char test = 'A';
+    char *ptr = &test;
+
+    //function with pointer parameter
+    void myFunction(char *ptr) {
+        // Function body
+        *ptr = 'B'; // *ptr, dereferencing the pointer to change the value
+    }
+    myFunction(&test); //pass the address of test to the function
+    ```
 * **Dereferencing (`*`)**: Using the `*` symbol to access or change the value stored at the memory address the pointer is pointing to.
 
 
@@ -58,6 +131,7 @@ There are three distinct methods for passing arguments to functions in C++:
 | **Pass by Value** | A **copy** of the value is created and passed to the function. | <br />**None**; changes within the function do not affect the original. |
 | **Pass by Reference** | The function receives a **reference** to the original variable. | <br />**Direct**; changes to the parameter affect the original value. |
 | **Pass by Pointer** | The function receives the **memory address** (pointer) of the variable. | <br />**Direct**; changes via dereferencing affect the original value. |
+| **Pass by Const Reference** | Receives a **reference** (alias) but treats it as **read-only**. | <br />**None**; Efficient for large data (no copy). |
 
 <details>
     <summary>Pass by Value</summary>
@@ -136,6 +210,24 @@ graph TD
     B["x: 0x05"]
     end
     B -- "points to (dereferences)" --> A
+```
+</details>
+
+<details>
+    <summary>Pass by Const Reference</summary>
+
+The function uses the direct memory block (address) but cannot alter the value. This combines the safety of **Pass by Value** with the efficiency of **Pass by Reference** by avoiding expensive copies (e.g., when passing large text or 1 million rows of data).
+
+```cpp
+void processBigData(const std::string &data) {
+    // data += " modification"; // Error: Cannot modify const reference
+    std::cout << "Read-only access to " << data.length() << " chars." << std::endl;
+}
+
+int main() {
+    std::string hugeText(1000000, 'A'); // Simulate large data
+    processBigData(hugeText); // Fast: Passes by address, no copy is made
+}
 ```
 </details>
 
