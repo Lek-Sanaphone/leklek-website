@@ -7,7 +7,80 @@ title: 31257 Information System Development Methodologies
 # 1. Introduction to Information System Development (ISD)
 ## 1.1 Lecture
 
-### ISD Fundamentals: Light Weight vs Heavy Weight Methods
+### Purpose of Information Systems (IS)
+The primary goal of an Information System is to facilitate business decision-making by providing accurate and timely information. It typically supports organizational activities such as forecasting, planning, control, and coordination.
+
+* **Core Services**: Includes data collection, storage, and retrieval (e.g., sales transactions).
+* **Data Transformation**: Application programs transform raw data into useful information.
+* **Management**: Uses intelligence tools and policies for data management, such as stock taking.
+
+### Drivers for IS Development Projects
+
+Information System projects arise because the world and business requirements are constantly changing.
+
+* **Performance Gaps**: Existing systems may fail to perform as required due to changes in government policies or external environments.
+* **Competitive Advantage**: Organizations pursue new opportunities, such as leveraging AI techniques, to gain a lead.
+* **Operational Excellence**: Projects often aim to reduce costs, such as inventory control systems that manage stock levels.
+* **Technological Adaptation**: Systems must be migrated to new environments like the cloud or re-architected for mobile platforms.
+
+### The Importance of Methodologies
+
+Methodologies provide a systematic framework to ensure a system meets user needs and to avoid costly failures.
+
+* **Risk Mitigation**: Large IT projects frequently suffer from budget overruns (avg. 45%) and schedule delays.
+* **Value Delivery**: Without a structured method, projects often align poorly with business objectives; only 34% of projects are reported to deliver value consistently.
+* **Critical Failures**: Approximately 17% of large projects go so poorly they threaten the company's existence, and over 30% are never finished.
+
+### ISDM and Types of Development Methodologies (Heavyweight vs Lightweight)
+
+Methodologies are generally categorized based on the level of control and flexibility they provide.
+
+#### What is ISDM?
+* An Information System Development Methodology (ISDM) is a systematic process used to develop information systems that meet specific organizational and user needs.
+* It acts as a framework to manage the complex interaction between business drivers, technology drivers, and various project stakeholders.
+
+#### Key Components of ISDM
+* **Phases**: A series of structured steps:
+    * **Initiation**: Defining the project scope and objectives.
+    * **Analysis**: Understanding user requirements.
+    * **Design**: Creating the system architecture and design.
+    * **Implementation**: Building and testing the system.
+* **Techniques**: Specific methods used within phases (e.g., interviews, prototyping, testing).
+* **Tools**: Software or templates that support the process (e.g., CASE tools, project management software).
+
+
+
+#### Methodologies
+<details>
+<summary>Heavyweight Methodologies</summary>
+
+These methodologies impose greater control and are process-oriented.
+
+* **Best Use Cases**: Ideal for larger teams (**20+ members**), multiple teams working in different locations, or high-stake projects with significant risk.
+* **Examples**: PRINCE2 and RUP.
+
+</details>
+
+<details>
+<summary>Lightweight Methodologies</summary>
+
+These focus on people over processes and accommodate change well.
+
+* **Characteristics**: They utilize smaller teams, dynamic checklists, and foster knowledge sharing.
+* **Improvement Cycles**: These methods rely on iterations, allowing teams to learn from each build and correct issues throughout the project.
+* **Examples**: SCRUM (the most popular at 43%), XP, and KANBAN.
+
+</details>
+
+### Selecting a Methodology
+
+The selection of a specific methodology depends on several key factors:
+
+* **Project Constraints**: Budget, team size, and the criticality of the project.
+* **Technical Environment**: The technology used and the software requirements.
+* **Organizational Assets**: Existing processes, documentation standards, and lessons learned from previous projects.
+
+
 
 ---
 
