@@ -7,6 +7,9 @@ sidebar_label: VMusic
 
 # <img src="/img/VMusic/icon.png" alt="VMusic Icon" width="50"/> VMusic
 
+### Developer/Contributor
+[(Lek) Sanaphone Nammathao](https://www.linkedin.com/in/lek-sanaphone-nammathao-4aa0a3312/) & [(Don)Xanadonh Nammathao](https://www.linkedin.com/in/xanadonh-nammathao-3231b1311/)
+
 ### Demo
 
 <video width="50%" controls>
@@ -14,48 +17,35 @@ sidebar_label: VMusic
   Your browser does not support the video tag.
 </video>
 
+
+
+---
+
 ## VMusic: High-Performance Cross-Platform Media Solution
 
-**VMusic** is a sophisticated, high-performance mobile application built with **React Native** and **Expo**, designed to provide users with a seamless, local-first music management experience. Engineered for both **iOS** and **Android**, VMusic bridges the gap between high-speed cloud media discovery and robust offline playback.
+**VMusic** is a high-performance mobile application built with **React Native** and **Expo**, engineered for a seamless, local-first music management experience. It bridges cloud-based discovery with robust offline playback for **iOS** and **Android**.
 
 ---
 
-### Core Features & Capabilities
+### Core Features
 
-* **Intelligent Media Discovery**: Integrates with specialized APIs to search and identify high-quality audio streams globally.
-* **Offline-First Architecture**: Features a robust download pipeline that converts and stores media locally, ensuring playback availability regardless of network status.
-* **Advanced Metadata Management**: Automatically parses and hydrates track information, including artist names, high-resolution artwork, and album titles.
-* **Dynamic Playback Queue**: Utilizes a customized reordering system with haptic feedback and smooth drag-and-drop gestures for real-time queue manipulation.
-* **Persistence & Sync**: Employs **MMKV** for ultra-fast, synchronous storage, maintaining user preferences, playback history, and "Recently Added" shelves across app sessions.
-* **Local Library Indexing**: Implements a background scanning service that monitors the local filesystem to keep the library in sync with physical files.
-
----
-
-### Technical Architecture
-
-VMusic is built using a modern, scalable tech stack prioritized for performance and reliability:
-
-| Layer | Technology |
-| --- | --- |
-| **Framework** | **React Native** with **Expo SDK** |
-| **State Management** | **Zustand** (custom store pattern) |
-| **Storage Layer** | **MMKV** (Synchronous, high-speed storage) |
-| **Networking** | **RapidAPI** integration with custom fetch-retry logic |
-| **UI Components** | **shadcn/ui** (customized for mobile) & **Lucide** icons |
-| **File System** | **Expo FileSystem** (Legacy/Standard) with relative-path mapping |
+* **Intelligent Discovery**: High-speed cloud media search and global audio stream identification.
+* **Offline-First Architecture**: Robust download pipeline for local media storage and network-independent playback.
+* **Dynamic Playback**: Gesture-based queue management with haptic feedback and custom **"Slowed & Nightcore"** DSP modes.
+* **Library Management**: Background filesystem indexing, automated metadata hydration (high-res artwork/ID3 tags), and a "Recently Added" dashboard.
+* **Hybrid Auth**: Secure user identity via **Google Sign-In** and **Anonymous/Guest** access modes.
 
 ---
+
 
 ### Development Roadmap
 
-VMusic is currently in active development, focusing on the following "Hardening" phases:
-
-1. **Phase 4.7: Queue Viewer Hardening**: Optimizing large list rendering (500+ tracks) using `getItemLayout` and interaction management.
-2. **Metadata Reactivity**: Ensuring real-time UI updates when track information or artwork is modified.
-3. **Cross-Device Stability**: Enhancing network resilience for diverse hardware, including tablet optimizations and DNS retry logic.
+* **Cloud Scaling**: Optimizing the backend on Cloud Run for global metadata requests.
+* **Queue Hardening**: Improving virtualization for large-scale playlists (500+ tracks).
+* **Stability**: Enhancing DNS retry logic and cross-device UI responsiveness.
 
 ---
 
 ### Compliance & Intended Use
 
-VMusic is designed as a **technical showcase** of mobile engineering principles, including advanced gesture handling, local-first data persistence, and efficient API integration. It is intended for personal media management and developer educational purposes.
+VMusic serves as a **technical showcase** for advanced mobile engineering, focusing on gesture handling, local-first data persistence, and efficient cloud-to-edge API integration.
