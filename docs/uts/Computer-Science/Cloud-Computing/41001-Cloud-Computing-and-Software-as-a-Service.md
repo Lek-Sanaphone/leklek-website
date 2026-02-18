@@ -50,6 +50,34 @@ Cloud computing fulfills the vision of computing as the fifth utility, following
 
 ### Infrastructure as a Service (IaaS)
 
+#### Definition and Control
+
+IaaS provides on-demand access to fundamental computing resources over the internet. Users bypass physical hardware ownership, instead renting virtualized infrastructure.
+
+* **User Control**: Consumers manage operating systems, storage, and deployed applications.
+* **Provider Management**: The cloud provider maintains the underlying physical networks, servers, and storage.
+* **Core Examples**: Includes AWS EC2, Azure VMs, and Google Compute Engine.
+
+#### Technical and Economic Parameters
+
+* **Virtualization**: Physical hardware is sliced into virtual machines delivered on the fly.
+* **Elasticity**: Infrastructure scales instantly to follow demand, preventing wasted money or system crashes.
+* **OpEx Model**: Metered usage (per second/GB) turns large upfront capital investments (CapEx) into monthly operational expenses (OpEx).
+* **Automation**: The full resource lifecycle is automated via APIs, requiring no human intervention for provisioning.
+
+#### The 4 Layers of IaaS
+
+1. **Co-location Layer**: Power, cooling, connectivity, security
+2. **Hardware Layer**: Physical servers, storage, networking
+3. **Virtualisation Layer**: Slices physical into virtual resources
+4. **Service Layer**: Web console / API - your front door
+
+#### Business Advantages
+
+* **Agility**: Deployment time is reduced from months of physical installation to instant availability.
+* **Cost Reduction**: Eliminates expenses for server rooms, cooling, and hardware maintenance.
+* **Focus**: IT staff focus on application innovation rather than infrastructure management.
+
 ---
 
 # 2. Cloud Service Models
