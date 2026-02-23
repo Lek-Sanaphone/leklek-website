@@ -483,12 +483,56 @@ If capacity increases by 1 each time:
 This is O(n²) (very slow).
 </details>
 
-### Introduction to Linked Lists
 
-### Deque
+## 2.3 Vector Functions and Syntax
+<details>
+    <summary>std::vector Fundamentals</summary>
 
+A vector is a dynamic data structure that stores elements in a contiguous block of memory and resizes automatically as needed .
 
+**Key Syntax and Operations:**
 
+- **Initialization:**
+    - `std::vector<int> nums {3, 1, 4};` — Creates a vector with initial values.
+    - `std::vector<int> result(nums.size(), 1);` — Creates a vector of a specific size filled with a default value (e.g., 1).
+- **Accessing Elements:**
+    - `nums[i]` — Access via indexing operator (fast, no bounds checking) .
+    - `nums.at(i)` — Access with bounds checking .
+- **Capacity Management:**
+    - `nums.push_back(val)` — Adds an element to the end.
+    - `nums.size()` — Returns the number of elements currently in the vector .
+    - `nums.capacity()` — Returns the total space allocated before a resize is required .
+- **Looping Strategies:**
+    - **Standard for-loop:** `for (std::size_t i = 0; i < nums.size(); i++)` — Use `std::size_t` because it is unsigned and can handle larger indices than `int` .
+    - **Range-based for-loop:** `for (int n : nums)` — Cleanest way to iterate over every element.
+</details>
+
+<details>
+    <summary>How Vectors Work (Doubling Strategy)</summary>
+
+Vectors use a **doubling strategy** to resize efficiently:
+
+1. **Initial Allocation:** When created, a vector has a small initial capacity (e.g., 1 or 2).
+2. **Doubling:** When full, it allocates a new array with **twice** the current capacity.
+3. **Copying:** All existing elements are copied to the new array.
+4. **Cleanup:** The old array is deleted.
+
+**Example:**
+
+| Action | Size | Capacity | Memory Cost |
+|--------|------|----------|-------------|
+| Create | 0 | 1 | 1 |
+| push_back(10) | 1 | 1 | 1 |
+| push_back(20) | 2 | 2 | 2 (copy 1 element) |
+| push_back(30) | 3 | 4 | 4 (copy 2 elements) |
+| push_back(40) | 4 | 4 | 0 |
+| push_back(50) | 5 | 8 | 4 (copy 4 elements) |
+
+**Why Doubling?**
+
+- **O(n) amortized time:** Each element is copied only when the vector doubles, so the average cost per element is constant .
+- **Avoids O(n²) copying:** Unlike +1 growth, doubling keeps copying localized .
+</details>
 ---
 
 # 3. Templates and Iterators
