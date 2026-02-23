@@ -231,21 +231,263 @@ int main() {
 ```
 </details>
 
-## 1.2 Tasks
+### Class in C++
 
-* **Released:** Ex 1 (18 Feb, 9am)
+<details>
+    <summary>Simple Class in C++</summary>
+
+```cpp
+#include <iostream>
+using namespace std;
+
+class MyClass {
+private:
+    int data;                 // private data
+public:
+    MyClass(int val = 0) {    // constructor (default/parameter)
+        data = val;
+    }
+    void insert(int val) { data = val; }  // setter
+    int get() { return data; }            // getter
+    void display() { cout << data << endl; }
+};
+
+int main() {
+    MyClass obj1;       // default constructor
+    MyClass obj2(10);   // parameter constructor
+    obj1.insert(5);
+    obj2.display();     // 10
+    cout << obj1.get(); // 5
+    return 0;
+}
+```
+Key Points
+* private: data hidden, public: accessible methods
+* Constructor: initialize objects (default or with parameters)
+* Member functions: access/modify private data
+* main() → program entry
+
+</details>
+
+<details>
+    <summary>Copy Class Objects</summary>
+
+# Copying a Simple Class (Shallow Copy)
+
+Suppose your class only has **simple types** like `int`:
+
+```cpp
+class MyClass {
+public:
+    int data;
+};
+```
+
+Now:
+
+```cpp
+MyClass obj1;
+obj1.data = 5;
+
+MyClass obj3 = obj1; // copy obj1 into obj3
+```
+
+**What happens in memory:**
+
+```
+obj1.data ---> 5
+obj3.data ---> 5  (a separate copy)
+```
+
+* `obj1` and `obj3` have **independent copies** of `data`
+* Changing one does **not** affect the other:
+
+```cpp
+obj1.data = 10;
+cout << obj3.data; // still 5
+```
+
+✅ This is simple, safe, and what happens by default.
+
+---
+
+# Copying a Class with a Pointer (Shallow Copy Problem)
+
+```cpp
+class MyClass {
+public:
+    int* data;
+    MyClass(int val) { data = new int(val); }
+};
+```
+
+Now:
+
+```cpp
+MyClass obj1(5);
+MyClass obj3 = obj1; // default copy
+```
+
+**Memory layout:**
+
+```
+obj1.data ---> [5]   (some heap memory)
+obj3.data ---> same [5]  (points to the same memory)
+```
+
+```
+obj1        obj3
++----+     +----+
+|data| --->|    |  <-- both point to the SAME heap memory
++----+     +----+
+             |
+             v
+           [ 5 ]  <- heap
+```
+
+* Both objects **share the same memory** for `data`
+* Changing one affects the other:
+
+```cpp
+*obj1.data = 10;
+cout << *obj3.data; // prints 10 too!
+```
+
+⚠ Problem: **shallow copy** → unintended side effects; `obj1` and `obj3` share the same memory.
+
+---
+
+# How to Fix It: Deep Copy (Custom Copy Constructor)
+
+Define a **copy constructor**:
+
+```cpp
+class MyClass {
+public:
+    int* data;
+    MyClass(int val) { data = new int(val); }
+
+    // copy constructor for deep copy
+    MyClass(const MyClass &other) {
+        data = new int(*other.data); // allocate new memory
+    }
+};
+```
+
+Now:
+
+```cpp
+MyClass obj1(5);
+MyClass obj3 = obj1;  // deep copy
+```
+
+**Memory layout:**
+```
+obj1        obj3
++----+     +----+
+|data| --->|    |  <-- separate memory blocks
++----+     +----+
+  |          |
+  v          v
+ [ 5 ]      [ 5 ]  <- two independent heap memory blocks
+```
+
+* `obj1` and `obj3` are fully independent
+* No side effects
+
+```cpp
+*obj1.data = 10;
+cout << *obj3.data; // prints 5
+```
+
+---
+
+# Summary
+
+| Case                                    | Copy Behavior                   | Notes                         |
+| --------------------------------------- | ------------------------------- | ----------------------------- |
+| Only `int` or simple types              | Default copy → independent      | Safe, shallow copy works fine |
+| Class has **pointers / dynamic memory** | Default copy → shared memory    | Can cause bugs (shallow copy) |
+| Use **custom copy constructor**         | Allocate new memory → deep copy | Each object fully independent |
+
+---
+
+# Takeaway
+* **`MyClass obj3 = obj1;` works by default**
+* Safe for normal types like `int`, `double`, etc.
+* Use **deep copy** for pointers or dynamic memory to avoid shared memory problems.
+</details>
 
 ---
 
 # 2. Sequence Containers
 
-## 2.1 Lecture
+## 2.1 Lecture Part 1: Abstract Data Types (ADTs)
 
-### Vectors, Deques, and Arrays
+### ADT vs Data Structure
+* **ADT Definition**: A collection of values and a specification of operations that can be performed on them. It acts like a "user's manual," focusing on what can be done rather than how.
+* **Data Structure Definition**: A concrete implementation of an ADT.
+* **Problem Solving Strategy**: Design algorithms using ADTs by imagining "special powers" (operations) needed to solve the problem, then find a data structure that efficiently implements those powers
 
-## 2.2 Tasks
+### Example: Contains Duplicate
+The lecture uses Leetcode 217 to illustrate these concepts.
+* **The Problem**: Given an array, determine if any value appears twice.
+* **Brute Force**: A double for loop checks every element against all previous elements.
+* **ADT Approach**: Define an ADT with two operations: `contains(val)` and `insert(val)`.
+* **Efficiency**: While the double loop is one implementation, using more advanced data structures like Hash Tables or Balanced Binary Search Trees can significantly improve performance.
 
-* **Released:** Ex 2 (25 Feb, 9am)
+## 2.2 Lecture Part 2: Sequence Containers: Vectors, Deques, and Arrays
+
+### Fixed-Sized Arrays and the RAM Model
+* **Fixed-Size Array ADT**: Requires a maximum size at initialization. Operations include `get(i)` and `set(i, x)`.
+* **Random Access Memory (RAM) Model**:
+    * Memory is viewed as a long tape of "words" with integer addresses.
+    * **Rule 1**: Constant time reading/writing to any address.
+    * **Rule 2**: Constant time memory allocation/freeing.
+    * **Rule 3**: Constant time arithmetic on addresses.
+* **Implementation**: Elements are stored in a **contiguous block** of memory. The address of any element is calculated using the formula:
+$$
+    \text{Address} = \underbrace{\&arr[0]}_{base\_address} + \underbrace{i \times \text{sizeof(type)}}_{index \times \text{number of bytes per element}}
+$$
+
+### Resizable Arrays
+* **The Problem**: Fixed-size arrays require knowing the size in advance, which isn't always possible.
+* **Resizable Array ADT**: Supports `push_back(x)`, `pop_back()`, `size()`, `get(i)`, and `set(i, x)`.
+* **Implementation Strategy**:
+    1. Start with a fixed-size array.
+    2. Fill it from left to right as long as there is **excess capacity** (takes constant time).
+    3. When full, allocate a **new, larger array**, copy the old elements over, and free the old memory.
+
+<details>
+    <summary>Growth Strategy: Why Doubling?</summary>
+
+* **Why not just add 1?** If we only add 1 element at a time, the cost of copying dominates. To insert N elements, it would take $1 + 2 + 3 + ... + N = O(N^2)$ time.
+* **Why doubling?** By doubling the size, we ensure that the expensive copy operation happens less frequently. This leads to an **amortized** time complexity of $O(1)$ for `push_back`.
+---
+Doubling Strategy:
+When the array becomes full:
+1. Create a new array
+2. Make its capacity double the old one
+3. Copy old elements into it and Free the old array
+```
+Total Copying Cost
+Each resize copies all current elements:
+1 + 2 + 4 + ... + n/2
+```
+---
+Why Not +1 Growth?
+If capacity increases by 1 each time:
+```
+1 + 2 + 3 + ... + (n−1) = n(n−1)/2
+```
+This is O(n²) (very slow).
+</details>
+
+### Introduction to Linked Lists
+
+### Deque
+
+
 
 ---
 
