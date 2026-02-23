@@ -8,23 +8,6 @@ title: 41001 Cloud Computing and Software as a Service
 ## 1.1 Lecture
 
 ### What is Cloud Computing?
-#### Software Architecture Paradigm Shifts
-
-The transition to cloud delivery was enabled by three major shifts in software design:
-* **Process-Oriented (1960s–80s)**: Programs were composed of tightly coupled processes acting on shared data, making reuse difficult.
-* **Object-Oriented (1980s–90s)**: Real-world entities were modeled as objects encapsulating data, communicating via messages.
-* **Service-Oriented Architecture (SOA) (2000s+)**: Applications became modular sets of independent services with standard interfaces. SOA provided the modular, reusable foundation necessary for cloud distribution.
-
-
-#### NIST Definition and Core Concepts
-
-NIST defines cloud computing as a model for on-demand network access to a shared pool of configurable resources (servers, storage, applications) that can be rapidly provisioned with minimal management. It is characterized by:
-
-* **Resource Pooling**: Shared physical infrastructure serves multiple consumers through multi-tenancy.
-* **Service Delivery**: Computing is delivered as a service rather than a physical product.
-* **Elasticity**: Resources scale up or down instantly to match actual demand.
-
-
 
 #### Six Defining Parameters of Cloud Computing
 
@@ -36,10 +19,6 @@ A true cloud environment must meet these six criteria:
 4. **Metered Usage**: A "pay-as-you-go" model where usage is tracked at a granular level (per second or GB), converting capital risk into operating cost.
 5. **Internet Delivery**: Resources are accessed via APIs and categorized as IaaS (raw infrastructure), PaaS (dev platforms), or SaaS (ready-made apps).
 6. **Automated Lifecycle**: Provisioning and de-provisioning are fully automated through self-service portals, requiring no human intervention.
-
-#### Utility Computing: The Fifth Utility
-
-Cloud computing fulfills the vision of computing as the fifth utility, following water, electricity, gas, and the internet. Like traditional utilities, it offers on-demand availability, seamless scaling, and pay-per-unit consumption without the need for the user to own or maintain the underlying infrastructure.
 
 #### Business Benefits
 
@@ -86,7 +65,97 @@ IaaS provides on-demand access to fundamental computing resources over the inter
 
 ### Platform as a Service (PaaS)
 
+#### Definition and Shared Responsibility
+
+* **NIST Standard**: The capability to deploy consumer-created applications onto cloud infrastructure using provider-supported languages, libraries, and tools.
+* **Management Boundary**: Users control application settings and code; the provider manages all underlying infrastructure (network, servers, OS, storage).
+* **Shared Responsibility**: Users manage **Applications** and **Data**; the Provider manages the **Platform** (Runtime, Middleware, OS) and **Infrastructure** (Hardware, Storage).
+
+#### Key Technical Mechanisms
+
+* **Multitenancy**: Multiple consumers share the same physical platform instance while remaining logically isolated.
+* **Logical Isolation**: Software-defined segregation of compute, memory, and storage to ensure tenant privacy.
+* **Resource Pooling**: Dynamic allocation of shared hardware to maximise efficiency and lower costs.
+
+#### PaaS Architectures (Case Studies)
+
+<details>
+<summary><strong>Google App Engine (GAE) — Four Pillars Architecture</strong></summary>
+
+* **Google File System (GFS)**: Distributed storage that replicates code in 64 MB chunks for high availability.
+* **Datastore / Cloud SQL**: Managed NoSQL (schema-less entities) or Relational (fixed schema) storage.
+* **Web Servers**: Auto-scaled HTTP request handlers with automatic load balancing.
+* **MemoryStore**: SSD-based fast cache for sub-millisecond data access and session continuity.
+
+</details>
+
+<details>
+<summary><strong>Force.com (Salesforce)</strong></summary>
+
+* **Metadata-Driven**: Applications are not pre-stored as static views; they are assembled from metadata at runtime.
+* **Polymorphic Abstraction**: Identifies the requesting tenant and routes them to their specific metadata and data.
+* **Development Model**: Supports **Declarative** (No-Code drag-and-drop) and **Programmatic** (Apex / Visualforce) builds on the same platform.
+
+</details>
+
+#### Pricing and Implications
+
+* **Pricing Models**:
+  * **Subscription**: Fixed fee for defined resource tiers.
+  * **Consumption**: Pay-as-you-go based on actual usage (CPU, RAM, bandwidth).
+  * **Freemium**: Free basic tier with upgrades for advanced features.
+* **Key Benefits**: No upfront capital expenditure (CapEx), no maintenance responsibility, and focus shifts entirely to application logic.
+
 ### Software as a Service (SaaS)
+
+#### Definition and Characteristics
+
+* **NIST Standard**: Software applications provided as a service over the internet, accessible via web browsers or thin client interfaces.
+* **Utility Model**: Applications are provided on-demand, shifting software from a product "ownership" model to a service "consumption" model.
+* **Provider Management**: The SaaS provider manages the entire stack below the application, including hardware, frameworks, and core code.
+* **Shared Code Base**: All consumers share the same program code, enabling massive scale and centralised updates.
+
+#### Traditional Procurement vs. SaaS
+
+* **Traditional Pain Points**: High upfront capital (CapEx), long deployment times (months to years), and ongoing maintenance burdens for IT teams.
+* **SaaS Advantage**: Eliminates upfront costs, provides immediate access ("utility" model), and removes responsibility for patches and upgrades from the enterprise.
+
+#### Enterprise Integration Challenges
+
+Most organisations operate in a **Hybrid Reality**, maintaining some legacy on-premise systems while adopting SaaS for specific functions.
+
+<details>
+<summary><strong>Three Implementation Flavours</strong></summary>
+
+* **Pure SaaS**: Complete migration; no in-house applications remain.
+* **SaaS Consuming On-Premise (Hybrid Front-End)**: Core logic is in the cloud but references local data (e.g., a cloud CRM pulling from local inventory).
+* **On-Premise Consuming SaaS (Hybrid Back-End)**: Main interface remains in-house but outsources specific functions to the cloud (e.g., local payroll using cloud HR data).
+
+</details>
+
+<details>
+<summary><strong>The Integration Broker Architecture</strong></summary>
+
+A central intermediary responsible for managing data flow, security, and transformation between on-premise and cloud sinks.
+
+**The Four Pipeline Modules:**
+
+1. **Data Security**: Authenticates sources, decrypts data, and scans for threats.
+2. **Validation & Transformation**: Matches data formats between source and sink.
+3. **Data Synchronisation**: Ensures consistency using mechanisms like **Polling** (time-based), **Push** (event-based), or **Publish/Subscribe**.
+4. **Routing**: Determines the correct destination based on metadata rules.
+
+> **Key Insight**: The **Pipeline** is the workhorse (sequential processing), while the **Metadata Layer** is the brain (intelligence for all modules).
+
+</details>
+
+#### Data Synchronisation Mechanisms
+
+| Mechanism | Type | Scaling | Pros / Cons |
+|---|---|---|---|
+| **Polling** | Time-based | Poor | Simple but wastes messages and isn't real-time |
+| **Push** | Event-based | Limited | Real-time and efficient for pairs, but complex for many sinks |
+| **Publish/Subscribe** | Decoupled | **Excellent** | Combines speed with multi-sink scaling via a message broker |
 
 ---
 
