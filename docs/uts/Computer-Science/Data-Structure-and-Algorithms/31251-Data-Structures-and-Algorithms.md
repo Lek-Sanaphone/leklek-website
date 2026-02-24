@@ -232,190 +232,257 @@ int main() {
 </details>
 
 ### Class in C++
-
-<details>
-    <summary>Simple Class in C++</summary>
-
+#### Class Template and Implementation
 ```cpp
-#include <iostream>
-using namespace std;
+#ifndef MY_INTEGER_HPP_
+#define MY_INTEGER_HPP_
 
-class MyClass {
-private:
-    int data;                 // private data
-public:
-    MyClass(int val = 0) {    // constructor (default/parameter)
-        data = val;
-    }
-    void insert(int val) { data = val; }  // setter
-    int get() { return data; }            // getter
-    void display() { cout << data << endl; }
+class myInteger {
+ private:
+  int value {};
+
+ public:
+  // default constructor
+  myInteger();
+
+  // constructor taking an integer
+  // explicit means we don't allow myInteger x = 3
+  // the constructor has to be explicitly called
+  explicit myInteger(int);
+
+  // copy constructor
+  // create a copy constructor with the same value as another myInteger
+  myInteger(const myInteger&);
+
+  // assignment operator
+  // this enables myInteger x {3}; myInteger y {5}; x = y;
+  myInteger& operator=(const myInteger&);
+  // allow user to assignment object: a = b = c
+  // Without & in the myInteger, it will create copy, causing a redundance work
+
+  // destructor, delete the memory
+  ~myInteger();
+
+  // determine if two myIntegers are equal
+  friend bool operator==(const myInteger&, const myInteger&);
+
+  // determine if one myInteger is less than another
+  friend bool operator<(const myInteger&, const myInteger&);
 };
 
-int main() {
-    MyClass obj1;       // default constructor
-    MyClass obj2(10);   // parameter constructor
-    obj1.insert(5);
-    obj2.display();     // 10
-    cout << obj1.get(); // 5
-    return 0;
-}
+#endif  // MY_INTEGER_HPP_
 ```
-Key Points
-* private: data hidden, public: accessible methods
-* Constructor: initialize objects (default or with parameters)
-* Member functions: access/modify private data
-* main() → program entry
+
+<details>
+    <summary>Class Structure and Encapsulation</summary>
+
+```cpp
+class myInteger {
+private:
+    int value {};
+```
+
+* The class stores one private variable: `value`.
+* Because it is private, outside code cannot access it directly.
+* All interaction must happen through constructors, operators, or friend functions.
+
+This demonstrates **encapsulation** — hiding internal data.
 
 </details>
 
 <details>
-    <summary>Copy Class Objects</summary>
+    <summary>Object Creation (Constructors)</summary>
 
-# Copying a Simple Class (Shallow Copy)
-
-Suppose your class only has **simple types** like `int`:
+**Default Constructor**
 
 ```cpp
-class MyClass {
-public:
-    int data;
-};
+myInteger::myInteger() {}
 ```
 
-Now:
+Used when no value is provided:
 
 ```cpp
-MyClass obj1;
-obj1.data = 5;
-
-MyClass obj3 = obj1; // copy obj1 into obj3
+myInteger a;
 ```
 
-**What happens in memory:**
-
-```
-obj1.data ---> 5
-obj3.data ---> 5  (a separate copy)
-```
-
-* `obj1` and `obj3` have **independent copies** of `data`
-* Changing one does **not** affect the other:
-
-```cpp
-obj1.data = 10;
-cout << obj3.data; // still 5
-```
-
-✅ This is simple, safe, and what happens by default.
+Because `value` was declared as `int value {};`, it is automatically initialized to `0`.
 
 ---
 
-# Copying a Class with a Pointer (Shallow Copy Problem)
+**Constructor with an Integer**
 
 ```cpp
-class MyClass {
-public:
-    int* data;
-    MyClass(int val) { data = new int(val); }
-};
+myInteger::myInteger(int input) : value {input} {}
 ```
 
-Now:
+Used when creating an object with a value:
 
 ```cpp
-MyClass obj1(5);
-MyClass obj3 = obj1; // default copy
+myInteger a(5);
 ```
 
-**Memory layout:**
+The syntax `: value {input}` is called a **member initializer list**. It directly initializes `value` with `input`.
 
-```
-obj1.data ---> [5]   (some heap memory)
-obj3.data ---> same [5]  (points to the same memory)
-```
-
-```
-obj1        obj3
-+----+     +----+
-|data| --->|    |  <-- both point to the SAME heap memory
-+----+     +----+
-             |
-             v
-           [ 5 ]  <- heap
-```
-
-* Both objects **share the same memory** for `data`
-* Changing one affects the other:
+The constructor is marked `explicit`, which prevents:
 
 ```cpp
-*obj1.data = 10;
-cout << *obj3.data; // prints 10 too!
+myInteger a = 5;   // Not allowed
 ```
 
-⚠ Problem: **shallow copy** → unintended side effects; `obj1` and `obj3` share the same memory.
+This avoids unintended automatic conversions.
+
+</details>
+
+<details>
+    <summary>Copying Objects (Copy Constructor)</summary>
+
+```cpp
+myInteger::myInteger(const myInteger& x) : value {x.value} {}
+```
+
+Used when creating a new object from an existing one:
+
+```cpp
+myInteger a(5);
+myInteger b = a;   // Copy constructor
+```
+
+What happens:
+
+* A new object `b` is created.
+* `b.value` is set to `a.value`.
+
+This teaches how objects are copied safely.
+
+</details>
+
+<details>
+    <summary>Assigning Objects (Assignment Operator)</summary>
+
+```cpp
+myInteger& myInteger::operator=(const myInteger& x) {
+    value = x.value;
+    return *this;
+}
+```
+
+Used when both objects already exist:
+
+```cpp
+myInteger a(5);
+myInteger b(3);
+
+b = a;   // Assignment operator
+```
+
+What happens:
+
+* `b.value` is replaced with `a.value`.
+* The function returns `*this` (a reference to the current object).
+
+Returning a reference allows **chained assignment**:
+
+```cpp
+a = b = c;
+```
+
+If it returned by value instead of reference, extra copies would be created.
+
+</details>
+
+<details>
+    <summary>Object Destruction (Destructor)</summary>
+
+```cpp
+myInteger::~myInteger() {}
+```
+
+Called automatically when an object goes out of scope.
+
+In this class, it does nothing because no dynamic memory is used. However, it demonstrates how cleanup would work if resources were allocated.
+
+</details>
+
+<details>
+    <summary>Operator Overloading and Friend Functions Relationship</summary>
+<details>
+    <summary>Operator Overloading</summary>
+
+The class overloads comparison operators so that objects behave like integers.
+
+**Equality Operator**
+
+```cpp
+bool operator==(const myInteger& x, const myInteger& y) {
+    return x.value == y.value;
+}
+```
+
+Allows:
+
+```cpp
+if (a == b)
+```
+
+It compares the private `value` of both objects.
 
 ---
 
-# How to Fix It: Deep Copy (Custom Copy Constructor)
-
-Define a **copy constructor**:
+**Less-Than Operator**
 
 ```cpp
-class MyClass {
-public:
-    int* data;
-    MyClass(int val) { data = new int(val); }
-
-    // copy constructor for deep copy
-    MyClass(const MyClass &other) {
-        data = new int(*other.data); // allocate new memory
-    }
-};
+bool operator<(const myInteger& x, const myInteger& y) {
+    return x.value < y.value;
+}
 ```
 
-Now:
+Allows:
 
 ```cpp
-MyClass obj1(5);
-MyClass obj3 = obj1;  // deep copy
+if (a < b)
 ```
 
-**Memory layout:**
-```
-obj1        obj3
-+----+     +----+
-|data| --->|    |  <-- separate memory blocks
-+----+     +----+
-  |          |
-  v          v
- [ 5 ]      [ 5 ]  <- two independent heap memory blocks
-```
+</details>
 
-* `obj1` and `obj3` are fully independent
-* No side effects
+<details>
+    <summary>Why Are These Operators friend?</summary>
+
+In the class:
 
 ```cpp
-*obj1.data = 10;
-cout << *obj3.data; // prints 5
+friend bool operator==(const myInteger&, const myInteger&);
+friend bool operator<(const myInteger&, const myInteger&);
 ```
 
----
+These operators are **not** member functions. They are normal functions defined outside the class.
 
-# Summary
+However, they need access to the private `value`. The keyword `friend` gives them permission to access private members.
 
-| Case                                    | Copy Behavior                   | Notes                         |
-| --------------------------------------- | ------------------------------- | ----------------------------- |
-| Only `int` or simple types              | Default copy → independent      | Safe, shallow copy works fine |
-| Class has **pointers / dynamic memory** | Default copy → shared memory    | Can cause bugs (shallow copy) |
-| Use **custom copy constructor**         | Allocate new memory → deep copy | Each object fully independent |
+Without `friend`, this line would cause an error:
 
----
+```cpp
+return x.value == y.value;
+```
 
-# Takeaway
-* **`MyClass obj3 = obj1;` works by default**
-* Safe for normal types like `int`, `double`, etc.
-* Use **deep copy** for pointers or dynamic memory to avoid shared memory problems.
+</details>
+
+</details>
+
+<details>
+    <summary>Summary: Object Lifecycle and Operator Overloading</summary>
+
+This class demonstrates:
+
+1. **Encapsulation** (private data)
+2. **Object initialization** (constructors)
+3. **Copy construction**
+4. **Assignment** between objects
+5. **Object destruction**
+6. **Operator overloading**
+7. **Controlled access** using `friend`
+
+Although the class only wraps an `int`, it teaches how real C++ classes manage their lifecycle and behave like built-in types. This is foundational knowledge for writing safe and well-designed C++ classes.
+
 </details>
 
 ---
@@ -504,7 +571,19 @@ A vector is a dynamic data structure that stores elements in a contiguous block 
     - `nums.capacity()` — Returns the total space allocated before a resize is required .
 - **Looping Strategies:**
     - **Standard for-loop:** `for (std::size_t i = 0; i < nums.size(); i++)` — Use `std::size_t` because it is unsigned and can handle larger indices than `int` .
+        - Alternative of std::size_t is auto, but we need to add `u (unsigned)`, preventing warning
+        ```cpp
+        for (auto i = 0u; i < nums.size(); i++) {
+            // ...
+        }
+        ```
     - **Range-based for-loop:** `for (int n : nums)` — Cleanest way to iterate over every element.
+    - **Iterator-based for-loop:** `for (auto it = nums.begin(); it != nums.end(); it++)` — Use iterators to iterate over every element.
+        ```cpp
+        for (auto it = vec.begin(); it < vec.end(); it++) {
+            std::cout << *it << '\n';
+        }
+        ```
 </details>
 
 <details>
