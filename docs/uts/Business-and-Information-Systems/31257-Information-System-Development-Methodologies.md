@@ -88,7 +88,120 @@ The selection of a specific methodology depends on several key factors:
 
 ## 2.1 Lecture
 
-### Core Concepts of Method Engineering
+### What is Method Engineering?
+
+Method Engineering (ME) is the discipline of designing and tailoring development methodologies to suit the specific context of a project. The key principle is that **no single development method fits all projects** — each project has unique characteristics, and the methodology must be engineered accordingly.
+
+### Why Method Engineering Is Needed
+
+Different projects vary in size, complexity, risk level, requirement stability, team experience, governance needs, and stakeholder involvement. Method Engineering allows combining strengths from multiple methodologies to create a context-appropriate hybrid method.
+
+<details>
+<summary>Examples of Methodological Emphasis</summary>
+
+* **SCRUM**: Focuses on agility and stakeholder engagement.
+* **PRINCE2**: Emphasizes governance, accountability, and risk management.
+* **RUP**: Provides strong structure in defining work products and documentation.
+* **Nexus Framework**: Scales Scrum for larger teams.
+
+</details>
+
+### Components of a Methodology
+
+A methodology consists of two main knowledge areas: **Process Knowledge** and **Work Product Knowledge**.
+
+<details>
+<summary>Process Knowledge</summary>
+
+Describes *how* development work is organized, including:
+
+* Phases
+* Activities
+* Tasks
+* Techniques
+
+This is represented using a **process metamodel**.
+
+</details>
+
+<details>
+<summary>Work Product Knowledge</summary>
+
+Describes *what* is produced during development, such as:
+
+* Requirements documents
+* Use cases
+* Class diagrams
+* Design models
+* Code
+
+This is represented using a **work product metamodel** (e.g., UML defines modeling constructs).
+
+</details>
+
+### Process Framework
+
+All projects include core framework activities such as:
+
+* Communication
+* Planning
+* Modeling
+* Design
+* Implementation
+* Testing
+* Deployment
+
+These activities are always present, but the **tasks within each activity** and the **level of detail and rigor** will vary depending on project context.
+
+### Umbrella Activities
+
+Umbrella activities run throughout the project lifecycle and support all framework activities. They ensure control, quality, and coordination across the project.
+
+<details>
+<summary>Examples of Umbrella Activities</summary>
+
+* Project management
+* Risk management
+* Quality assurance
+* Configuration management
+* Reusability management
+* Technical reviews
+
+</details>
+
+### Process Model
+
+A process model defines:
+
+* The workflow between activities
+* Input and output relationships
+* Dependencies between tasks
+* Required work products
+* Quality assurance mechanisms
+
+Different models apply different levels of structure and control (e.g., agile vs. governance-heavy approaches).
+
+### Role of the Method Engineer
+
+The method engineer (often the project manager) is responsible for selecting appropriate method fragments, combining process and product components, adapting the framework to project needs, and ensuring alignment with project constraints. The goal is to create a **"production method"** tailored to the project.
+
+<details>
+<summary>Key Responsibilities</summary>
+
+* Selecting appropriate method fragments
+* Combining process and product components
+* Adapting the framework to project needs
+* Ensuring alignment with project constraints and objectives
+
+</details>
+
+### Key Takeaways
+
+1. No methodology is universally suitable.
+2. Development methods are composed of modular elements.
+3. Project context determines method selection and rigor.
+4. Process and work products must be aligned.
+5. Effective project management requires deliberate method design.
 
 ## 2.2 Tasks
 
