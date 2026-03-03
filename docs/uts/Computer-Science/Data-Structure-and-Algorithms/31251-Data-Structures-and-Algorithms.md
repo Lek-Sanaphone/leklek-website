@@ -618,7 +618,427 @@ Vectors use a **doubling strategy** to resize efficiently:
 
 ## 3.1 Lecture
 
-### Generic Programming and Pointer Abstractions
+### Code Architecture in C++
+
+In professional C++ development, programs are divided into multiple files. This approach is called **separate compilation**. It improves organization, maintainability, and compilation efficiency.
+
+#### Header Files (`.hpp`) – Interface
+
+Header files contain **declarations** only. They describe:
+
+* Class definitions (structure)
+* Function signatures (name, parameters, return type)
+* Member variables
+
+They do not contain implementation logic.
+
+<details>
+    <summary>Example: student.hpp</summary>
+
+```cpp
+#ifndef STUDENT_HPP
+#define STUDENT_HPP
+
+#include <string>
+
+class Student {
+private:
+    std::string name;
+    int age;
+
+public:
+    Student(std::string n, int a);
+    void printInfo();
+};
+
+#endif
+```
+
+This file defines what a `Student` is, but not how its functions work.
+
+</details>
+
+#### Implementation Files (`.cpp`) – Definitions
+
+Implementation files contain the actual logic of functions declared in the header.
+
+<details>
+    <summary>Example: student.cpp</summary>
+
+```cpp
+#include "student.hpp"
+#include <iostream>
+
+Student::Student(std::string n, int a) {
+    name = n;
+    age = a;
+}
+
+void Student::printInfo() {
+    std::cout << name << " is " << age << " years old.\n";
+}
+```
+
+The `Student::` prefix connects the function definition to the class declared in the header.
+
+</details>
+
+#### Compilation and Linking
+
+Compilation happens in two stages:
+
+1. Compile source files into object files:
+
+   ```
+   g++ -c student.cpp
+   g++ -c main.cpp
+   ```
+
+2. Link object files into an executable:
+
+   ```
+   g++ student.o main.o -o program
+   ```
+
+If only `main.cpp` changes, `student.cpp` does not need to be recompiled. This improves efficiency in large projects.
+
+#### Header Guards
+
+Header guards prevent multiple inclusion of the same header file, which would otherwise cause redefinition errors.
+
+```cpp
+#ifndef STUDENT_HPP
+#define STUDENT_HPP
+
+// declarations
+
+#endif
+```
+
+The macro is defined the first time the file is included. Subsequent inclusions are ignored.
+
+---
+
+### Templates (Generic Programming)
+
+Templates allow writing code that works with multiple data types without duplication. They enable **generic programming**.
+
+Without templates, separate versions of the same function would be required for each type.
+
+<details>
+    <summary>Function Template Example</summary>
+
+```cpp
+#include <iostream>
+
+template<typename T>
+T add(T a, T b) {
+    return a + b;
+}
+
+int main() {
+    std::cout << add(3, 4) << "\n";        // int
+    std::cout << add(2.5, 1.5) << "\n";    // double
+}
+```
+
+The compiler generates specific versions of the function when it sees how it is used. This is called **template instantiation**.
+
+</details>
+
+<details>
+    <summary>Class Template Example</summary>
+
+```cpp
+template<typename T>
+class Box {
+private:
+    T value;
+
+public:
+    Box(T v) : value(v) {}
+
+    T getValue() {
+        return value;
+    }
+};
+```
+
+Usage:
+
+```cpp
+Box<int> intBox(10);
+Box<std::string> strBox("Hello");
+```
+
+One template definition can produce multiple typed classes.
+
+</details>
+
+#### Importance of Templates
+
+The Standard Template Library (STL) is built using templates. Examples include:
+
+* `std::vector`
+* `std::list`
+* `std::sort`
+* `std::find`
+
+Templates allow algorithms to operate generically on containers using iterators.
+
+---
+
+### Iterators
+
+An iterator is an object that allows traversal of elements in a container. It acts similarly to a pointer. Iterators connect containers with algorithms.
+
+<details>
+    <summary>Basic Iterator Example</summary>
+
+```cpp
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> vec = {10, 20, 30};
+
+    for (auto it = vec.begin(); it != vec.end(); ++it) {
+        std::cout << *it << "\n";
+    }
+}
+```
+
+* `vec.begin()` returns an iterator to the first element.
+* `vec.end()` returns an iterator to one past the last element.
+* `*it` dereferences the iterator to access the value.
+
+</details>
+
+<details>
+    <summary>Iterators with Algorithms</summary>
+
+```cpp
+#include <algorithm>
+#include <vector>
+
+int main() {
+    std::vector<int> vec = {5, 2, 8, 1};
+    std::sort(vec.begin(), vec.end());
+}
+```
+
+`std::sort` operates using iterators. It does not depend on the specific container type, only on the iterator capabilities.
+
+</details>
+
+#### Half-Open Interval
+
+STL algorithms use a half-open interval:
+
+```
+[first, last)
+```
+
+This means:
+
+* Include `first`
+* Exclude `last`
+
+<details>
+    <summary>Half-Open Interval Example</summary>
+
+```cpp
+std::vector<int> vec = {10, 20, 30, 40, 50};
+std::sort(vec.begin() + 1, vec.end() - 1);
+```
+
+This sorts the elements from index 1 up to but not including the last element.
+
+**Important:** Dereferencing `vec.end()` results in undefined behavior.
+
+</details>
+
+#### Iterator Categories
+
+| Category | Capabilities | Example Container |
+| --- | --- | --- |
+| **Random Access** | Jump forward/backward, compare, arithmetic | `std::vector` |
+| **Bidirectional** | Move forward and backward | `std::list` |
+| **Forward** | Move forward only | `std::forward_list` |
+
+<details>
+    <summary>Random Access Example</summary>
+
+```cpp
+auto it = vec.begin();
+it = it + 2;  // valid for vector
+```
+
+This is invalid for `std::list` because it does not support random access.
+
+</details>
+
+<details>
+    <summary>Bidirectional Example</summary>
+
+```cpp
+#include <list>
+
+std::list<int> myList = {10, 20, 30};
+auto it = myList.begin();
+++it; // Move forward to 20
+--it; // Move backward to 10
+```
+
+Bidirectional iterators can be incremented (`++`) and decremented (`--`), but do not support arithmetic like `it + 2`.
+
+</details>
+
+<details>
+    <summary>Forward Example</summary>
+
+```cpp
+#include <forward_list>
+
+std::forward_list<int> fList = {10, 20, 30};
+auto it = fList.begin();
+++it; // Move forward to 20
+// --it; // Error: Cannot move backward
+```
+
+Forward iterators can only be incremented sequentially using `++`.
+
+</details>
+
+### Stack vs Heap (Memory Model)
+
+| Feature | Stack | Heap |
+| --- | --- | --- |
+| **Usage** | Local variables and function call frames | Dynamic memory (`new`, `new[]` / `delete`, `delete[]`) |
+| **Speed/Management** | Fast, automatically managed | Slower, manually managed (unless using smart pointers) |
+| **Lifetime** | Memory is freed when the variable goes out of scope | Controlled by the programmer; objects can outlive their creation scope |
+| **Size limits** | Limited and fixed per thread (not suitable for very large allocations) | Used by containers (e.g., `std::vector` naturally stores its elements here) |
+
+<details>
+    <summary>Stack vs Heap Example</summary>
+
+```cpp
+void foo() {
+    Player p;                 // p on stack, destroyed at end of foo()
+    Player* q = new Player(); // object on heap, pointer q on stack
+    // ... use q ...
+    delete q;                 // must delete to avoid memory leak
+}
+```
+
+</details>
+
+---
+
+### Constructors and Destructors
+
+#### Default Constructor
+Called when an object is created without arguments. Used to set sensible defaults.
+
+```cpp
+class Player {
+public:
+    std::string name;
+    int health;
+
+    Player() : name("Unknown"), health(100) {}
+};
+```
+
+#### Parameterized Constructor and Initialization Lists
+Initializes an object with explicit values.
+Prefer **initialization lists** over assignment inside the constructor body—they are more efficient and required for `const` members and references.
+
+```cpp
+Player(std::string n, int h) : name(n), health(h) {}
+```
+
+#### Destructor
+Called when an object is destroyed. Used to free resources allocated by the object (e.g., heap memory, file handles, sockets).
+
+```cpp
+~MyVector() {
+    delete[] arrayPointer_;
+}
+```
+
+---
+
+### Copy Initialization and Assignment
+
+#### Copy Constructor
+Purpose: Defines how to create a new object as a copy of an existing object.
+
+```cpp
+MyVector v1;
+MyVector v2 = v1; // copy constructor used
+```
+
+<details>
+    <summary>Shallow vs Deep Copy</summary>
+
+*   **Shallow Copy (Default):** Member-wise copy where pointers are copied as values, meaning both objects point to the same heap memory. *Dangerous for owned resources.*
+*   **Deep Copy:** Allocates new memory and copies the actual contents so each object owns its own resource.
+
+**The Shallow Copy Problem:**
+```cpp
+MyVector v1;
+v1.arrayPointer_ = new int[5]{1,2,3,4,5};
+MyVector v2 = v1; // default shallow copy
+// v1 and v2 point to the same memory. When both are destroyed -> double delete -> crash.
+```
+
+**Deep Copy Implementation:**
+```cpp
+MyVector::MyVector(const MyVector& other)
+  : size_(other.size_), capacity_(other.capacity_) {
+    if (other.arrayPointer_) {
+        arrayPointer_ = new int[capacity_];
+        for (int i = 0; i < size_; ++i)
+            arrayPointer_[i] = other.arrayPointer_[i];
+    } else {
+        arrayPointer_ = nullptr;
+    }
+}
+```
+
+Result: `v2` receives its own copy of the array and can be safely destroyed independently of `v1`.
+
+</details>
+
+#### Copy Assignment
+Used to overwrite an existing object with data from another (`v2 = v1;` where both already exist).
+
+<details>
+    <summary>Copy-and-Swap Idiom</summary>
+
+**Best Practice:** Use the Copy-and-Swap idiom to ensure exception safety and avoid self-assignment issues.
+
+```cpp
+MyVector& MyVector::operator=(MyVector other) {
+    std::swap(arrayPointer_, other.arrayPointer_);
+    std::swap(size_, other.size_);
+    return *this;
+}
+```
+
+</details>
+
+---
+
+### The Rule of Three
+The Rule of Three states that if a class requires a manual implementation of a raw pointer to heap memory, it likely requires **all three**:
+
+1. **Destructor:** To free the memory (`delete[]`).
+2. **Copy Constructor:** To perform a Deep Copy during initialization.
+3. **Copy Assignment Operator:** To perform a Deep Copy during assignment.
+
+*If you omit any of these while using `new`, your program will likely suffer from memory leaks (forgetting the destructor) or double-free crashes (forgetting the copy logic).*
 
 ## 3.2 Tasks
 
