@@ -163,7 +163,95 @@ A central intermediary responsible for managing data flow, security, and transfo
 
 ## 3.1 Lecture
 
-### Virtualisation Technologies and Methods
+
+### Core Concept
+
+Virtualisation allows multiple users to share one physical system while each user feels like they have their own dedicated machine. It is the foundation of cloud computing and enables multi-tenancy in SaaS systems.
+
+<details>
+<summary><strong>Virtualisation Basics & What is a VM?</strong></summary>
+
+A Virtual Machine (VM) is a software-based slice of a physical computer.
+
+| Feature          | Meaning                             |
+| ---------------- | ----------------------------------- |
+| Resource Sharing | Many VMs run on one physical server |
+| Isolation        | Each VM is independent              |
+| Efficiency       | Idle capacity becomes usable        |
+
+</details>
+
+### Types of Virtual Machines
+
+| Type                        | OS Layer                      | Performance | Typical Use          | Examples                                   |
+| --------------------------- | ----------------------------- | ----------- | -------------------- | ------------------------------------------ |
+| Process VM (PVM)            | Shares host OS                | Lightweight | Run one application  | Java Virtual Machine, Google App Engine    |
+| System VM – Host (Type 2)   | Guest OS on Host OS           | Moderate    | Development, testing | VirtualBox, VMware Workstation             |
+| System VM – Native (Type 1) | Guest OS directly on hardware | High        | Cloud & data centres | VMware ESXi, Microsoft Hyper-V, Amazon EC2 |
+
+### Hypervisor (VMM)
+
+The Virtual Machine Monitor (Hypervisor):
+
+* Creates and manages VMs
+* Allocates CPU, RAM, storage
+* Translates hardware requests
+* Enables VM migration
+
+**Types**:
+* **Type 1** runs on hardware.
+* **Type 2** runs on a host operating system.
+
+### Virtualisation in the Cloud
+
+Cloud providers create the illusion of infinite capacity using:
+
+| Mechanism              | Purpose                                  |
+| ---------------------- | ---------------------------------------- |
+| Automated Provisioning | Automatically place VMs on servers       |
+| Elastic Operations     | Move VMs at runtime (live migration)     |
+| Workload Consolidation | Pack VMs onto fewer servers to save cost |
+
+**Result**:
+* Server utilisation increases (from ~20% to ~70%)
+* Energy and hardware costs decrease
+* Resources appear unlimited to users
+
+### Applications of Virtualisation
+
+| Application            | Benefit                            |
+| ---------------------- | ---------------------------------- |
+| Server Consolidation   | Fewer physical servers needed      |
+| Security via VMM       | Centralised monitoring and control |
+| Desktop Virtualisation | Centralised desktop management     |
+
+### Multi-tenancy
+
+**Definition**: Multi-tenancy means multiple customers share the same application and infrastructure, but their data is isolated.
+
+<details>
+<summary><strong>Multi-tenant Data Approaches</strong></summary>
+
+| Approach                    | Structure                           | Isolation | Scalability | Multi-tenant Level     |
+| --------------------------- | ----------------------------------- | --------- | ----------- | ---------------------- |
+| Separate DB                 | One database per tenant             | Full      | Poor        | Not truly multi-tenant |
+| Shared DB + Separate Schema | One DB, multiple schemas            | Logical   | Moderate    | Partially multi-tenant |
+| Shared DB + Shared Schema   | One DB, one schema, TenantID column | Row-level | High        | Fully multi-tenant     |
+
+*Most modern SaaS platforms use Shared DB + Shared Schema.*
+
+</details>
+
+<details>
+<summary><strong>Overall Story of This Topic</strong></summary>
+
+* **Virtualisation**: Transforms physical hardware into flexible virtual machines.
+* **Cloud Computing**: Uses automation and VM migration to create elastic, scalable infrastructure.
+* **Multi-tenancy**: Extends sharing from hardware level to application and database level.
+
+Together, they enable modern cloud platforms to be scalable, cost-efficient, and efficient.
+
+</details>
 
 ---
 
