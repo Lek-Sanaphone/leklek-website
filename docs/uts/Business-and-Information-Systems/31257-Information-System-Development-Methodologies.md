@@ -203,10 +203,6 @@ The method engineer (often the project manager) is responsible for selecting app
 4. Process and work products must be aligned.
 5. Effective project management requires deliberate method design.
 
-## 2.2 Tasks
-
-* **Notes:** Classes and Tutorials
-
 ---
 
 # 3. PRINCE2 in ISD
@@ -215,9 +211,158 @@ The method engineer (often the project manager) is responsible for selecting app
 
 ### Project Management Frameworks in ISD
 
-## 3.2 Tasks
+#### Overview of PRINCE2
 
-* **Notes:** Class and Tutorials
+PRINCE2 (Projects IN Controlled Environments) is a structured project management methodology widely used in large organisations and government environments.
+
+A project in PRINCE2 is defined as:
+> A temporary organisation created to deliver one or more business products according to an agreed business case.
+
+PRINCE2 is considered a **heavyweight methodology** because it emphasises governance, documentation, hierarchy, and control.
+
+
+### Core Components of PRINCE2
+
+PRINCE2 consists of four integrated elements:
+1. Principles
+2. Themes
+3. Processes
+4. Tailoring
+
+#### 1. Principles (Guiding Obligations)
+PRINCE2 has **7 principles** that must always be followed.
+
+<details>
+    <summary>The 7 Principles</summary>
+
+1. **Continued Business Justification (Most Important)**
+   * A project must remain valuable throughout its lifecycle.
+   * The business case is continuously monitored and updated.
+   * If the project is no longer viable, it should be changed or stopped.
+   * *This ensures resources are not wasted on unjustified projects.*
+2. **Learn from Experience**
+   * Lessons from previous projects must be documented and reused.
+   * Mistakes should not be repeated.
+   * Exception reports help improve future decisions.
+3. **Defined Roles and Responsibilities**
+   * Roles are clearly defined at the beginning.
+   * Responsibilities remain stable throughout the project.
+   * Unlike agile methods (e.g., Scrum), roles do not change dynamically.
+4. **Manage by Stages**
+   * Large projects are divided into manageable stages.
+   * Each stage is planned and approved separately.
+   * At the end of each stage, progress is reviewed before proceeding.
+5. **Manage by Exception**
+   * Each management level operates within defined tolerances: Cost, Time, Scope, Risk, Quality.
+   * If tolerances are exceeded, the issue is escalated to the next level.
+   * *This prevents micromanagement and ensures efficient governance.*
+6. **Focus on Products**
+   * The final product must be clearly defined.
+   * Quality expectations and acceptance criteria must be specified.
+   * Work is always aligned with delivering agreed outputs.
+7. **Tailor to Suit the Project Environment**
+   * PRINCE2 can be adapted depending on project size, complexity, risk level, and organisational culture.
+   * Documentation and processes can be simplified where appropriate.
+
+</details>
+
+#### 2. Themes (Ongoing Management Areas)
+
+PRINCE2 includes **7 themes** that must be addressed continuously. They represent areas that require constant monitoring and management throughout the project lifecycle:
+1. Business Case
+2. Organisation
+3. Quality
+4. Plans
+5. Risk
+6. Change
+7. Progress
+
+#### 3. Governance Structure and Exception Management
+
+**Governance Structure (Hierarchy)**
+
+* **Corporate / Program Board:** Provides project mandate and funding approval.
+* **Project Board:** Oversees project alignment with business strategy.
+* **Project Manager:** Manages day-to-day coordination across stages.
+* **Team Leaders:** Manage work packages within stages.
+* **Project Teams**
+
+**Management by Exception**
+
+This is a core control mechanism ensuring efficient reporting, reduced unnecessary oversight, and clear accountability.
+* Tolerances are set for time, cost, scope, risk, and quality.
+* If performance remains within tolerances, no escalation is required.
+* If performance exceeds tolerances, an exception report is submitted upward.
+
+### The Planning Phase in PRINCE2
+
+In this subject, focus is placed mainly on the **planning phase**, particularly:
+* Starting a Project
+* Initiating a Project
+* Developing the Project Brief
+* Developing the Business Case
+
+*The project does not begin execution until the business case is approved.*
+
+#### Project Brief
+The **Project Brief** is the first major document created after the project mandate.
+
+<details>
+    <summary>Project Brief Contents</summary>
+
+1. **Project Definition**: Background, objectives, scope and exclusions, assumptions, constraints, and stakeholders.
+2. **Outline Business Case**: Reasons for the project and initial justification.
+3. **Project Product Description**: Customer quality expectations and acceptance criteria.
+4. **Project Approach**: High-level delivery strategy.
+5. **Project Management Team Structure**
+6. **Role Descriptions**
+
+*Important: The Project Brief contains only an outline of the business case. The full Business Case is developed later.*
+
+</details>
+
+#### Business Case (Central Concept)
+
+The Business Case is the most critical document in PRINCE2. It acts as a guiding reference (“lighthouse”) for all stages and answers:
+* Why is the project needed?
+* What are the expected benefits, costs, and risks?
+* Is the investment justified?
+
+At the end of each stage, deliverables are checked against the Business Case. If benefits are not achievable or costs exceed tolerances, adjustments are made (or the project may be stopped if no longer viable).
+
+#### Planning and Control Documents
+
+<details>
+    <summary>Key Structured Documents</summary>
+
+* **Project Plan:** Overall timeline, budget, and major milestones.
+* **Stage Plan:** Detailed plan for a specific stage.
+* **Work Packages:** Assigned tasks for teams.
+* **Checkpoint Reports:** Team → Project Manager.
+* **Highlight Reports:** Project Manager → Project Board.
+* **Exception Reports:** Used when tolerances are exceeded.
+* **Project Initiation Document (PID):** Authorises the project plan and stage plans.
+
+</details>
+
+#### Project Lifecycle Summary
+1. Corporate issues a project mandate.
+2. Project Board and Project Manager are appointed.
+3. Project Brief is developed.
+4. Business Case is fully developed and approved.
+5. Project is divided into stages.
+6. Each stage is planned, executed, and reviewed.
+7. Exceptions are escalated when necessary.
+8. Project is formally closed and lessons learned are documented.
+
+### Key Takeaway
+PRINCE2 teaches that:
+* A project must always remain justified.
+* Authority and responsibilities must be clearly defined.
+* Projects must be controlled through structured stages.
+* Escalation should occur only when tolerances are breached.
+* Planning and documentation are essential before execution.
+
 
 ---
 

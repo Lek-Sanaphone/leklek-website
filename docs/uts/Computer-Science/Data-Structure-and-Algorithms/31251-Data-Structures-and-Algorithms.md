@@ -1040,11 +1040,6 @@ The Rule of Three states that if a class requires a manual implementation of a r
 
 *If you omit any of these while using `new`, your program will likely suffer from memory leaks (forgetting the destructor) or double-free crashes (forgetting the copy logic).*
 
-## 3.2 Tasks
-
-* **Released:** Ex 3 (4 Mar, 9am)
-* **Due:** Ex 1 (1 Mar, 23:59)
-
 ---
 
 # 4. Linked Lists
