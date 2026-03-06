@@ -253,6 +253,55 @@ Together, they enable modern cloud platforms to be scalable, cost-efficient, and
 
 </details>
 
+## 3.2 Lab
+
+<details>
+  <summary>Register and Start Lab</summary>
+
+Step 1: Register for AWS Academy (Check Outlook for this AWS Academy link)
+
+Step 2: Start the Learner Lab (In Canvas -> Modules -> Learner Lab -> "Start Lab" -> wait 1-2 minute for the button the turn green -> click the green button to go to the AWS Console)
+
+<img src="https://i.ytimg.com/vi/SRH5uEnr2SY/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGEIgUChlMA8=&rs=AOn4CLCxQFs8KuV7zjRfgBP5Fiv9ocxqSQ"/>
+</details>
+
+<details>
+  <summary>Create EC2 Instance</summary>
+
+<img src="https://media.geeksforgeeks.org/wp-content/uploads/20221018100930/EC2.jpg" />
+
+1. Navigate to EC2 Dashboard
+2. Click on "Launch Instance"
+3. Select an Amazon Machine Image (AMI)
+4. Select an Instance Type
+5. Configure Security Group (For now just allow 0.0.0.0 to access from anywhere)
+6. Create a new key pair
+7. Download the .pem file
+8. Launch the instance
+
+</details>
+
+<details>
+  <summary>Creating and Using a Custom AMI</summary>
+
+<img src="https://media.licdn.com/dms/image/v2/D5622AQGoD26sQrLO7A/feedshare-shrink_800/B56ZcgyktcHUAk-/0/1748601819441?e=2147483647&v=beta&t=RyHZXazdmeXr8Rg1m5nS1CEjkncJqHKUlOT-nwIl66w"/>
+
+Create a Custom AMI
+1. Select your running instance (checkbox)
+2. Click Actions → Image and templates → Create image
+3. Image name: "MyCustomAMI"
+4. Click "Create image"
+5. Navigate to AMIs in the left menu. Wait for status: "Available"
+
+---
+
+Launch from Custom AMI
+1. In the AMIs dashboard, select your custom AMI
+2. Click "Launch instance from AMI"
+3. Select 13 micro, use existing key pair "mynewkp", select existing security group
+4. Click "Launch instance"
+5. Return to Instances dashboard. You should see two running instances
+</details>
 ---
 
 # 4. AWS Elastic Beanstalk
