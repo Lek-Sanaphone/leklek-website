@@ -1042,16 +1042,616 @@ The Rule of Three states that if a class requires a manual implementation of a r
 
 ---
 
+## 3.2 Templated + MyVector functions
+
+### MyVector & Template Example
+<details>
+<summary>MyVector & Template Example</summary>
+
+### Set up
+
+#### 1. Overview: What is `MyVector`?
+<details>
+<summary>1. Overview: What is MyVector?</summary>
+
+```cpp
+template <typename T>
+class MyVector { ... };
+```
+
+* A dynamic array container similar to `std::vector`.
+* Supports adding, removing, and accessing elements dynamically.
+* Stores `size_`, `capacity_`, and `arrayPointer_` to manage memory efficiently.
+
+</details>
+
+#### 2. Private Variables
+<details>
+<summary>2. Private Variables</summary>
+
+```cpp
+T* arrayPointer_ = nullptr;
+int size_ = 0;
+int capacity_ = 0;
+```
+
+* `arrayPointer_` points to the first element of a dynamic array.
+* `size_` tracks the number of elements currently in the vector.
+* `capacity_` tracks allocated memory size, which may exceed `size_`.
+* Key invariant: `size_ <= capacity_`.
+
+</details>
+
+---
+
+### Functions + Templates
+
+#### 3. Default Constructor
+<details>
+<summary>3. Default Constructor</summary>
+
+```cpp
+template <typename T>
+MyVector<T>::MyVector() {}
+```
+
+* Creates an empty vector.
+* Initial values: `arrayPointer_ = nullptr`, `size_ = 0`, `capacity_ = 0`.
+
+</details>
+
+#### 4. Constructor with Size
+<details>
+<summary>4. Constructor with Size</summary>
+
+```cpp
+template <typename T>
+MyVector<T>::MyVector(int n) :
+  arrayPointer_ {n > 0 ? new T[n]{} : nullptr},
+  size_ {n},
+  capacity_ {n} {}
+```
+
+* Allocates memory for `n` elements initialized to 0.
+* Both `size_` and `capacity_` are set to `n`.
+* Example: `MyVector<int> v(5)` → `[0,0,0,0,0]`.
+
+</details>
+
+#### 5. Copy Constructor
+<details>
+<summary>5. Copy Constructor</summary>
+
+```cpp
+template <typename T>
+MyVector<T>::MyVector(const MyVector<T>& other) 
+  : arrayPointer_ {other.size_ > 0 ? new T[other.size_] : nullptr},
+    size_ {other.size_},
+    capacity_ {other.capacity_} {
+    for (int i = 0; i < size_; ++i)
+        arrayPointer_[i] = other.arrayPointer_[i];
+}
+```
+
+* Used when copying a vector: `MyVector<int> b = a;`.
+* Allocates new memory and copies elements.
+* Ensures `a` and `b` point to **different memory**.
+
+</details>
+
+#### 6. Initializer List Constructor
+<details>
+<summary>6. Initializer List Constructor</summary>
+
+```cpp
+template <typename T>
+MyVector<T>::MyVector(std::initializer_list<T> vals) {
+  size_ = capacity_ = vals.size();
+  arrayPointer_ = new T[size_];
+  int i = 0;
+  for (T x : vals)
+    arrayPointer_[i++] = x;
+}
+```
+
+* Allows vector initialization with `{}`: `MyVector<int> v = {1,2,3};`.
+* Sets `size_` and `capacity_` to list size.
+* Copies each element from the initializer list.
+
+</details>
+
+#### 7. Destructor
+<details>
+<summary>7. Destructor</summary>
+
+```cpp
+template <typename T>
+MyVector<T>::~MyVector() {
+  delete[] arrayPointer_;
+}
+```
+
+* Frees dynamically allocated memory.
+* Prevents memory leaks from `new T[]`.
+
+</details>
+
+#### 8. Copy Assignment Operator
+<details>
+<summary>8. Copy Assignment Operator</summary>
+
+```cpp
+template <typename T>
+MyVector<T>& MyVector<T>::operator=(MyVector<T> other) {
+  std::swap(arrayPointer_, other.arrayPointer_);
+  std::swap(size_, other.size_);
+  std::swap(capacity_, other.capacity_);
+  return *this;
+}
+```
+
+* Implements **copy-swap idiom**.
+* Swaps content of `*this` with `other` for safe assignment.
+* Handles self-assignment and memory management automatically.
+
+</details>
+
+#### 9. push_back()
+<details>
+<summary>9. push_back()</summary>
+
+```cpp
+template <typename T>
+void MyVector<T>::push_back(T val) { ... }
+```
+
+* Adds an element at the end of the vector.
+* If `size_ < capacity_`, simply store the value.
+* If `size_ == capacity_`, double `capacity_`, allocate new memory, copy old elements, delete old memory, then add the new value.
+* Maintains `size_` correctly after addition.
+
+</details>
+
+#### 10. pop_back()
+<details>
+<summary>10. pop_back()</summary>
+
+```cpp
+template <typename T>
+void MyVector<T>::pop_back() {
+  if (!empty()) --size_;
+}
+```
+
+* Removes the last element by decreasing `size_`.
+* Memory remains allocated; element is logically removed.
+
+</details>
+
+#### 11. back()
+<details>
+<summary>11. back()</summary>
+
+```cpp
+template <typename T>
+T& MyVector<T>::back() {
+  return arrayPointer_[size_ - 1];
+}
+```
+
+* Returns a reference to the last element.
+* Can be used to read or modify the last element.
+* Requires `size_ > 0` to be safe.
+
+</details>
+
+#### 12. empty()
+<details>
+<summary>12. empty()</summary>
+
+```cpp
+template <typename T>
+bool MyVector<T>::empty() {
+  return size_ == 0;
+}
+```
+
+* Returns true if the vector has no elements.
+* Simple check on `size_`.
+
+</details>
+
+#### 13. size()
+<details>
+<summary>13. size()</summary>
+
+```cpp
+template <typename T>
+int MyVector<T>::size() const {
+  return size_;
+}
+```
+
+* Returns the number of elements stored.
+* Constant function, does not modify the vector.
+
+</details>
+
+#### 14. capacity()
+<details>
+<summary>14. capacity()</summary>
+
+```cpp
+template <typename T>
+int MyVector<T>::capacity() const {
+  return capacity_;
+}
+```
+
+* Returns the allocated memory size (max elements without reallocation).
+
+</details>
+
+#### 15. operator[]
+<details>
+<summary>15. operator[]</summary>
+
+```cpp
+template <typename T>
+T& MyVector<T>::operator[](int i) { return arrayPointer_[i]; }
+
+template <typename T>
+const T& MyVector<T>::operator[](int i) const { return arrayPointer_[i]; }
+```
+
+* Access elements by index: `v[i]`.
+* Returns by reference so values can be modified.
+* Const version allows read-only access.
+* If returned by value, assignment like `v[0] = 5` would not work.
+
+---
+C++ needs two versions to handle:
+1. Non-const objects → can read and modify elements.
+```cpp
+MyVector<int> v;
+v[0] = 5;  // uses non-const version
+// ---------------
+MyVector<int> v = {1,2,3};
+v[0] = 10;  // ✅ Can modify
+```
+2. Const objects → can only read elements.
+```cpp
+const MyVector<int> cv;
+int x = cv[0];  // uses const version
+// ---------------
+const MyVector<int> cv = {1,2,3};
+int x = cv[0];  // ✅ Can read
+cv[0] = 10;     // ❌ Error! Cannot modify, because it's const
+```
+
+</details>
+
+#### 16. Explicit Template Instantiation
+<details>
+<summary>16. Explicit Template Instantiation</summary>
+
+```cpp
+template class MyVector<int>;
+template class MyVector<float>;
+template class MyVector<double>;
+```
+
+* Tells the compiler to generate code for these types.
+* Ensures vector works for `int`, `float`, and `double`.
+
+</details>
+
+#### 17. Example of Memory Layout
+<details>
+<summary>17. Example of Memory Layout</summary>
+
+```cpp
+MyVector<int> v = {1,2,3};
+
+arrayPointer_ → [1][2][3][ ][ ][ ]
+size_ = 3
+capacity_ = 6
+```
+
+* Shows `size_` vs `capacity_`.
+* Unused memory is allocated but ignored until needed.
+
+</details>
+
+#### 18. Core Concepts Learned
+<details>
+<summary>18. Core Concepts Learned</summary>
+
+* Dynamic memory allocation: `new[]` / `delete[]`.
+* Pointers to manage dynamic arrays.
+* Copy constructor ensures separate memory for copies.
+* Push-back resizing doubles capacity.
+* Access via reference allows modification.
+* Efficient memory management with copy-swap idiom.
+
+</details>
+
+</details>
+---
+
+
+
 # 4. Linked Lists
 
 ## 4.1 Lecture
 
-### Singly, Doubly, and Circularly Linked Lists
+### Linked List: Singly Linked List
+<img src="https://media2.dev.to/dynamic/image/width=800%2Cheight=%2Cfit=scale-down%2Cgravity=auto%2Cformat=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Fdgye7mw6lexnn28hqb2r.png"/>
 
-## 4.2 Tasks
+* Each node contains a value and a pointer to the next node.
+* Last node points to `nullptr`.
+* Insertion and deletion are efficient.
+* Random access is not supported.
+* Memory allocation is dynamic, not contiguous.
 
-* **Released:** Ex 4 (11 Mar, 9am)
-* **Due:** Ex 2 (8 Mar, 23:59)
+## 4.2 Singly Linked List + forward_list Example
+<details>
+<summary>forward_list Example</summary>
+
+### Set up
+
+#### 1. Overview: What is `ForwardList`?
+<details>
+<summary>1. Overview: What is ForwardList?</summary>
+
+```cpp
+class ForwardList { ... };
+```
+
+* Implements a **singly linked list** storing integers.
+* Each node stores `data` and a pointer to the **next node**.
+* Supports operations: push/pop at the front, access front element, display, check empty, and get size.
+
+</details>
+
+#### 2. Node Structure
+<details>
+<summary>2. Node Structure</summary>
+
+```cpp
+struct Node {
+    int data {};
+    Node* next = nullptr;
+    Node(){}
+    Node(int input_data, Node* next_node = nullptr) : data{input_data}, next{next_node} {}
+};
+```
+
+* `data` stores the value of the node.
+* `next` points to the **next node** in the list.
+* Constructors allow default creation or setting data and next node pointer.
+
+</details>
+
+#### 3. Private Variables
+<details>
+<summary>3. Private Variables</summary>
+
+```cpp
+int size_ = 0;
+Node* head_ = nullptr;
+```
+
+* `size_` tracks the number of nodes.
+* `head_` points to the **first node** of the list.
+* If `head_ == nullptr`, the list is empty.
+
+</details>
+
+---
+
+### Functions
+
+#### 4. Default Constructor
+<details>
+<summary>4. Default Constructor</summary>
+
+```cpp
+ForwardList::ForwardList() {}
+```
+
+* Creates an empty list.
+* `head_` is initialized to `nullptr`, `size_ = 0`.
+
+</details>
+
+#### 5. Destructor
+<details>
+<summary>5. Destructor</summary>
+
+```cpp
+ForwardList::~ForwardList() {
+  for (Node* cur = head_; cur != nullptr;) {
+    Node* tmp = cur;
+    cur = cur->next;
+    delete tmp;
+    --size_;
+  }
+}
+```
+
+* Frees all nodes to prevent memory leaks.
+* Traverses from `head_` to the end, deleting each node.
+* Updates `size_` as nodes are deleted.
+
+</details>
+
+#### 6. Constructor from Initializer List
+<details>
+<summary>6. Constructor from Initializer List</summary>
+
+```cpp
+ForwardList::ForwardList(std::initializer_list<int> input) {
+  for (auto it = std::rbegin(input); it != std::rend(input); it++) {
+    push_front(*it);
+  }
+}
+```
+
+* Allows initialization: `ForwardList fl = {1,2,3};`
+* Iterates **backwards** through the initializer list.
+* Calls `push_front` to maintain order.
+
+</details>
+
+#### 7. push_front()
+<details>
+<summary>7. push_front()</summary>
+
+```cpp
+void ForwardList::push_front(int data) {
+  head_ = new Node{data, head_};
+  size_++;
+}
+```
+
+* Adds a node at the **beginning**.
+* Creates a new node pointing to the old `head_`.
+* Updates `head_` to the new node.
+* Increases `size_`.
+
+</details>
+
+#### 8. pop_front()
+<details>
+<summary>8. pop_front()</summary>
+
+```cpp
+void ForwardList::pop_front() {
+  Node* temp = head_;
+  head_ = head_->next;  // (*head_).next
+  delete temp;
+  size_--;
+}
+```
+
+* Removes the first node.
+* `head_ = head_->next` moves the head pointer to the **second node**.
+* Deletes the old head node.
+* Decreases `size_`.
+
+### **Why `head_->next` and not `head_.next`?**
+
+* `head_` is a **pointer to Node**, not a Node object.
+* `head_.next` would be valid **only if `head_` were an object**, because `.` accesses members of an object.
+* `->` is shorthand for `(*head_).next`:
+
+  ```cpp
+  head_->next == (*head_).next
+  ```
+* Always use `->` when accessing members **through a pointer**.
+
+</details>
+
+#### 9. front() by Value
+<details>
+<summary>9. front() by Value</summary>
+
+```cpp
+int ForwardList::front() const {
+  return head_->data;
+}
+```
+
+* Returns the value of the first node.
+* Const version, cannot modify the node.
+
+</details>
+
+#### 10. front() by Reference
+<details>
+<summary>10. front() by Reference</summary>
+
+```cpp
+int& ForwardList::front() {
+  return head_->data;
+}
+```
+
+* Returns a reference to the first node’s data.
+* Allows modifying the value:
+
+  ```cpp
+  fl.front() = 10;
+  ```
+
+</details>
+
+#### 11. display()
+<details>
+<summary>11. display()</summary>
+
+```cpp
+void ForwardList::display() const {
+  for (Node* it = head_; it != nullptr; it = it->next)
+    std::cout << it->data << (it->next ? " " : "");
+}
+```
+
+* Traverses the list from `head_` to `nullptr`.
+* Prints values in sequence, separated by spaces.
+
+</details>
+
+#### 12. empty()
+<details>
+<summary>12. empty()</summary>
+
+```cpp
+bool ForwardList::empty() const {
+  return size_ == 0;
+}
+```
+
+* Returns true if the list has no nodes.
+
+</details>
+
+#### 13. size()
+<details>
+<summary>13. size()</summary>
+
+```cpp
+int ForwardList::size() const {
+  return size_;
+}
+```
+
+* Returns the number of nodes in the list.
+
+</details>
+
+#### 14. Key Concepts
+<details>
+<summary>14. Key Concepts</summary>
+
+* **Singly linked list**: each node points only to the next.
+* **head_ pointer**: always points to the first node.
+* **Dynamic memory**: `new`/`delete` for node allocation.
+* **Push/Pop front**: O(1) operations.
+* **Accessing node members**:
+
+  * Use `->` for pointers (`head_->next`).
+  * Use `.` for objects (`node.data`).
+* **Const vs reference access**:
+
+  * `front()` const → read only.
+  * `front()` non-const → read/write.
+
+</details>
+
+</details>
+
 
 ---
 
