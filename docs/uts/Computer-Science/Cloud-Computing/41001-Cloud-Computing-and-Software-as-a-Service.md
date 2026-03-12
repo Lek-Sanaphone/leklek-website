@@ -308,7 +308,118 @@ Launch from Custom AMI
 
 ## 4.1 Lecture
 
-### Introduction to AWS Elastic Beanstalk
+### AWS Elastic Beanstalk (EB)
+
+
+AWS Elastic Beanstalk is a **Platform as a Service (PaaS)** offering that allows developers to deploy applications without the need to manually configure servers or infrastructure.
+
+<details>
+<summary><strong>Core Concepts and Lifecycle</strong></summary>
+
+* **Application:** Represents the overall project folder.
+* **Version:** A specific, labeled iteration of the application code.
+* **Environment:** The actual provisioned AWS resources running a specific version.
+* **Lifecycle:** The process follows four stages: 
+  1. **Create Application** (select platform)
+  2. **Upload Code** (zip or S3)
+  3. **Launch Environment** (automatic provisioning)
+  4. **Manage Environment** (monitor health and iterate)
+
+</details>
+
+<details>
+<summary><strong>Web Server Tier Architecture</strong></summary>
+
+<img src="https://static.d-libro.com/01-course-content-images/4010-10-AWS-Basics/010-main-figures/distributing-traffic-with-elastic-load-balancing-elb-id401010040510.webp" height="330"/>
+
+The Web Server Tier is customer-facing and designed to handle **HTTP/HTTPS requests** with high responsiveness. It automatically provisions six architectural layers:
+
+| Component | Responsibility |
+| :--- | :--- |
+| **EC2 Instances** | Virtual servers running the application code via a "Host Manager". |
+| **Security Groups** | Software firewalls that default to allowing traffic on ports **80 (HTTP)** and **443 (HTTPS)**. |
+| **Availability Zones (AZs)** | Independent data centers within a region providing local resilience. |
+| **Auto Scaling Group (ASG)** | Dynamically adjusts instance counts based on demand spikes or lulls. |
+| **Elastic Load Balancer (ELB)** | Distributes incoming traffic and signals the ASG to scale when capacity is reached. |
+| **Amazon RDS** | Managed relational databases paired with the application environment. |
+
+</details>
+
+<details>
+<summary><strong>Worker Tier and Decoupling</strong></summary>
+
+The Worker Tier is used for **decoupling** resource-intensive background tasks from the front end to prevent the web server from becoming unresponsive.
+
+* **Use Cases:** Handles time-intensive tasks like credit history checks, AI scoring, and report generation.
+* **Amazon SQS (Simple Queue Service):** Acts as the central coordination mechanism. The web server places jobs into this managed queue.
+* **Daemon Process:** A background process in the worker tier that continuously polls the SQS queue and assigns jobs to available worker instances.
+* **Key Difference:** Unlike the Web Server Tier, the Worker Tier is not customer-facing and has **no public application URL**.
+
+</details>
+
+<details>
+<summary><strong>Key Benefits</strong></summary>
+
+* **Speed:** Transition from code to a running application in minutes.
+* **Abstracted Management:** EB manages patching, scaling, and backups on the user's behalf.
+* **Cost-Efficiency:** The Elastic Beanstalk service itself is free; users only pay for the underlying resources (EC2, S3, RDS) it provisions.
+
+</details>
+
+
+## 4.2 Lab
+
+<details>
+  <summary>Create AWS Elastic Beanstalk</summary>
+
+1. Start the AWS Lab, Navigate to Elastic Beanstalk
+2. Deploying Sample Application
+  * 2.1 Click "Create Application"
+  * 2.2 Environment tier -> Web server environment
+  * 2.3 Create Application information + Environment information
+  * 2.4 Platform: "PHP"
+  * 2.5 Platform branch: "PHP 8.5 running on 64bit Amazon Linux 2023"
+  * 2.6 Platform version: "4.10.0 (Recommended)"
+  * 2.7 Application code: "Sample application"
+  * 2.8 Presets: "Single instance (free tier eligible)"
+  ---
+  * 2.9 Configure service access: Service access
+    * 2.9.1 Service role: LabRole
+    * 2.9.2 EC2 key pair: LabinstanceProfile
+    * 2.9.3 Security group: vockey
+  * 2.10 Click: Skip to Review -> Create environment
+
+---
+3. Monitor Environment Health
+  * 3.1 After deploying done, under the page, there is a Events, Health, Logs, ...
+  * 3.2 To create a Cloud Watch Dashboard
+    * 3.2.1 Click on "Monitoring" in the left menu
+    * 3.2.2 Click on "Add to dashboard"
+    * 3.2.3 Click on "Create new" -> "name it" -> click: create -> Add to dashboard
+    * 3.2.4 If want to add more widget, click plus icon (on the right of save button) -> select metric -> EC2/By Auto Scaling Group/etc -> select 1 of the line from the list -> click: Create widget
+    * 3.2.5 Click: Save
+</details>
+
+<details>
+  <summary>What Elastic Beanstalk Provisioned For You</summary>
+
+1. EC2 Instance
+2. Security Group
+3. Auto Scaling Group
+4. CloudWatch Monitoring
+5. Application Deployment
+
+</details>
+
+<details>
+  <summary>Deploy Custom Application on AWS Elastic Beanstalk</summary>
+
+1. Create a New Environment
+2. Repear the same steps as [Create AWS Elastic Beanstalk](#create-aws-elastic-beanstalk) until Application code, instead of Sample application, select "Upload your code"
+3. Version Label: v1.0.0 and Upload your code (upload zip file that download from canvas)
+4. Then Deploy
+
+</details>
 
 ---
 
