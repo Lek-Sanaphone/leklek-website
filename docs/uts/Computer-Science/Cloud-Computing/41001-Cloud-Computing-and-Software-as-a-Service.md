@@ -427,7 +427,107 @@ The Worker Tier is used for **decoupling** resource-intensive background tasks f
 
 ## 5.1 Lecture
 
-### Environment Configuration and Customisation
+<details>
+<summary><strong>1. High Availability (HA) Elastic Beanstalk</strong></summary>
+
+A High Availability environment is designed to be "production-grade," ensuring the application remains accessible even during hardware or data center failures.
+
+*   **Architecture:** Unlike single-instance setups, HA environments distribute multiple EC2 instances across at least two different Availability Zones (AZs).
+*   **Redundancy:** By spreading instances across multiple AZs, the system ensures fault tolerance; if one data center (AZ) experiences a power or internet failure, the others continue to serve traffic.
+*   **Comparison:** While single-instance environments are "simple and affordable" for development, they represent a "single point of failure". The tutor explicitly recommends HA for anything user-facing or revenue-generating.
+
+</details>
+
+<details>
+<summary><strong>2. Auto Scaling Groups (ASG)</strong></summary>
+
+Elastic Beanstalk uses ASGs to manage the "fleet" of EC2 instances automatically based on demand.
+
+*   **Capacity Settings:**
+    *   **Minimum ($Min$):** The fewest instances AWS will keep alive, even at zero demand.
+    *   **Maximum ($Max$):** The upper ceiling that caps your AWS bill.
+    *   **Desired:** The target number of instances AWS aims to maintain right now.
+*   **Scaling Lifecycle:** The process follows a continuous loop: **Launch** (starts desired instances) $\rightarrow$ **Monitor** (watches metrics) $\rightarrow$ **Breach** (threshold crossed) $\rightarrow$ **Scale** (adds/removes instances) $\rightarrow$ **Cool Down** (wait period to prevent rapid oscillation).
+*   **Triggers:** Common metrics include average **CPU Utilization** (e.g., scale up at 70%, down at 30%), **Request Latency**, and **Network I/O**.
+
+</details>
+
+<details>
+<summary><strong>3. Elastic Load Balancers (ELB)</strong></summary>
+
+The Load Balancer acts as the "front door" to your fleet, distributing incoming requests across healthy instances.
+
+*   **Application Load Balancer (ALB):** Operates at **OSI Layer 7**. It is "content-aware," meaning it can route traffic based on URL paths (e.g., `/api` vs `/images`) or host headers. This is the recommended default for most web apps.
+*   **Network Load Balancer (NLB):** Operates at **OSI Layer 4** (Transport). It is designed for ultra-high performance and low latency, handling millions of requests per second. Use cases include gaming, IoT, and real-time data streaming.
+*   **Classic Load Balancer (CLB):** A legacy product operating at Layers 4 and 7. It is **deprecated** and should only be used for old "EC2-Classic" instances.
+
+</details>
+
+<details>
+<summary><strong>4. EC2 Instance Types</strong></summary>
+
+Choosing the right instance is a "Core Decision Framework": **Start General, Measure, then Specialize**.
+
+*   **General Purpose (T3, M5):** Balanced compute, memory, and networking. Ideal for web apps and dev/test.
+*   **Compute Optimized (C5, C6i):** Higher-performance processors for CPU-bound tasks like heavy mathematical crunching or video rendering.
+*   **Memory Optimized (R5, R6i):** Designed for massive in-memory datasets (e.g., Redis) or sub-millisecond data access like bank fraud detection.
+*   **Accelerated Computing (P4, G5):** Uses hardware accelerators (GPUs/FPGAs) for parallel processing like Machine Learning or genomics.
+*   **Storage Optimized (I3, D2):** High-speed disk throughput for massive sequential data scans, such as Hadoop clusters or Turnitin-style document comparisons.
+
+</details>
+
+<details>
+<summary><strong>5. AWS Regions and Availability Zones (AZs)</strong></summary>
+
+The tutor uses a **Campus Analogy** to explain global infrastructure:
+
+*   **Region:** The geographic area/City (e.g., Sydney). Each region is independent and isolated to ensure data sovereignty and low latency for local customers.
+*   **Availability Zone (AZ):** The Campus Building. An AZ consists of one or more discrete data centers with redundant power and networking. AZs are connected by low-latency fiber optic cables.
+
+</details>
+
+<details>
+<summary><strong>6. Virtual Private Clouds (VPC) and Subnets</strong></summary>
+
+*   **VPC:** Your private, logically isolated network within AWS. A single VPC spans **all** Availability Zones in its Region.
+*   **Subnet:** A smaller range of IP addresses carved out of your VPC.
+*   **The Hard Constraint:** "One Subnet, One AZ". A subnet exists in exactly one AZ and cannot span others.
+*   **Security Strategy:** Place Load Balancers in **Public Subnets** (internet-facing) and keep EC2 instances/databases in **Private Subnets** for "defense in depth".
+
+</details>
+
+<details>
+<summary><strong>7. Health Monitoring and Metrics</strong></summary>
+
+Visibility is split into three categories:
+
+1.  **CloudWatch Monitoring:** Infrastructure-level metrics like CPU and Network I/O. These drive automation like Auto Scaling.
+2.  **Enhanced Health Reporting:** Uses an agent on each instance to report OS and application-level vitals (latency, HTTP 5xx error rates) every 10 seconds. Uses color codes: **Green (OK)**, **Yellow (Warning)**, **Red (Degraded)**, and **Grey (Severe)**.
+3.  **Event Streaming:** A "digital paper trail" or dash-cam that records deployments, scaling events, and config changes. Events are retained in the console for **6 weeks**.
+
+</details>
+
+<details>
+<summary><strong>8. AWS CloudFormation (IaC)</strong></summary>
+
+Infrastructure as Code (IaC) treats infrastructure like software code—versioned, tested, and reproducible.
+
+*   **Templates:** JSON or YAML files that act as a "blueprint" for all resources.
+*   **Stacks:** A running instance of a template. Every Elastic Beanstalk environment is technically a CloudFormation stack behind the scenes.
+*   **Benefits:** It offers **Reproducibility** (identical environments every time), **Automatic Rollback** (reverts to last good state if a change fails), and **Clean Deletion**.
+
+</details>
+
+<details>
+<summary><strong>9. Spot Instances and Fleet Composition</strong></summary>
+
+During the console demo, the tutor highlights **Spot Instances** as a cost-saving measure:
+
+*   **Definition:** Spare AWS capacity offered at a steep discount (up to 90% off) compared to On-Demand prices.
+*   **The "Catch":** If AWS needs the capacity back or you are outbid, you get a **2-minute notice** to vacate the instance.
+*   **Strategy:** You can create a "Mixed Fleet" in Elastic Beanstalk, combining **On-Demand** instances (for baseline reliability) and **Spot** instances (to handle spikes cheaply).
+
+</details>
 
 ---
 
