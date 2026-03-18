@@ -1659,12 +1659,165 @@ int ForwardList::size() const {
 
 ## 5.1 Lecture
 
-### Linear Data Structures and Hashing Collisions
+### Hashmap Functions
 
-## 5.2 Tasks
+<details>
+<summary>Hashmap Functions</summary>
 
-* **Released:** Ex 5 (18 Mar, 9am) & Assignment 1 (16 Mar, 9am)
-* **Due:** Ex 3 (15 Mar, 23:59)
+<details>
+    <summary>Hashmap in cpp - std::unordered_map</summary>
+Most common std::unordered_map functions
+
+1. Accessing Elements
+    * Use [] for easy access or at() if you want to ensure the key exists.
+
+    ```cpp
+    std::unordered_map<std::string, int> scores = {{"Alice", 10}};
+    // operator[]: Creates the key if it doesn't exist (e.g., Bob becomes 0)
+    scores["Bob"] = 20; 
+    // at(): Throws an error if the key is missing
+    int a = scores.at("Alice"); 
+    ```
+
+2. Checking Existence
+    * Before C++20, find was the standard; now contains is preferred for readability.
+    ```cpp
+    // Modern (C++20 and later)
+    if (scores.contains("Alice")) { /* Found it */ }
+    // Traditional (Works in all versions)
+    if (scores.find("Alice") != scores.end()) { /* Found it */ }
+    ```
+
+3. Inserting Elements
+    * `insert` and `emplace` add new items, but they won't overwrite existing ones.
+    ```cpp
+    // Standard insertion
+    scores.insert({"Charlie", 30});
+    // Efficient "in-place" construction
+    scores.emplace("Daisy", 40);
+    // C++17: Insert OR Update if it already exists
+    scores.insert_or_assign("Alice", 50); 
+    ```
+
+4. Removing Elements
+    * You can remove by key or clear everything at once.
+    ```cpp
+    // Remove by key (returns 1 if found/removed, 0 otherwise)
+    scores.erase("Alice");
+    // Remove by iterator
+    auto it = scores.find("Bob");
+    if (it != scores.end()) scores.erase(it);
+    // Wipe the entire map
+    scores.clear();
+    ```
+
+5. Iterating
+    * You can loop through the map using a range-based loop. Remember that first is the key and second is the value.
+    ```cpp
+    for (const auto& [key, val] : scores) { // C++17 Structured Binding
+        std::cout << key << " has score " << val << std::endl;
+    }
+    // Check size or if empty
+    if (!scores.empty()) {
+        std::cout << "Size is: " << scores.size();
+    }
+    ```
+
+</details>
+
+<details>
+    <summary>Hashmap Functions Constant time logic + Sample Scatch Coding</summary>
+
+<img src="https://i0.wp.com/www.protechskills.com/wp-content/uploads/2014/08/Flow.jpg?w=907"/>
+
+* **Hash table concept:** A hash table stores keys in an **array of buckets**, where a **hash function converts a key into an array index**.
+
+* **Core idea:** Instead of searching through elements, the structure **computes the location of the key directly** using a hash function.
+
+* **Operations:** Insert, search, and delete all **compute the bucket first**, then operate only on that bucket.
+
+* **Handling collisions:** If multiple keys map to the same bucket, they are stored together (e.g., using a **linked list**, called *separate chaining*).
+
+* **Why O(1):** Because the hash function **directly jumps to the correct bucket**, avoiding scanning the entire structure, making operations **constant time on average**.
+
+---
+
+<details>
+    <summary>Sample: Hashmap Functions</summary>
+Example structure:
+```
+bucket[0] -> 10 -> 20
+bucket[1] -> 5
+bucket[2] -> 17 -> 22
+bucket[3]
+bucket[4] -> 9
+```
+
+Sample code:
+```cpp
+#ifndef HASH_HPP_
+#define HASH_HPP_
+
+#include <list>
+#include <algorithm>
+
+
+template <std::size_t N>
+class Hash {
+ 
+  std::list<int> buckets[N] {}; // Array of N buckets, each bucket is a linked list of integers
+  std::size_t numElements {}; // Tracks how many elements are stored in the hash table
+
+ public:
+  void insert(int key) {
+    std::size_t bucket = key % N; // Compute bucket index using the hash function (key % N)
+    
+    if (!contains(key)) { // Check if the key is NOT already in the hash table
+      buckets[bucket].push_back(key); // Insert the key into the linked list stored in that bucket
+      ++numElements;
+    }
+  }
+
+  void erase(int key) {
+    std::size_t bucket = key % N;
+    
+    if (contains(key)) { // Only remove if the key exists in the table
+      buckets[bucket].remove(key); // Remove the key from the linked list in that bucket
+      --numElements;
+    }
+  }
+
+  bool contains(int key) {
+    std::size_t bucket = key % N; // Compute the bucket index for this key
+
+    auto it = std::find(buckets[bucket].begin(), buckets[bucket].end(), key); // Search the linked list in that bucket for the key
+
+    return it != buckets[bucket].end();
+  }
+
+  std::size_t size() {
+    return numElements;
+  }
+};
+
+#endif      // HASH_HPP_
+```
+</details>
+</details>
+
+</details>
+
+### Stack Functions
+
+<details>
+<summary>Stack Functions</summary>
+
+<details>
+    <summary>Stack Functions Constant time logic</summary>
+
+</details>
+
+</details>
 
 ---
 
