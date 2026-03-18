@@ -566,11 +566,79 @@ For a project to be approved, the Business Case must demonstrate:
 
 ## 5.1 Lecture
 
-### Balancing Design Rigor with Agile Methodologies
+### 1. Nature of ISD as a Design Process
+<details>
+<summary><strong>Nature of ISD as a Design Process</strong></summary>
 
-## 5.2 Tasks
+* ISD is not linear or predictable; it does not follow a fixed sequence of steps like traditional models (e.g., waterfall). Instead, development progresses through **iteration and revision**.
+* Requirements are not fully known at the start; they are gradually **discovered, refined, and sometimes redefined** as the project evolves.
+* The process involves **trial-and-error**, where multiple solution ideas are explored, tested, and improved over time.
+* ISD is **human-centered and collaborative**, meaning different stakeholders (developers, users, managers) contribute different perspectives, often leading to competing ideas.
+* Because of uncertainty, **risks and constraints emerge during development**, not just at the beginning.
+</details>
 
-* **Notes:** Class and Tutorials
+### 2. Design Thinking (DT): User-Centred Problem Solving
+<details>
+<summary><strong>Design Thinking (DT): User-Centred Problem Solving</strong></summary>
+
+* **Design Thinking** is a systematic approach that focuses on understanding real user needs rather than assumed requirements.
+* It begins with **empathy**, requiring developers to observe, engage, and understand users in their real context.
+* The approach emphasizes continuously asking **“Why?”** to uncover deeper problems instead of addressing surface-level issues.
+* Solutions must balance three key factors:
+    * **Desirability**: what users actually need or want
+    * **Feasibility**: what technology can realistically deliver
+    * **Viability**: what makes sense from a business perspective
+* The process typically moves through stages:
+    * **What is** (understand the problem)
+    * **What if** (generate ideas)
+    * **What works** (test solutions)
+    * **What wows** (deliver value)
+</details>
+
+### 3. Integrated Development Approach (PRINCE2 + DT + Scrum)
+<details>
+<summary><strong>Integrated Development Approach (PRINCE2 + DT + Scrum)</strong></summary>
+
+* Real-world ISD does not rely on a single methodology; instead, it uses a **hybrid approach** combining different methods for different purposes.
+* **PRINCE2** provides structure at the project level, including **planning, governance, and business case development**, ensuring the project is justified and organized.
+* **Design Thinking** is used in early phases to **understand users and define the problem**, as well as during ideation and prototyping.
+* **Scrum (Agile)** is used during development to **build the system iteratively**, allowing teams to adapt to feedback and changing requirements.
+* These methods are organised in layers:
+    * High-level planning (PRINCE2)
+    * Problem-solving and development (DT + Scrum)
+    * Detailed activities and outputs across phases
+* This integration allows teams to remain **structured but flexible**, which is essential in complex projects.
+</details>
+
+### 4. Agile and Scrum: Iterative and Adaptive Development
+<details>
+<summary><strong>Agile and Scrum: Iterative and Adaptive Development</strong></summary>
+
+* Agile is based on the idea that **change is inevitable**, and development must be able to adapt quickly rather than follow rigid plans.
+* Work is divided into **short iterations (timeboxes)**, each producing a small but functional part of the system.
+* Frequent delivery allows for **continuous user feedback**, which helps refine both requirements and solutions.
+* Scrum is a specific Agile framework that applies these principles in practice:
+    * Uses **sprints** (short development cycles) to structure work
+    * Uses **user stories** to express requirements from the user’s perspective
+* Scrum teams are:
+    * **Self-organising**: they decide how to complete tasks without external control
+    * **Cross-functional**: they possess all necessary skills within the team
+* Scrum emphasizes:
+    * **Transparency** (clear visibility of progress)
+    * **Inspection** (regular evaluation of work)
+    * **Adaptation** (adjusting based on feedback)
+* Overall, Agile and Scrum enable teams to manage uncertainty, improve collaboration, and deliver value incrementally.
+</details>
+
+### 5. Overall Key Insight
+<details>
+<summary><strong>Overall Key Insight</strong></summary>
+
+* ISD is a dynamic, iterative, and user-focused design activity. Effective development requires:
+    * Understanding users deeply (Design Thinking)
+    * Building and refining solutions continuously (Agile/Scrum)
+    * Maintaining structure and direction (Project management)
+</details>
 
 ---
 
