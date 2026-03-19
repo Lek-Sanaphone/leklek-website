@@ -72,6 +72,14 @@ These focus on people over processes and accommodate change well.
 
 </details>
 
+<details>
+    <summary>Different between Heavyweight and Lightweight Methodologies</summary>
+
+Quiz Answer Review (They asked for 2 differents):
+* Documentation and control
+* Change and delivery style
+</details>
+
 ### Selecting a Methodology
 
 The selection of a specific methodology depends on several key factors:

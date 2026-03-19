@@ -1813,7 +1813,140 @@ class Hash {
 <summary>Stack Functions</summary>
 
 <details>
-    <summary>Stack Functions Constant time logic</summary>
+    <summary>Stack Functions in C++ - std::stack</summary>
+
+* `std::stack` is a container adapter that follows the **LIFO** (Last-In, First-Out) principle. 
+
+### Core Functions and Usage
+
+Here is how those specific functions look and behave in C++:
+
+| Function | C++ Syntax | Description |
+| :--- | :--- | :--- |
+| **Constructor** | `std::stack<int> A;` | Creates an empty stack (in this case, for integers). |
+| **Push** | `A.push(x);` | Adds element `x` to the very top. |
+| **Top** | `A.top();` | Returns a reference to the top element without removing it. |
+| **Pop** | `A.pop();` | Removes the top element. Note: In C++, `pop()` returns `void`. |
+| **Size** | `A.size();` | Returns the number of elements currently in the stack. |
+
+---
+
+### A Quick Code Example
+To use a stack, you need to include the `<stack>` header. Here is how your logic translates into a functional snippet:
+
+```cpp
+#include <iostream>
+#include <stack>
+
+int main() {
+    std::stack<int> A; // Creates an empty stack
+
+    A.push(10);        // Stack: [10]
+    A.push(20);        // Stack: [10, 20] (20 is at the top)
+
+    std::cout << "Top element: " << A.top() << std::endl; // Returns 20
+    std::cout << "Size: " << A.size() << std::endl;        // Returns 2
+
+    A.pop();           // Removes 20. Stack: [10]
+    
+    return 0;
+}
+```
+
+### Important Tip
+Always check if the stack is empty using `A.empty()` before calling `A.top()` or `A.pop()`. Attempting to access the top of an empty stack will cause your program to crash (undefined behavior).
+
+</details>
+
+<details>
+    <summary>Stack Functions from Scratch with Vector</summary>
+
+<details>
+    <summary>myStack.hpp</summary>
+
+```cpp
+#ifndef STACK_HPP_
+#define STACK_HPP_
+
+#include <vector>
+
+template <typename T>
+class MyStack {
+ private:
+  std::vector<T> data {};
+
+ public:
+  // default constructor
+  MyStack();
+
+  // add an element to the top of stack
+  void push(T val);
+
+  // remove an element from the top of stack
+  void pop();
+
+  // get the element at the top of stack
+  T& top();
+
+  // return number of elements in the stack
+  int size();
+
+  // check if stack is empty
+  bool empty();
+};
+
+#endif      // STACK_HPP_
+```
+
+</details>
+
+<details>
+    <summary>myStack.cpp</summary>
+
+```cpp
+#include <vector>
+#include <string>
+#include "myStack.hpp"
+
+// default constructor (nothing to do here)
+template <typename T>
+MyStack<T>::MyStack() {}
+
+// add an element to the top of stack
+template <typename T>
+void MyStack<T>::push(T val) {
+  data.push_back(val);
+}
+
+// remove an element from the top of stack
+template <typename T>
+void MyStack<T>::pop() {
+  data.pop_back();
+}
+
+// get the element at the top of stack
+template <typename T>
+T& MyStack<T>::top() {
+  return data.back();
+}
+
+// return number of elements in the stack
+template <typename T>
+int MyStack<T>::size() {
+  return data.size();
+}
+
+// check if stack is empty
+template <typename T>
+bool MyStack<T>::empty() {
+  return data.empty();
+}
+
+template class MyStack<int>;
+template class MyStack<char>;
+template class MyStack<std::string>;
+```
+</details>
 
 </details>
 
