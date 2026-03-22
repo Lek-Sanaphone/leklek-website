@@ -529,6 +529,118 @@ During the console demo, the tutor highlights **Spot Instances** as a cost-savin
 
 </details>
 
+## 5.2 Lab
+
+### AWS Elastic Beanstalk Customization
+
+<details>
+  <summary>Summary and Guide</summary>
+
+<details>
+<summary>Objective</summary>
+<img src="https://miro.medium.com/v2/resize:fit:1042/0*1-ZdHJfr-JyNeYZD"/>
+
+1. Build a custom network foundation: VPC, subnets, Internet Gateway, and route tables
+2. Create custom security controls: Security Group with explicit rules and a Key Pair for SSH
+3. Launch a customised EB environment: custom VPC, HA, ALB, ASG, RDS, and notifications
+4. Verify the deployed architecture: EC2 instances in custom subnets across different AZs
+</details>
+
+<details>
+<summary>Step 1-2: VPC and Internet Gateway</summary>
+
+1. Create Custom VPC
+  * Navigate to VPC Dashboard
+  * Select "Create VPC"
+  * Select "VPC only"
+  * Name your VPC (e.g., MyCustomVPC)
+  * IPv4 CIDR: 10.0.0.0/16
+  * Click "Create VPC"
+2. Create and Attach Internet Gateway
+  * Click "Internet gateways" in VPC sidebar
+  * Click "Create internet gateway"
+  * Name it (e.g., My Custom|GW)
+  * Actions → "Attach to VPC"
+  * Select your custom VPC → Attach
+
+</details>
+
+<details>
+<summary>Steps 3-4: Two Subnets, Two AZs</summary>
+
+(Two data centres, two subnets)
+
+3. Subnet 1: Availability Zone A
+  * VPC sidebar → Subnets → "Create subnet"
+  * Select your custom VPC
+  * Name: MySubnet 1
+  * AZ: Select first AZ in list (e.g., ap-southeast-1a)
+  * CIDR: 10.0.1.0/24 (256 addresses)
+
+4. Subnet 2: Availability Zone B
+  * Click "Add new subnet" (same page)
+  * Name: MySubnet2
+  * AZ: Select a different AZ (e.g., ap-southeast-1b)
+  * CIDR: 10.0.2.0/24 (256 addresses)
+  * Click "Create Subnet"
+</details>
+
+<details>
+<summary>Steps 5-6: Route Table and Association</summary>
+
+5. Part 1: Create Route Table
+  * VPC sidebar → Route Tables → Create route table
+  * Select your custom VPC
+  * Name it (e.g., MyRouteTable)
+5. Part 2: Add Internet Route
+  * Edit routes → Add route
+  * Destination: 0.0.0.0/0
+  * Target: Internet Gateway
+  * (select your custom IGW)
+6. Associate with Subnets 
+  * Edit subnet associations
+  * Select both subnets:
+    * MySubnet1 (AZ-a)
+    * MySubnet2 (AZ-b)
+  * Save associations
+
+Example of picture:
+<img src="https://cdn.hashnode.com/res/hashnode/image/upload/v1718693178517/26d432de-aeb4-40ac-81e1-82bfe1b795bb.png" />
+</details>
+
+---
+
+<details>
+<summary>Create Your Security Controls</summary>
+
+1. Create a security group with SSH and HTTP rules
+  * VPC sidebar → Security Groups → Create
+  * Name: MySecurityGroup
+  * VPC: Select your custom VPC
+  * Add inbound rules:
+    | Type | Port | Source |
+    |---|---|---|
+    | SSH | 22 | 0.0.0.0/0 |
+    | HTTP | 80 | 0.0.0.0/0 |
+2. Create a key pair for SSH authentication
+  * Services → EC2 → Key Pairs
+  * Click "Create key pair"
+  * Name: MyKeyPair
+  * Type: RSA, Format: .pem
+  * .pem file downloads automatically
+</details>
+
+<details>
+<summary>Customise Elastic Beanstalk</summary>
+
+1. Create an EB application and environment with your custom VPC
+2. Configure High Availability with ALB and Auto Scaling
+3. Add an RDS MySQL database with Multi-AZ
+4. Enable email notifications via SNS
+</details>
+
+</details>
+
 ---
 
 # 6. AWS Storage Services
