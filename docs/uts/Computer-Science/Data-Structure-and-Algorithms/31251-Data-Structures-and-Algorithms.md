@@ -1958,12 +1958,84 @@ template class MyStack<std::string>;
 
 ## 6.1 Lecture
 
-### Time and Space Complexity Analysis
+<details>
+<summary>1. Recursion Fundamentals</summary>
 
-## 6.2 Tasks
+### Recursion Fundamentals
 
-* **Released:** Ex 6 (25 Mar, 9am)
-* **Due:** Ex 4 (22 Mar, 23:59)
+Recursion is a technique where a function calls itself to solve a problem by breaking it down into simpler, identical subproblems.
+
+#### The Three Pillars of Recursive Logic
+1.  **Divide:** Break the problem into smaller, similar subproblems.
+2.  **Conquer:** Solve subproblems recursively until they are simple enough to solve directly.
+3.  **Combine:** Merge subproblem solutions to solve the original problem.
+
+#### The Base Case (Critical)
+The **Base Case** is the "exit condition" for the smallest possible input. Without it, the function enters an endless loop, eventually causing a stack overflow.
+
+</details>
+
+<details>
+<summary>2. Factorial Logic ($n!$)</summary>
+
+### Factorial Recursive Logic
+
+The factorial of $n$ is the product of all positive integers from $1$ to $n$.
+
+* **Recursive Pattern:** $n! = n \times (n-1)!$.
+* **Base Case:** $0! = 1$.
+
+```cpp
+int factorial(int n) {
+    if (n == 0) return 1;       // Base Case: stops recursion
+    return n * factorial(n-1);  // Recursive Step: n * (n-1)!
+}
+```
+
+</details>
+
+<details>
+<summary>3. Fibonacci Sequence Logic</summary>
+
+### Fibonacci Sequence Recursive and iterative Logic
+
+In this sequence, each number is the sum of the two preceding numbers.
+
+* **Recursive Formula:** $fib(n) = fib(n-1) + fib(n-2)$.
+* **Base Cases:** $fib(0) = 0$ and $fib(1) = 1$.
+
+#### Comparison: Recursive vs. Iterative
+
+| Feature | Recursive Fibonacci | Iterative Fibonacci |
+| :--- | :--- | :--- |
+| **Logic** | Follows math formula directly. | Uses a `for` loop to build up. |
+| **Base Cases** | `if (n <= 1) return n;`. | `if (n <= 1) return n;`. |
+| **Efficiency** | Slower; calculates the same values many times. | Faster; calculates each value exactly once. |
+| **Memory** | Uses Stack space for every call. | Uses minimal fixed memory (3 variables). |
+
+```cpp
+// Recursive Logic
+int64_t recursiveFibonacci(int n) {
+	if (n == 0) return 0;
+	if (n == 1) return 1;
+
+	return recursiveFibonacci(n-1)+recursiveFibonacci(n-2);
+}
+
+// Iterative Logic (Building from the bottom up)
+int64_t iterativeFibonacci(int n) {
+    if (n <= 1) return n;
+    int64_t prev1 = 0, prev2 = 1;
+    for (int i = 2; i <= n; ++i) {
+        int64_t ans = prev1 + prev2; // Combine previous two
+        prev1 = prev2;               // Shift window forward
+        prev2 = ans;
+    }
+    return prev2;
+}
+```
+
+</details>
 
 ---
 
