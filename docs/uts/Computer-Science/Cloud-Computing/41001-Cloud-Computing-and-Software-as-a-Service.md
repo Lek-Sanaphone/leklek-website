@@ -649,6 +649,48 @@ Example of picture:
 
 ### Cloud Storage Solutions and Implementations
 
+<details>
+<summary>1. Key Performance Metrics</summary>
+
+Engineers evaluate storage based on these core characteristics:
+
+* **Durability**: The mathematical probability that data will not be lost (e.g., 99.999999999% or "11 nines").
+* **Security**: The protection of data from unauthorized access.
+* **Cost**: The price of storage (e.g., Dollars per gigabyte ($/GB)).
+* **Availability**: The percentage of time a system is operational and accessible (e.g., 99.99% allows 52 minutes of yearly downtime).
+* **Performance**: Measured by latency, throughput, and **IOPS** (Input/Output Operations Per Second).
+* **Scalability**: The ability to grow or shrink capacity and compute power as needed.
+* **Integration**: The ability to integrate with other services.
+</details>
+
+<details>
+<summary>2. The Three Storage Types</summary>
+
+AWS organizes its services by how "abstract" they are for the developer:
+
+| Type | Service Example | Best Use Case |
+| :--- | :--- | :--- |
+| **Block** | **Amazon EBS** | Databases (MySQL, MongoDB) and high-performance apps. |
+| **File** | **Amazon EFS** | Shared content management, DevOps, and home directories. |
+| **Object** | **Amazon S3** | Media storage (videos/images), static websites, and data lakes. |
+
+* **Block Storage** is the **least abstract**, interfaced like a physical hard drive (SATA/SSD) for high-speed, low-latency tasks.
+* **File Storage** uses a directory hierarchy (folders/paths) and is ideal for systems where multiple users need to access the same files simultaneously.
+* **Object Storage** is the **most abstract**, storing data as "blobs" accessible via web APIs rather than a traditional file system.
+
+</details>
+
+<details>
+<summary>3. Optimizing for Cost and Access</summary>
+
+The lecture highlights **Amazon S3** for its versatility and tiering:
+
+* **S3 Standard**: For frequently accessed data.
+* **S3 Glacier**: For long-term archives, offering up to a **95% price reduction** compared to the standard tier.
+* **Lifecycle Management**: Systems can automatically move data between tiers to save money as access patterns change.
+
+</details>
+
 ---
 
 # 7. Force.com PaaS: Data Objects

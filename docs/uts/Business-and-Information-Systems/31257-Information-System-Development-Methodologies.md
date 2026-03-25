@@ -656,10 +656,141 @@ For a project to be approved, the Business Case must demonstrate:
 
 ### Agile Frameworks: Scrum and Extreme Programming (XP)
 
-## 6.2 Tasks
+<details>
+<summary>1. Agile and Scrum Overview</summary>
 
-* **Due:** Project Part A
-* **Notes:** Class and Tutorials
+Scrum is a widely used Agile framework that emphasizes iterative development, continuous feedback, and frequent delivery of working software. Work is organized into short cycles called sprints, typically lasting 1 to 4 weeks.
+
+Scrum promotes:
+
+* Self-organising and cross-functional teams
+* Transparency, inspection, and adaptation
+* Continuous communication and collaboration
+
+</details>
+
+<details>
+<summary>2. Scrum Team Structure</summary>
+
+#### Roles
+
+* **Product Owner**: Manages the product backlog, prioritises work, and engages stakeholders
+* **Scrum Master**: Ensures Scrum practices are followed and facilitates the team
+* **Development Team**: Delivers the product increment
+
+#### Team Values
+
+Commitment, focus, openness, respect, and courage guide team behaviour.
+
+</details>
+
+<details>
+<summary>3. Scrum Process</summary>
+
+#### Sprint
+
+A fixed iteration (1–4 weeks) where a usable product increment is developed.
+
+#### Key Events
+
+* **Sprint Planning**: Defines sprint goals and determines tasks
+* **Daily Scrum**: A 15-minute meeting to track progress and identify issues
+* **Sprint Review**: Demonstrates completed work and gathers feedback
+* **Sprint Retrospective**: Reflects on and improves team processes
+
+</details>
+
+<details>
+<summary>4. Scrum Artefacts</summary>
+
+* **Product Backlog**: Ordered list of all requirements (user stories)
+* **Sprint Backlog**: Tasks selected for the current sprint
+* **Product Increment**: A potentially shippable product produced each sprint
+
+</details>
+
+<details>
+<summary>5. User Stories</summary>
+
+User stories describe features from the user’s perspective:
+“As a [user], I want [goal], so that [benefit].”
+
+They are continuously refined, split into smaller tasks, or expanded with detailed conditions.
+
+</details>
+
+<details>
+<summary>6. Key Scrum Concepts</summary>
+
+* Time-boxed activities ensure discipline and efficiency
+* A shared definition of “Done” ensures quality
+* Frequent delivery enables continuous feedback and adaptation
+
+</details>
+
+<details>
+<summary>7. Extreme Programming (XP) Overview</summary>
+
+Extreme Programming is an Agile framework focused on improving software quality and development practices. It emphasises strong technical discipline and rapid feedback.
+
+#### Core Values
+
+Communication, simplicity, feedback, courage, and respect
+
+</details>
+
+<details>
+<summary>8. Scrum vs XP</summary>
+
+| Aspect               | Scrum              | XP                            |
+| -------------------- | ------------------ | ----------------------------- |
+| Sprint Length        | 1–4 weeks          | **1 week only**               |
+| Focus                | Management/process | **Technical practices**       |
+| Customer Involvement | Indirect           | **Direct & continuous**       |
+| Work Hours           | Flexible           | **40 hrs/week (sustainable)** |
+
+---
+
+* Scrum focuses on project management and workflow
+* XP focuses on engineering and technical practices
+* Scrum allows flexible sprint lengths; XP uses fixed one-week iterations
+* XP requires closer customer involvement and enforces a sustainable workload (40 hours per week)
+
+</details>
+
+<details>
+<summary>9. XP Roles</summary>
+
+* **XP Coach**: Guides both process and technical practices
+* **Product Manager**: Refines user stories
+* **Development Team**: Includes all necessary roles, including designers, testers, and users
+
+</details>
+
+<details>
+<summary>10. XP Practices</summary>
+
+* **Pair Programming**: Two developers collaborate on the same task
+* **Test-First Development**: Tests are written before code
+* **Continuous Integration**: Code is integrated frequently
+* **Daily Deployment**: Software is deployed regularly to production
+* **Fast Builds**: Build times should remain under ten minutes
+
+</details>
+
+<details>
+<summary>11. XP Artefacts</summary>
+
+XP uses similar artefacts to Scrum, such as backlogs and increments, but requires stricter completion criteria, including continuous deployment.
+
+</details>
+
+<details>
+<summary>12. Key Takeaways</summary>
+
+Scrum provides a structured approach to managing work, while XP enhances the technical quality of development. Together, they support efficient, adaptive, and high-quality software delivery.
+
+</details>
 
 ---
 
