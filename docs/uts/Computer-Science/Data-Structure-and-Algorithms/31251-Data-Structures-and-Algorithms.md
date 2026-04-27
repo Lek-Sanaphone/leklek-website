@@ -2043,12 +2043,280 @@ int64_t iterativeFibonacci(int n) {
 
 ## 7.1 Lecture
 
-### Merge Sort, Quick Sort, and Recursion
+<details>
+    <summary>Sorting 0s and 1s</summary>
 
-## 7.2 Tasks
+Key Points:
+* The array is guaranteed to only contain `0`s and `1`s (or `false`/`true`)
+* Faster than generic sorting because we exploit this constraint
+* Uses a two-pointer approach — one pointer scans right, one tracks the "boundary"
+* Core idea: track the position of the first `1` in the array
+    * Whenever a `0` is found to the right of that position → swap it with the first `1`
+    * Then advance the "first `1`" pointer one step right
+* Only requires a single pass through the array → O(n) time
+* No extra memory needed — sorting is done in-place
 
-* **Released:** Ex 7 (1 Apr, 9am)
-* **Due:** Ex 5 (29 Mar, 23:59)
+<details>
+<summary>Code Sample and Explanation</summary>
+
+```cpp
+#ifndef SORT_BOOLEAN_HPP_
+#define SORT_BOOLEAN_HPP_
+#include <iterator>
+#include <utility>
+
+// Iter = iterator to a container of pairs: { first: 0 or 1, second: string }
+template <typename Iter>
+void sortBoolean(Iter begin, Iter end) {
+
+  Iter leftEnd = begin;
+  // STEP 1: Scan forward to find the FIRST "1" in the array.
+  // leftEnd will stop at the first element where first == 1.
+  // If the whole array is 0s, leftEnd will reach end and we return early.
+  while (leftEnd != end and leftEnd->first == 0) {
+    ++leftEnd;
+  }
+
+  // STEP 2: If no 1 was found, the array is already sorted — nothing to do.
+  if (leftEnd == end) {
+    return;
+  }
+
+  // INVARIANT: leftEnd always points to the leftmost "1" in the unsorted region.
+  // We now scan j from the element AFTER leftEnd to the end of the array.
+  for (Iter j = std::next(leftEnd); j != end; ++j) {
+
+    // STEP 3: If we find a 0 to the right of the first 1...
+    if (j->first == 0) {
+      // ...swap the 0 (at j) with the first 1 (at leftEnd).
+      // The 0 moves left into the sorted region, the 1 moves right.
+      std::swap(*leftEnd, *j);
+
+      // Advance leftEnd so it still points to the leftmost 1.
+      // (The element we just swapped in is now the new first 1.)
+      ++leftEnd;
+    }
+    // If j->first == 1, we skip it — it's already on the correct (right) side.
+  }
+}
+#endif  // SORT_BOOLEAN_HPP_
+```
+
+Walkthrough example: `[0, 1, 0, 1, 0]`
+1. `leftEnd` scans → stops at index 1 (first `1`)
+2. `j` starts at index 2, finds `0` → swap indices 1 & 2 → `[0, 0, 1, 1, 0]`, `leftEnd` = index 2
+3. `j` moves to index 3, finds `1` → skip
+4. `j` moves to index 4, finds `0` → swap indices 2 & 4 → `[0, 0, 0, 1, 1]`, `leftEnd` = index 3
+5. Done ✓
+</details>
+
+</details>
+
+<details>
+    <summary>The Partition Problem</summary>
+
+Key points:
+* Generalises the 0s-and-1s sort to any type with any condition
+* Takes a predicate function `p` — a function that returns `true` or `false` for any element
+* Goal: rearrange the array so that all elements where `p(x) == false` come before all elements where `p(x) == true`
+* The insight: applying `p` to every element maps the array to 0s and 1s — so the exact same algorithm applies
+* Returns an iterator pointing to the first element that satisfies `p` (the boundary between the two groups)
+* Time complexity: O(n) — one pass through the array
+* In-place, no extra memory needed
+* Used as the building block inside Quicksort
+
+<details>
+<summary>Code Sample and Explanation</summary>
+
+```cpp
+#ifndef PARTITION_HPP_
+#define PARTITION_HPP_
+#include <iterator>
+#include <utility>
+
+// Iter      = any iterator (works on vectors, arrays, etc.)
+// Predicate = any callable that takes an element and returns bool
+//             e.g. [](int x){ return x > 3; }
+template <typename Iter, typename Predicate>
+Iter myPartition(Iter begin, Iter end, Predicate p) {
+
+  Iter leftEnd = begin;
+
+  // STEP 1: Scan forward to find the FIRST element that satisfies p(x).
+  // This is equivalent to finding the first "1" in the 0s-and-1s problem.
+  // Elements that do NOT satisfy p(x) are already on the correct (left) side.
+  while (leftEnd != end and not p(*leftEnd)) {
+    ++leftEnd;
+  }
+
+  // STEP 2: If no element satisfies p(x), no rearrangement needed.
+  // Return end to signal the boundary is at the very end (all elements are "false").
+  if (leftEnd == end) {
+    return leftEnd;
+  }
+
+  // INVARIANT: leftEnd always points to the leftmost element satisfying p(x).
+  // (Same logic as sortBoolean — leftEnd is the "first 1" pointer.)
+  for (Iter j = std::next(leftEnd); j != end; ++j) {
+
+    // STEP 3: If j points to a "false" element (does NOT satisfy p)...
+    if (not p(*j)) {
+      // ...swap it with the first "true" element (at leftEnd).
+      // This pushes the false element left and the true element right.
+      std::swap(*leftEnd, *j);
+
+      // Advance leftEnd to maintain the invariant.
+      ++leftEnd;
+    }
+    // If p(*j) is true, element is already on the right side — skip it.
+  }
+
+  // Return the boundary iterator:
+  // everything before leftEnd is "false", everything from leftEnd onward is "true".
+  return leftEnd;
+}
+#endif  // PARTITION_HPP_
+```
+
+Walkthrough example: array `[3, 1, 4, 1, 5, 9, 2]`, predicate `p(x) = x > 3`
+
+| Step | Array state | leftEnd value | 
+| :--- | :--- | :--- |
+| Start | `[3, 1, 4, 1, 5, 9, 2]` | points to 4 (index 2, first true) |
+| Swap 4↔1 (index 2↔3)| `[3, 1, 1, 4, 5, 9, 2]` | advances to 4 (index 3) |
+| Swap 4↔2 (index 3↔6)| `[3, 1, 1, 2, 5, 9, 4]` | advances to 5 (index 4) |
+| End of array | `[3, 1, 1, 2, 5, 9, 4]` | returns index 4 |
+
+Result: [3,1,1,2] all ≤3 (false) on the left, [5,9,4] all >3 (true) on the right ✓
+</details>
+</details>
+
+<details>
+    <summary>Quicksort</summary>
+    
+Key Points:
+* A recursive sorting algorithm that uses myPartition as its core building block
+* Strategy: divide and conquer
+    * Pick a pivot (last element of the current subarray)
+    * Partition: everything less than the pivot goes left, everything greater goes right
+    * The pivot lands in its exact final sorted position — it never moves again
+    * Recursively apply the same process to the left and right halves
+* Base case: a subarray of size 0 or 1 is already sorted → return immediately
+* Average time complexity: O(n log n)
+    * Each partition call does O(n) work
+    * On average, we have O(log n) levels of recursion (each pivot halves the problem)
+* Worst case: O(n²) — happens when the pivot is always the smallest or largest element (e.g. already-sorted array with last-element pivot)
+* In-place — no extra array needed, just swaps
+* After partitioning, the pivot is swapped into the boundary position so it sits between the two halves
+<details>
+<summary>Code Sample and Explanation</summary>
+
+```cpp
+#ifndef QUICKSORT_HPP_
+#define QUICKSORT_HPP_
+#include <algorithm>
+#include <iterator>
+
+// --- myPartition (same as Partition section above) ---
+// Included here because quicksort depends on it.
+template <typename Iter, typename Predicate>
+Iter myPartition(Iter begin, Iter end, Predicate p) {
+  Iter leftEnd = begin;
+  while (leftEnd != end and not p(*leftEnd)) { ++leftEnd; }
+  if (leftEnd == end) { return leftEnd; }
+  for (Iter j = std::next(leftEnd); j != end; ++j) {
+    if (not p(*j)) { std::swap(*leftEnd, *j); ++leftEnd; }
+  }
+  return leftEnd;
+}
+
+// --- Quicksort (using homemade partition) ---
+template <typename Iter>
+void quicksort(Iter begin, Iter end) {
+
+  // BASE CASE: If the subarray has fewer than 2 elements, it's already sorted.
+  // std::distance counts elements between begin and end.
+  if (std::distance(begin, end) < 2) {
+    return;
+  }
+
+  // STEP 1: Choose the PIVOT — the last element in the current subarray.
+  // std::prev(end) gives an iterator to the last element.
+  // We copy the value (not a reference) so swaps don't affect it.
+  auto pivot = *std::prev(end);
+
+  // STEP 2: Partition all elements EXCEPT the pivot (begin to std::prev(end)).
+  // The predicate is: "is element a GREATER THAN the pivot?"
+  //   - false (≤ pivot) → goes to the LEFT side
+  //   - true  (> pivot) → goes to the RIGHT side
+  // leftEnd now points to the first element greater than pivot — the boundary.
+  Iter leftEnd = myPartition(
+    begin,
+    std::prev(end),                              // exclude the pivot itself
+    [&pivot](const auto& a) { return a > pivot; } // predicate: a > pivot
+  );
+
+  // STEP 3: Place the pivot in its FINAL position.
+  // Swap the pivot (currently at the last position) with the first element
+  // that is greater than it (leftEnd). The pivot now sits exactly at the boundary.
+  // Everything to its left is ≤ pivot; everything to its right is > pivot.
+  std::iter_swap(leftEnd, std::prev(end));
+
+  // STEP 4: Recursively sort the LEFT half (elements < pivot).
+  // This subarray runs from begin up to (but NOT including) leftEnd.
+  quicksort(begin, leftEnd);
+
+  // STEP 5: Recursively sort the RIGHT half (elements > pivot).
+  // This subarray starts ONE PAST leftEnd (skipping over the now-placed pivot).
+  quicksort(std::next(leftEnd), end);
+}
+
+// --- Alternative: Quicksort using std::partition ---
+// std::partition uses the OPPOSITE predicate convention:
+//   - true  → goes LEFT  (elements we want on the left: a <= pivot)
+//   - false → goes RIGHT (elements we want on the right: a > pivot)
+// Otherwise identical logic to the version above.
+template <typename Iter>
+void quicksort_std(Iter begin, Iter end) {
+  if (std::distance(begin, end) < 2) {
+    return;
+  }
+  auto pivot = *std::prev(end);
+
+  // std::partition: elements satisfying predicate go LEFT.
+  // Predicate is a <= pivot, so elements ≤ pivot go left — same result as above.
+  Iter leftEnd = std::partition(
+    begin,
+    std::prev(end),
+    [&pivot](const auto& a) { return a <= pivot; } // NOTE: flipped from homemade version
+  );
+
+  std::iter_swap(leftEnd, std::prev(end));
+  quicksort_std(begin, leftEnd);
+  quicksort_std(std::next(leftEnd), end);
+}
+#endif  // QUICKSORT_HPP_
+```
+
+Walkthrough example: `[7, -2, 10, 8, 3, 1, 5]`
+```
+quicksort([7,-2,10,8,3,1,5])
+  pivot = 5
+  partition → [-2, 3, 1, | 5 | 7, 10, 8]   (5 is now in final position)
+  quicksort([-2, 3, 1])
+    pivot = 1
+    partition → [-2 | 1 | 3]               (1 is now in final position)
+    quicksort([-2])  → base case, return
+    quicksort([3])   → base case, return
+  quicksort([7, 10, 8])
+    pivot = 8
+    partition → [7 | 8 | 10]               (8 is now in final position)
+    quicksort([7])   → base case, return
+    quicksort([10])  → base case, return
+Final result: [-2, 1, 3, 5, 7, 8, 10] ✓
+```
+</details>
+</details>
 
 ---
 
@@ -2068,12 +2336,129 @@ int64_t iterativeFibonacci(int n) {
 
 ## 9.1 Lecture
 
-### Binary Search Trees and Heaps
+<details>
+<summary>1. Queue vs Priority Queue</summary>
 
-## 9.2 Tasks
+### Queue vs Priority Queue
 
-* **Released:** Ex 8 (15 Apr, 9am)
-* **Due:** Ex 6 (12 Apr, 23:59) & Assignment 1 (12 Apr, 23:59)
+**Queue (FIFO)**
+
+* First In, First Out
+* Elements are removed in the order they arrive
+
+**Priority Queue**
+
+* Elements are removed based on priority, not order
+* Highest priority element is always removed first
+
+</details>
+
+<details>
+<summary>2. Priority Queue in C++</summary>
+
+### Priority Queue in C++
+
+Default behavior:
+
+* `std::priority_queue` is a **max heap**
+* Largest element is always at the top
+
+#### Operations
+
+| Operation | Description        | Time Complexity |
+| --------- | ------------------ | --------------- |
+| `push(x)` | Insert element     | O(log n)        |
+| `pop()`   | Remove top element | O(log n)        |
+| `top()`   | Access top element | O(1)            |
+
+</details>
+
+<details>
+<summary>3. Min Priority Queue</summary>
+
+### Min Priority Queue
+
+To make the smallest element come first:
+
+```cpp
+std::priority_queue<int, std::vector<int>, std::greater<int>> pq;
+```
+
+</details>
+
+<details>
+<summary>4. Finding the k-th Largest Element</summary>
+
+### Finding the k-th Largest Element
+
+#### Idea
+
+* Keep only the k largest elements
+* Use a **min heap**
+* If size exceeds k, remove the smallest element
+
+#### Result
+
+* The top element is the k-th largest
+
+</details>
+
+<details>
+<summary>5. C++ Example</summary>
+
+### C++ Example
+
+```cpp
+#include <iostream>
+#include <queue>
+#include <vector>
+
+int findKthLargest(std::vector<int>& nums, int k) {
+    std::priority_queue<int, std::vector<int>, std::greater<int>> pq;
+
+    for (int num : nums) {
+        pq.push(num);
+
+        if (pq.size() > k) {
+            pq.pop();
+        }
+    }
+
+    return pq.top();
+}
+
+int main() {
+    std::vector<int> nums = {3, 2, 1, 5, 6, 4};
+    int k = 2;
+
+    std::cout << findKthLargest(nums, k) << std::endl;
+    return 0;
+}
+```
+
+</details>
+
+<details>
+<summary>6. Heap (Underlying Structure)</summary>
+
+### Heap (Underlying Structure)
+
+* Binary tree structure
+* Heap property:
+
+  * Min heap: parent ≤ children
+  * Max heap: parent ≥ children
+
+#### Array Representation
+
+For index `i`:
+
+* Left child: `2 * i`
+* Right child: `2 * i + 1`
+* Parent: `i / 2`
+
+</details>
+
 
 ---
 
@@ -2081,12 +2466,294 @@ int64_t iterativeFibonacci(int n) {
 
 ## 10.1 Lecture
 
-### Adjacency Matrices and Lists
+<details>
+<summary>1. What is a Graph?</summary>
 
-## 10.2 Tasks
+### What is a Graph?
 
-* **Released:** Ex 9 (22 Apr, 9am)
-* **Due:** Ex 7 (19 Apr, 23:59)
+A **graph** is made of:
+
+* **Nodes (vertices)**: the points
+* **Edges**: the connections between points
+
+#### Key ideas
+
+* A graph can have **cycles** (loops)
+* It does not have to start from one root like a tree
+
+#### Types of graphs
+
+* **Undirected**: connection goes both ways
+* **Directed**: connection goes one way
+* **Weighted**: edges have values like distance or cost
+
+</details>
+
+<details>
+<summary>2. Graph Representation</summary>
+
+### Graph Representation
+
+#### Adjacency List
+
+This is the most common way to store a graph.
+
+Each node stores a list of its neighbors.
+
+```cpp
+vector<vector<int>> adj(n);
+
+// undirected edge
+adj[u].push_back(v);
+adj[v].push_back(u);
+```
+
+#### Weighted Graph
+
+If edges have weights, store a pair:
+
+```cpp
+vector<vector<pair<int, int>>> adj(n);
+
+// edge u -> v with weight w
+adj[u].push_back({v, w});
+```
+
+#### Adjacency Matrix
+
+A 2D table is used.
+
+`matrix[u][v] = 1` means there is an edge.
+
+```cpp
+vector<vector<int>> matrix(n, vector<int>(n, 0));
+
+matrix[u][v] = 1;
+matrix[v][u] = 1;
+```
+
+#### Quick comparison
+
+| Method | Space    | Edge Check |
+| ------ | -------- | ---------- |
+| Matrix | O(V²)    | Fast       |
+| List   | O(V + E) | Slower     |
+
+</details>
+
+<details>
+<summary>3. Traversal Algorithms</summary>
+
+### Traversal Algorithms
+
+Traversal means visiting all the nodes in a graph.
+
+#### Breadth-First Search (BFS)
+
+**Idea**
+
+* Visits nodes **level by level**
+* Uses a **queue**
+
+**Use**
+
+* Good for shortest path in an unweighted graph
+
+**BFS code**
+
+```cpp
+#include <queue>
+
+void bfs(int start, vector<vector<int>>& adj) {
+    vector<bool> visited(adj.size(), false);
+    queue<int> q;
+
+    visited[start] = true;
+    q.push(start);
+
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+
+        for (int v : adj[u]) {
+            if (!visited[v]) {
+                visited[v] = true;
+                q.push(v);
+            }
+        }
+    }
+}
+```
+
+#### Depth-First Search (DFS)
+
+**Idea**
+
+* Goes as deep as possible first
+* Uses **recursion** or a **stack**
+
+**Use**
+
+* Cycle detection
+* Path finding
+* Topological sort
+
+**DFS code**
+
+```cpp
+void dfs(int u, vector<vector<int>>& adj, vector<bool>& visited) {
+    visited[u] = true;
+
+    for (int v : adj[u]) {
+        if (!visited[v]) {
+            dfs(v, adj, visited);
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary>4. Example Graph</summary>
+
+### Example Graph
+
+Let’s use this graph:
+
+* 0 connected to 1 and 2
+* 1 connected to 3 and 4
+* 2 connected to 5
+
+#### Adjacency list
+
+```cpp
+vector<vector<int>> adj = {
+    {1, 2},    // 0
+    {0, 3, 4}, // 1
+    {0, 5},    // 2
+    {1},       // 3
+    {1},       // 4
+    {2}        // 5
+};
+```
+
+#### Picture in words
+
+```
+      0
+     / \
+    1   2
+   / \   \
+  3   4   5
+```
+
+</details>
+
+<details>
+<summary>5. BFS Step-by-Step</summary>
+
+### BFS Step-by-Step
+
+Start from node `0`.
+
+**Step 1**
+* Visit `0`
+* Queue: `[0]`
+
+**Step 2**
+* Remove `0`
+* Add its neighbors `1`, `2`
+* Queue: `[1, 2]`
+
+**Step 3**
+* Remove `1`
+* Add new neighbors `3`, `4`
+* Queue: `[2, 3, 4]`
+
+**Step 4**
+* Remove `2`
+* Add new neighbor `5`
+* Queue: `[3, 4, 5]`
+
+**Step 5**
+* Remove `3`
+* No new nodes
+* Queue: `[4, 5]`
+
+**Step 6**
+* Remove `4`
+* No new nodes
+* Queue: `[5]`
+
+**Step 7**
+* Remove `5`
+* No new nodes
+* Queue: `[]`
+
+**BFS order:**
+`0, 1, 2, 3, 4, 5`
+
+</details>
+
+<details>
+<summary>6. DFS Step-by-Step</summary>
+
+### DFS Step-by-Step
+
+Start from node `0`.
+
+**Step 1**
+* Visit `0`
+* Go to `1`
+
+**Step 2**
+* Visit `1`
+* Go to `3`
+
+**Step 3**
+* Visit `3`
+* No new unvisited nodes
+* Backtrack to `1`
+
+**Step 4**
+* From `1`, go to `4`
+
+**Step 5**
+* Visit `4`
+* No new unvisited nodes
+* Backtrack to `1`
+* Backtrack to `0`
+
+**Step 6**
+* From `0`, go to `2`
+
+**Step 7**
+* Visit `2`
+* Go to `5`
+
+**Step 8**
+* Visit `5`
+* No new unvisited nodes
+
+**DFS order:**
+`0, 1, 3, 4, 2, 5`
+
+</details>
+
+<details>
+<summary>7. Main Difference</summary>
+
+### Main Difference
+
+| BFS                    | DFS                       |
+| ---------------------- | ------------------------- |
+| Uses a queue           | Uses recursion or a stack |
+| Visits level by level  | Goes deep first           |
+| Good for shortest path | Good for exploring paths  |
+
+</details>
+
 
 ---
 
