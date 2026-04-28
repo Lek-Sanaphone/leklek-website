@@ -800,9 +800,109 @@ Scrum provides a structured approach to managing work, while XP enhances the tec
 
 ### Design Thinking: Staging and the Empathy Phase
 
-## 7.2 Tasks
+<details>
+<summary>1. Design Thinking Mindset</summary>
 
-* **Notes:** Class and Tutorials
+* Focuses on understanding the **“why”** behind problems rather than jumping to solutions 
+* Emphasises:
+  * User-centred thinking
+  * Empathy
+  * Iterative development
+* Objective: Address real user needs in complex problem contexts
+
+</details>
+
+<details>
+<summary>2. Design Thinking Process</summary>
+
+Guided by four key questions:
+
+* **What is?** – Understand the current situation
+* **What if?** – Explore possibilities
+* **What works?** – Test solutions
+* **What wow?** – Deliver impactful innovation 
+
+</details>
+
+<details>
+<summary>3. Key Tools and Techniques</summary>
+
+* **Empathy Maps** – Understand user perspectives
+* **Journey Mapping** – Visualise user experiences over time
+* **Mind Mapping** – Generate insights
+* **Brainstorming** – Develop ideas
+* **Concept Development** – Structure solutions
+* **Prototyping & Testing** – Validate ideas
+* **Customer Co-creation** – Involve users in design
+* **Learning Launch** – Test assumptions through experiments 
+
+</details>
+
+<details>
+<summary>4. Empathy (Core Phase)</summary>
+
+* Central to design thinking; focuses on understanding users as real individuals
+* Methods:
+  * Conduct interviews using open-ended questions
+  * Explore user experiences, emotions, and motivations
+  * Frequently ask “why” to uncover deeper insights 
+
+</details>
+
+<details>
+<summary>5. Empathy Map</summary>
+
+A tool to synthesise user understanding:
+
+* **Says, Thinks, Does, Feels**
+* Identifies:
+  * Pain points
+  * User needs
+  * Expected gains 
+
+</details>
+
+<details>
+<summary>6. Journey Mapping</summary>
+
+* Represents the user’s end-to-end experience as a timeline
+* Key elements:
+  * Actor (user)
+  * Scenario (goal/context)
+  * Phases (stages of interaction)
+  * Actions, thoughts, and emotions
+* Purpose: Identify issues and improvement opportunities 
+
+</details>
+
+<details>
+<summary>7. Insights and Iteration</summary>
+
+* Insights from empathy and mapping inform design improvements
+* Design is iterative:
+  * Begin with rough models
+  * Refine through feedback and testing
+* Assumptions should be documented and validated 
+
+</details>
+
+<details>
+<summary>8. Assessment Notes</summary>
+
+* Project Review due: 26 April (midnight)
+* Presentation (15%): Week 11 tutorial 
+
+</details>
+
+<details>
+<summary>Key Takeaways</summary>
+
+* Prioritise empathy and user understanding
+* Focus on problem definition before solution development
+* Use structured tools (e.g., empathy maps, journey maps)
+* Apply iterative and evidence-based design approaches
+
+</details>
 
 ---
 
@@ -810,12 +910,76 @@ Scrum provides a structured approach to managing work, while XP enhances the tec
 
 ## 8.1 Lecture
 
-### Design Thinking: Defining the Problem and Generating Ideas
+### Design Thinking: Define and Ideate Phases
 
-## 8.2 Tasks
+<details>
+<summary>1. Phase 2: Define (The POV)</summary>
 
-* **Notes:** Class and Tutorials
-* **Review:** Quiz 2
+The goal of the Define phase is to synthesise empathy insights into a meaningful problem statement.
+
+* **Insights from Empathy**: Look for unmet user needs and "pain points" as opportunities for innovation.
+* **Embracing Inconsistencies**: Users are complex; you may see positive actions paired with negative emotions, which can lead to deeper insights.
+* **The POV Statement**: A Point of View (POV) is an actionable problem statement structured as:
+  > **[User]** needs **[need (verb)]** because **[insight (compelling)]**.
+* **Example**: A desperate Nepali mother needs to keep her premature baby warm because she lacks the means to reach a hospital.
+
+</details>
+
+<details>
+<summary>2. Synthesis of POVs</summary>
+
+Synthesis is a collaborative process where the team identifies tensions and surprises. Use the following framework:
+
+* **WE MET...** – The inspired user.
+* **WE WERE SURPRISED TO NOTICE...** – Contradictions or surprises.
+* **WE WONDER IF THIS MEANS...** – Your inference.
+* **IT WOULD BE GAME CHANGING TO...** – An inspired challenge, not a solution.
+
+</details>
+
+<details>
+<summary>3. Phase 3: Ideate (POV to HMW)</summary>
+
+Ideation involves generating a broad range of possibilities to address your POV.
+
+* **How Might We (HMW)**: These questions open up the design space.
+  * **"How"**: Suggests we don't have the answer yet.
+  * **"Might"**: Emphasises that responses are possible solutions, not the only ones.
+  * **"We"**: Suggests a collective effort.
+
+#### HMW Guidelines
+
+* Break large POVs into **5–10 smaller, actionable HMW questions**.
+* HMWs should **not** suggest a specific solution but provide space for innovative thinking.
+
+</details>
+
+<details>
+<summary>4. Brainstorming & Mind Mapping</summary>
+
+Brainstorming is a semi-structured approach to rapid, radical idea generation.
+
+* **Mind Mapping**: A visual tool for generating ideas by association.
+  * **Process**: Start with a central theme and work outward with keywords, phrases, and branches.
+* **Rules for Success**:
+  * Set a time limit.
+  * Defer criticism (judgment comes later).
+  * Encourage wild ideas.
+* **Quantity over Quality**: Aim for a high volume of ideas to eventually whittle down to the best.
+
+</details>
+
+<details>
+<summary>5. Selecting Ideas</summary>
+
+Once a pool of ideas exists, vote using these three criteria:
+
+* Most likely to **succeed**.
+* Most likely to **delight**.
+* Most **breakthrough**.
+
+</details>
+
 
 ---
 
@@ -823,7 +987,94 @@ Scrum provides a structured approach to managing work, while XP enhances the tec
 
 ## 9.1 Lecture
 
-### Prototyping Strategies, Object-Oriented (OO) Analysis, and Agents
+### DT Prototyping & Testing: OO vs. Agents
+
+<details>
+<summary>1. Object-Oriented (OO) Design</summary>
+
+A **class** is a template (e.g., "Animal"); an **object** is a specific instance of one. Objects have two key features:
+
+1. **Attributes** — descriptive properties (e.g., size, colour) → stored as *variables*
+2. **Behaviors** — actions the object can perform (e.g., drive, bark) → defined as *methods*
+
+Objects of the same class share behavior but can differ in attribute values (e.g., all cars drive, but vary in size and colour).
+
+</details>
+
+<details>
+<summary>2. From Objects to Agents</summary>
+
+In organisational contexts, the key construct is a **role** (e.g., lecturer, student) rather than a class. Roles are reusable and intuitive like classes, but agents are more flexible — they can hold multiple roles simultaneously and switch roles over time.
+
+#### Agent properties beyond objects:
+
+| Property | What it means |
+|---|---|
+| **Autonomous** | Acts independently without being called |
+| **Situated** | Continuously senses its environment |
+| **Interactive** | Communicates with other agents |
+| **Collaborative** | Works together with other agents |
+| **Adaptive** | Learns and changes behaviour over time |
+
+Agentic AI tools (e.g., Anthropic, Gemini) provide infrastructure to build these agents, typically backed by LLMs.
+
+</details>
+
+<details>
+<summary>3. OO vs. Agents — Comparison</summary>
+
+| Concern | OO | Agents |
+|---|---|---|
+| **Correctness** | Shared language from design to code | Agents + LLMs span the full process |
+| **Extensibility** | High — objects are independent | Higher — agents can learn new behaviours |
+| **Reusability** | High — classes are reusable templates | High — roles are reusable across contexts |
+| **Robustness** | Good — objects outlast functions | Better — agents adapt to unforeseen problems |
+
+Key advantage of agents: they can run multiple LLMs simultaneously and learn on the fly.
+
+</details>
+
+<details>
+<summary>4. RUP — Rational Unified Process</summary>
+
+RUP is an iterative software development framework with requirements management, UML-based visual modelling, and built-in quality and change control.
+
+#### The 4 Phases:
+
+#### 1. Inception — *Define scope and get stakeholder buy-in*
+
+Initial requirements, cost-benefit analysis, candidate architecture, and a disposable prototype. Use Case Model is ~10–20% complete.
+
+#### 2. Elaboration — *Analyse requirements and design the system*
+
+Use Cases reach 80% completion. Interaction, class, activity, and state diagrams are produced. Includes an Architecture Document and revised Risk Assessment.
+
+#### 3. Construction — *Implement the design*
+
+Incremental coding with growing functionality and stability. Design and coding dominate; analysis continues in the background.
+
+#### 4. Transition — *Deliver to users*
+
+Installation, training, and support. Alpha → Beta → final releases. Dev team hands over to the maintenance team.
+
+#### UML Diagrams in RUP:
+
+| Type | Examples |
+|---|---|
+| **Static** | Class, Object, Component, Deployment Diagrams |
+| **Dynamic** | Sequence, Collaboration, Activity, Statechart Diagrams |
+| **Use-Case** | Use-Case Diagrams |
+
+Each iteration is a mini waterfall targeting risk reduction — performance, integration, and conceptual risks. Effort increases toward the later phases.
+
+</details>
+
+<details>
+<summary>5. Summary</summary>
+
+Both OO and Agentic approaches use a consistent language from requirements through to code, reducing errors and improving extensibility and reuse. Agents go further by being autonomous and adaptive. RUP provides the iterative process framework that governs how either approach is developed across four structured phases.
+
+</details>
 
 ## 9.2 Tasks
 

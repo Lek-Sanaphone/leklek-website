@@ -691,13 +691,104 @@ The lecture highlights **Amazon S3** for its versatility and tiering:
 
 </details>
 
+## 6.2 Lab
+
+<details>
+<summary>S3</summary>
+
+* Part 1: S3 Basics
+  * Created an S3 bucket (globally unique name)
+  * Uploaded a file
+  * Made it public
+  * Accessed via object URL in browser
+* Key idea:
+  * Files can be accessed directly without any server
+
+---
+* Part 2: S3 Management
+  * Enabled versioning
+  * Keeps old versions when overwriting files
+  * Created lifecycle rule
+  * Delete old versions after 30 days
+  * Built a static website
+  * Uploaded:
+    * index.html
+    * error.html
+  * Enabled S3 website hosting
+* Key idea:
+  * S3 can act like a web server
+
+</details>
+
+<details>
+<summary>EBS</summary>
+
+* Part 3: EBS (Block Storage)
+  * Created:
+    * Security group + key pair
+    * 2 EC2 instances (different AZs)
+    * Created 100GB EBS volume
+    * Attached to EC2
+  * Ran Linux commands:
+    * Format disk (mkfs)
+    * Mount disk
+  * Downloaded file from S3 using wget
+* Key idea:
+  * You manually manage storage like a real disk
+
+---
+* Part 4: Snapshots & Recovery
+  * Detached EBS volume
+  * Created a snapshot
+  * Restored it in a different AZ
+  * Attached to another EC2
+  * Verified data is still there
+* Key idea:
+  * Snapshots enable disaster recovery across AZs
+
+</details>
+
 ---
 
 # 7. Force.com PaaS: Data Objects
 
 ## 7.1 Lecture
 
-### Cloud Data Objects, Validations, and Interface
+### Force.com PaaS — Lecture Summary
+
+This lecture introduces **Force.com** as a Platform as a Service (PaaS) by Salesforce, contrasting it with the previous week's AWS Elastic Beanstalk. The key shift is from code-centric to **declarative development** — building entire apps without writing code.
+
+<details>
+<summary><strong>What is Force.com?</strong></summary>
+
+Force.com is a cloud development environment where you build apps using point-and-click tools. It's important not to confuse it with Salesforce.com, which is a SaaS product for consuming CRM. Force.com is where you *build*; Salesforce.com is what you *use*.
+
+</details>
+
+<details>
+<summary><strong>The Six Core Topics</strong></summary>
+
+**1. Applications** are just skeleton containers (like folders) that hold objects, tabs, and fields. They have no functionality on their own until you populate them.
+
+**2. Objects and Tabs (MVC)** — Force.com follows the MVC pattern. Custom Objects are the *Model* (database tables stored in the cloud, with API names ending in `__c`). Tabs are the *View* (the UI for an object). The platform itself acts as the *Controller* by default.
+
+**3. Custom Fields** — You define the data structure of objects by adding fields. Force.com offers many field types grouped into families: Text, Number, Selection (Picklist), Date/Time, and Relationships. All custom fields end in `__c` to distinguish them from standard fields.
+
+**4. Relationships** — There are exactly two relationship types. A **Lookup** relationship is optional and flexible (deleting the parent leaves the child intact). A **Master-Detail** relationship is tighter — the child cannot exist without the parent, and deleting the master cascades to delete all detail records. The Schema Builder gives you a visual map of your data model.
+
+**5. Validation Rules** — These are formula-based rules that block a record from saving when the formula evaluates to `TRUE`. The key example: `Date_of_Birth__c > TODAY()` prevents future dates of birth from being entered. A critical gotcha: the rule does **nothing** unless the *Active* checkbox is checked.
+
+**6. Page Layouts** — These control what users see on a record form, not what the database stores. You can create named sections, arrange fields in one or two columns, and hide fields without deleting their data. Different user profiles can have different layouts for the same object.
+
+</details>
+
+<details>
+<summary><strong>The Case Study</strong></summary>
+
+Throughout the lecture, an **HRM application** is built with three objects: **Position** (linked via Lookup to Job Application), **Job Application** (with a DOB validation rule), and **Interview Review Score** (linked via Master-Detail to Job Application, with cascade delete enabled).
+
+</details>
+
 
 ---
 
@@ -715,6 +806,141 @@ The lecture highlights **Amazon S3** for its versatility and tiering:
 
 ### Security of Force.com Objects
 
+<details>
+<summary><strong>1. Core Idea: Shared Responsibility</strong></summary>
+
+Security is split between the **cloud provider** (physical infrastructure, network, data centre) and **you** (application security, object/field access, record-level policies). Both keys are needed to secure the application.
+
+</details>
+
+<details>
+<summary><strong>2. The Three Security Layers (Gates)</strong></summary>
+
+Every user request passes through three sequential gates. A closed gate blocks everything behind it — you cannot skip or bypass one.
+
+| Gate | Name | Controls |
+|---|---|---|
+| 1 | **OLS** — Object-Level Security | Can the user access this object at all? (CRUD) |
+| 2 | **FLS** — Field-Level Security | Which fields can the user see or edit? |
+| 3 | **RLS** — Record-Level Security | Which specific records can the user access? |
+
+> Key rule: OLS access does NOT guarantee field access. Field access does NOT guarantee record access. Each layer is independent.
+
+</details>
+
+<details>
+<summary><strong>3. Part 1: Profiles</strong></summary>
+
+A **profile** is a collection of settings assigned to a user. Every user has exactly one profile; multiple users can share the same profile.
+
+A profile controls: app visibility, tab settings (Hidden / Default Off / Default On), CRUD permissions per object, field-level security, login hours, and IP restrictions.
+
+</details>
+
+<details>
+<summary><strong>4. Part 2: OLS and FLS</strong></summary>
+
+**OLS (Object-Level Security)** — CRUD permissions per object, set within the profile.
+* Create / Read / Update / Delete — each granted independently
+* Note: enabling Edit auto-grants Read; enabling Delete auto-grants Read and Edit
+
+**FLS (Field-Level Security)** — per-field visibility within an object, three states:
+* **Editable** — user can see and change the field
+* **Read-only** — user can see but not change it
+* **Hidden** — field is completely invisible
+
+</details>
+
+<details>
+<summary><strong>5. Case Study: HRM App (Company X)</strong></summary>
+
+One Employee object, four different views based on security settings:
+
+| User | Records Visible | Field Access |
+|---|---|---|
+| Employee | Own record only | All fields; Salary/Performance read-only |
+| Head of Area | Department only | Standard fields editable; TFN, DOB, Salary, Illness hidden |
+| HR Manager | All supervised staff | Full CRUD, all fields |
+| CEO | Company-wide | Full CRUD, all fields |
+
+> Important: this is an **access** hierarchy, not an organisational reporting hierarchy.
+
+</details>
+
+<details>
+<summary><strong>6. Part 3: Record-Level Security (RLS)</strong></summary>
+
+OLS alone cannot restrict *which* records a user sees — it only grants access to the object as a whole. RLS fills this gap.
+
+#### Step 1 — OWD (Organisation-Wide Default)
+
+Sets the baseline record access posture for the entire org. **Always start with Private** and open up selectively.
+
+| Setting | Effect |
+|---|---|
+| **Private** | Users see only records they own (recommended starting point) |
+| **Public Read Only** | Everyone can view all records; only owner can edit |
+| **Public Read/Write** | Everyone can view and edit — use with caution |
+
+#### Step 2 — Role Hierarchies
+
+Grants access **upward** in the hierarchy. A user inherits visibility of all records owned by users below them. Two steps required: (1) define the hierarchy, (2) enable "Grant Access Using Hierarchies" per object — doing only one has no effect.
+
+#### Step 3 — Sharing Rules
+
+Automated rules that grant access beyond what OWD and role hierarchies cover. Two types:
+* **Owner-based** — share records owned by a specific group
+* **Criteria-based** — share records that match a field condition (e.g. Department = Computer Science)
+
+Create a **Public Group** first, then write a sharing rule targeting that group.
+
+#### Step 4 — Manual Sharing
+
+The record owner grants one-off access to a specific user or group, directly from the record page (not Setup). Temporary and revocable at any time.
+
+> Analogy: OWD = building policy. Role Hierarchy = elevator access. Sharing Rules = permanent key card to a wing. Manual Sharing = a visitor pass to one room.
+
+</details>
+
+<details>
+<summary><strong>7. Profiles vs Role Hierarchies</strong></summary>
+
+| | Profiles | Role Hierarchies |
+|---|---|---|
+| Controls | What you can **do** | What you can **see** |
+| Covers | CRUD, FLS, tabs, login hours | Record visibility (upward only) |
+| Depends on | Nothing | OWD must be set first |
+
+Both are required — they work together, not as substitutes.
+
+</details>
+
+<details>
+<summary><strong>8. The Design Pattern</strong></summary>
+
+Start **restrictive**, open **selectively**:
+
+```
+OWD = Private  →  Role Hierarchy  →  Sharing Rules  →  Manual Sharing
+(lock it down)     (open upward)      (open by group)    (open one record)
+```
+
+Never start permissive and try to lock down. You can always open access later; restricting it retroactively is unreliable.
+
+</details>
+
+<details>
+<summary><strong>9. Summary — 6 Key Takeaways</strong></summary>
+
+1. Security is a shared responsibility between provider and tenant admin.
+2. Each user has exactly one profile; profiles govern OLS, FLS, tabs, and app access.
+3. OLS, FLS, and RLS are independent gates — passing one does not guarantee the next.
+4. Always start with Private OWD; never start permissive.
+5. Role hierarchies must be both defined and enabled per object to take effect.
+6. Sharing rules handle systematic group access; manual sharing handles one-off exceptions.
+
+</details>
+
 ---
 
 # 10. Force.com PaaS: Automation
@@ -722,6 +948,111 @@ The lecture highlights **Amazon S3** for its versatility and tiering:
 ## 10.1 Lecture
 
 ### Automating Workflows
+
+<details>
+<summary><strong>1. Context</strong></summary>
+
+Week 7 built the data model. Week 8 locked it down with security. Week 9 makes it work automatically — no code required. Workflows add intelligence on top of the structure and security already in place.
+
+</details>
+
+<details>
+<summary><strong>2. Case Study: University A Admissions</strong></summary>
+
+Three roles drive the scenario: the **Student** (submits application, never logs into Force.com), the **USSO** (receives and forwards applications), and the **FSSO** (assesses and decides). The system must automate five tasks across the admissions journey using just two workflow rules.
+
+</details>
+
+<details>
+<summary><strong>3. Part 1: Workflow Rules</strong></summary>
+
+A **workflow rule** monitors a record for a specific condition and fires one or more automated actions when that condition is met. Every rule has three components:
+
+| Component | What it does |
+|---|---|
+| **Object** | The object being monitored (one per rule) |
+| **Evaluation Criteria** | When the rule checks the record |
+| **Rule Criteria** | The condition that must be true for the rule to fire |
+
+#### Evaluation Criteria — three options:
+
+1. **Created** — fires once when the record is first created. Never re-evaluates.
+2. **Created, and Every Time Edited** — fires on every save. Cannot use time-based actions.
+3. **Created, and Edited to Subsequently Meet Criteria** — fires only when an edit causes the record to newly satisfy the condition. Supports time-based actions. Most commonly used.
+
+> When in doubt, Option 3 is the safest choice.
+
+</details>
+
+<details>
+<summary><strong>4. Part 2: Workflow Actions — Three Types</strong></summary>
+
+One rule can trigger all three action types simultaneously.
+
+**Task Assignment** — creates and assigns a task to a user or role. Used when a human needs to do something. Configure: Assigned To, Subject, Due Date (calculated from trigger), Status, Priority, Comments.
+
+**Field Update** — automatically changes a field value on the record with no human intervention. Important: leave "Re-evaluate Workflow Rules" unchecked to avoid infinite loops.
+
+**Email Alert** — sends an email using a pre-built template to a specified recipient. The template holds the content; the alert handles the delivery. They are separate objects linked together.
+
+> A new workflow rule defaults to **Inactive**. Nothing happens until you click Activate — this is the most common reason automation appears not to work.
+
+</details>
+
+<details>
+<summary><strong>5. Part 3: Time-Based Workflows</strong></summary>
+
+When an action needs to happen days or hours after the rule fires (not instantly), you add a **time trigger** to the same rule. No separate rule is needed.
+
+**How it works:**
+1. Rule fires → time trigger enters the **Workflow Queue**
+2. Platform monitors the queue and counts down
+3. On the scheduled day, the platform **re-evaluates the criteria** — if the record still qualifies, the action executes; if not (e.g. student withdrew), the action is cancelled
+
+This re-evaluation is the safety mechanism that prevents outdated actions from firing.
+
+A single rule can carry multiple time triggers (e.g. Day 30, Day 60, Day 90), each with its own action.
+
+</details>
+
+<details>
+<summary><strong>6. Part 4: Email Templates</strong></summary>
+
+Templates hold the email content and are linked to an Email Alert action. Three concepts to know:
+
+**Template Types** — Text and HTML with Letterhead are most common for workflow alerts. Text is simplest.
+
+**Merge Fields** — dynamic placeholders that pull live record data at send time. Syntax: `{!Object__c.Field__c}`. Example: `{!Application__c.First_Name__c}` resolves to the student's actual name.
+
+**Available for Use** — a checkbox on the template that must be ticked. If unchecked, the template is invisible in the email alert dropdown. This is the most common reason a template appears to be missing.
+
+</details>
+
+<details>
+<summary><strong>7. Case Study Summary — Full Workflow System</strong></summary>
+
+Two rules, four actions, two templates, zero lines of code:
+
+**Rule 1 — New Application Received** (fires on Create, criteria: Status = New Application)
+* Task: Assign FSSO to assess within 5 days
+* Field Update: Change status to "Being Processed with the FSSO"
+* Email Alert: Send acknowledgement to student (immediate)
+
+**Rule 2 — Student Accepted** (fires on Edit to Meet Criteria, criteria: Status = Accepted)
+* Time-Based Email Alert: Send registration reminder 30 days after acceptance (only fires if status is still Accepted at Day 30)
+
+</details>
+
+<details>
+<summary><strong>8. Key Rules to Remember</strong></summary>
+
+* One workflow rule = one object. You cannot span multiple objects in a single rule.
+* Immediate actions fire in under one second. Time-based actions enter a queue and execute on schedule.
+* Always plan your rules and actions on paper before touching the console.
+* Always activate the rule — inactive rules do nothing.
+* Always tick "Available for Use" on email templates or they will not appear in alerts.
+
+</details>
 
 ---
 
