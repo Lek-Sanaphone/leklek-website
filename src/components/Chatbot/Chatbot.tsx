@@ -23,10 +23,12 @@ const KATEX_OPTIONS = {
 // Render an assistant message as Markdown (bold, italics, lists, code,
 // headings, tables, links, LaTeX math). Links always open in a new tab.
 function MarkdownMessage({ content }: { content: string }) {
+  // remarkMath MUST run before remarkGfm. GFM table parsing treats `|`
+  // as column markers and can corrupt augmented matrices if it runs first.
   return (
     <div className="msg__markdown">
       <ReactMarkdown
-        remarkPlugins={[remarkGfm, remarkMath]}
+        remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[[rehypeKatex, KATEX_OPTIONS]]}
         components={{
           a: ({ node, ...props }) => (
