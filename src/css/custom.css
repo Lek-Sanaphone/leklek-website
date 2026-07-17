@@ -58,35 +58,156 @@
 /* --- Docs Assistant (solid theme, no blur) --- */
 .docs-assistant {
   position: fixed;
-  right: 16px;
-  bottom: 16px;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(20px, env(safe-area-inset-bottom));
   z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
 }
 
+/* Floating action: large labeled pill so visitors actually notice it */
 .docs-assistant__toggle {
-  width: 60px;
-  height: 50px;
-  border-radius: 50%;
-  border: 2px solid #fff; /* white border like in your screenshot */
-  background: #555; /* medium gray */
+  position: relative;
+  min-width: 64px;
+  min-height: 64px;
+  padding: 0 20px 0 16px;
+  border-radius: 999px;
+  border: none;
+  background: var(--ifm-color-primary);
   color: #fff;
-  font-size: 20px; /* make emoji a bit smaller */
-  display: flex;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 10px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  transition: background 0.3s ease, transform 0.2s ease;
+  box-shadow:
+    0 8px 24px rgba(37, 99, 235, 0.35),
+    0 2px 8px rgba(0, 0, 0, 0.18);
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    padding 0.2s ease;
+  animation: docs-assistant-fab-enter 0.55s ease-out both,
+    docs-assistant-fab-attention 2.8s ease-in-out 1.2s infinite;
+}
+
+.docs-assistant__toggle-icon {
+  font-size: 28px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15em;
+  height: 1.15em;
+}
+
+.docs-assistant__toggle-label {
+  white-space: nowrap;
+  padding-right: 2px;
+}
+
+/* Soft expanding ring behind the button */
+.docs-assistant__toggle::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  border: 2px solid var(--ifm-color-primary-light);
+  opacity: 0;
+  pointer-events: none;
+  animation: docs-assistant-fab-ring 2.8s ease-out 1.2s infinite;
+}
+
+.docs-assistant__toggle--open {
+  min-width: 64px;
+  padding: 0;
+  width: 64px;
+  height: 64px;
+  animation: none; /* stop attention pulse while chat is open */
+  background: var(--ifm-color-primary-dark);
+}
+
+.docs-assistant__toggle--open::before {
+  animation: none;
+  opacity: 0;
+}
+
+.docs-assistant__toggle--open .docs-assistant__toggle-icon {
+  font-size: 22px;
+  font-weight: 700;
 }
 
 .docs-assistant__toggle:hover {
-  background: #666; /* slightly lighter gray when hovered */
-  transform: scale(1.05);
+  background: var(--ifm-color-primary-dark);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow:
+    0 12px 28px rgba(37, 99, 235, 0.42),
+    0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .docs-assistant__toggle:active {
-  background: #444; /* darker when clicked */
-  transform: scale(0.95);
+  transform: translateY(0) scale(0.97);
+}
+
+.docs-assistant__toggle:focus-visible {
+  outline: 3px solid var(--ifm-color-primary-lightest);
+  outline-offset: 3px;
+}
+
+@keyframes docs-assistant-fab-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes docs-assistant-fab-attention {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-5px);
+  }
+  55% {
+    transform: translateY(0);
+  }
+  70% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes docs-assistant-fab-ring {
+  0% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+  70% {
+    opacity: 0;
+    transform: scale(1.18);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.18);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .docs-assistant__toggle,
+  .docs-assistant__toggle::before {
+    animation: none;
+  }
 }
 
 /* window: responsive, never larger than the viewport */

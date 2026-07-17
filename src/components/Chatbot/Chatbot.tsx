@@ -467,11 +467,19 @@ export default function Chatbot() {
       )}
 
       <button
-        className="docs-assistant__toggle"
+        className={`docs-assistant__toggle${
+          open ? " docs-assistant__toggle--open" : ""
+        }`}
         onClick={() => setOpen((v) => !v)}
-        aria-label="Toggle docs assistant"
+        aria-label={open ? "Close docs assistant" : "Open docs assistant"}
+        aria-expanded={open}
       >
-        💬
+        <span className="docs-assistant__toggle-icon" aria-hidden="true">
+          {open ? "✕" : "💬"}
+        </span>
+        {!open && (
+          <span className="docs-assistant__toggle-label">Ask docs</span>
+        )}
       </button>
     </div>
   );
