@@ -330,6 +330,26 @@
   30% { opacity: 1; transform: translateY(-3px); }
 }
 
+/* Streaming answer: plain text + blinking caret until the full
+   reply arrives (then we swap to Markdown/KaTeX). */
+.docs-assistant__body .msg__streaming {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+.docs-assistant__body .msg__cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--ifm-font-color-base);
+  animation: docs-assistant-cursor 0.9s step-end infinite;
+}
+@keyframes docs-assistant-cursor {
+  50% { opacity: 0; }
+}
+
 /* input row (sticky) */
 .docs-assistant__inputRow {
   position: sticky;

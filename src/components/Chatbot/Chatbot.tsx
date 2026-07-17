@@ -8,9 +8,13 @@ import { normalizeMath } from "./normalizeMath.mjs";
 
 const WORKER_CHAT_URL = "https://docusaurus-rag.lekjkboy2005.workers.dev/chat";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = {
+  role: "user" | "assistant";
+  content: string;
+  /** True while tokens are still arriving — render as plain text. */
+  streaming?: boolean;
+};
 type Source = { url: string; title?: string };
-type ChatResp = { answer?: string; sources?: Source[]; error?: string };
 
 // Contain KaTeX failures: a bad formula renders as red raw TeX instead of
 // throwing and breaking the rest of the message.
@@ -19,6 +23,21 @@ const KATEX_OPTIONS = {
   strict: false,
   errorColor: "#cc0000",
 };
+
+function formatSources(sources: Source[]): string {
+  const links = Array.from(
+    new Set(
+      sources
+        .map((s) => {
+          if (s?.title && s?.url) return `[${s.title}](${s.url})`;
+          return s?.url;
+        })
+        .filter(Boolean) as string[]
+    )
+  );
+  if (links.length === 0) return "";
+  return "\n\n**Sources:**\n" + links.map((s) => `- ${s}`).join("\n");
+}
 
 // Render an assistant message as Markdown (bold, italics, lists, code,
 // headings, tables, links, LaTeX math). Links always open in a new tab.
@@ -40,6 +59,73 @@ function MarkdownMessage({ content }: { content: string }) {
       </ReactMarkdown>
     </div>
   );
+}
+
+/**
+ * Read an SSE body from /chat and invoke callbacks for meta / token / done.
+ * Protocol: data: {"type":"meta"|"token"|"done"|"error", ...}
+ */
+async function readChatStream(
+  body: ReadableStream<Uint8Array>,
+  handlers: {
+    onMeta: (sources: Source[]) => void;
+    onToken: (text: string) => void;
+    onDone: () => void;
+    onError: (message: string) => void;
+  },
+  signal?: AbortSignal
+) {
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  const abort = () => {
+    try {
+      reader.cancel();
+    } catch {}
+  };
+  signal?.addEventListener("abort", abort, { once: true });
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith("data:")) continue;
+        const payload = trimmed.slice(5).trim();
+        if (!payload || payload === "[DONE]") continue;
+
+        let event: {
+          type?: string;
+          text?: string;
+          sources?: Source[];
+          error?: string;
+        };
+        try {
+          event = JSON.parse(payload);
+        } catch {
+          continue;
+        }
+
+        if (event.type === "meta") {
+          handlers.onMeta(Array.isArray(event.sources) ? event.sources : []);
+        } else if (event.type === "token" && typeof event.text === "string") {
+          handlers.onToken(event.text);
+        } else if (event.type === "done") {
+          handlers.onDone();
+        } else if (event.type === "error") {
+          handlers.onError(event.error || "Stream failed.");
+        }
+      }
+    }
+  } finally {
+    signal?.removeEventListener("abort", abort);
+  }
 }
 
 export default function Chatbot() {
@@ -89,65 +175,116 @@ export default function Chatbot() {
     if (!input.trim() || busy) return;
 
     const question = input.trim();
-    setMsgs((m) => [...m, { role: "user", content: question }]);
+    setMsgs((m) => [
+      ...m,
+      { role: "user", content: question },
+      // Placeholder assistant bubble — tokens append here as they arrive.
+      { role: "assistant", content: "", streaming: true },
+    ]);
     setInput("");
     setBusy(true);
 
     const ctrl = new AbortController();
     abortRef.current = ctrl;
 
+    let answer = "";
+    let sources: Source[] = [];
+
+    const patchLast = (patch: Partial<Msg>) => {
+      setMsgs((m) => {
+        const copy = [...m];
+        const last = copy[copy.length - 1];
+        if (last?.role === "assistant") {
+          copy[copy.length - 1] = { ...last, ...patch };
+        }
+        return copy;
+      });
+    };
+
     try {
       const r = await fetch(WORKER_CHAT_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "text/event-stream",
+        },
         body: JSON.stringify({ question }),
         signal: ctrl.signal,
       });
 
-      const data = (await r.json().catch(() => ({}))) as ChatResp;
-
-      if (!r.ok || data.error) {
-        throw new Error(data.error || `Request failed (${r.status})`);
+      if (!r.ok) {
+        const errBody = (await r.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        throw new Error(errBody.error || `Request failed (${r.status})`);
       }
 
-      // Raw model output, pre-normalizeMath — kept for diagnosing math
-      // rendering issues.
-      console.debug("[docs-assistant] raw answer:", data.answer);
+      if (!r.body) throw new Error("Empty response body");
 
-      // Normalize & dedupe sources into Markdown links so they render
-      // as a clean, clickable list.
-      const sources: string[] = Array.isArray(data.sources)
-        ? Array.from(
-            new Set(
-              data.sources
-                .map((s) => {
-                  if (typeof s === "string") return s;
-                  if (s?.title && s?.url) return `[${s.title}](${s.url})`;
-                  return s?.url;
-                })
-                .filter(Boolean) as string[]
-            )
-          )
-        : [];
+      const contentType = r.headers.get("content-type") || "";
 
-      const srcBlock =
-        sources.length > 0
-          ? "\n\n**Sources:**\n" + sources.map((s) => `- ${s}`).join("\n")
-          : "";
+      // Streaming path (SSE)
+      if (contentType.includes("text/event-stream")) {
+        await readChatStream(
+          r.body,
+          {
+            onMeta: (s) => {
+              sources = s;
+            },
+            onToken: (text) => {
+              answer += text;
+              patchLast({ content: answer, streaming: true });
+            },
+            onDone: () => {
+              const srcBlock = formatSources(sources);
+              patchLast({
+                content: (answer || "…") + srcBlock,
+                streaming: false,
+              });
+            },
+            onError: (message) => {
+              patchLast({
+                content: message || "Sorry, I couldn’t reach the assistant.",
+                streaming: false,
+              });
+            },
+          },
+          ctrl.signal
+        );
 
-      setMsgs((m) => [
-        ...m,
-        { role: "assistant", content: (data.answer || "…") + srcBlock },
-      ]);
+        // If the stream closed without a done event, finalize anyway.
+        setMsgs((m) => {
+          const last = m[m.length - 1];
+          if (last?.role === "assistant" && last.streaming) {
+            const copy = [...m];
+            copy[copy.length - 1] = {
+              ...last,
+              content: (answer || last.content || "…") + formatSources(sources),
+              streaming: false,
+            };
+            return copy;
+          }
+          return m;
+        });
+      } else {
+        // Legacy JSON fallback (older worker deploy)
+        const data = (await r.json().catch(() => ({}))) as {
+          answer?: string;
+          sources?: Source[];
+          error?: string;
+        };
+        if (data.error) throw new Error(data.error);
+        patchLast({
+          content: (data.answer || "…") + formatSources(data.sources || []),
+          streaming: false,
+        });
+      }
     } catch (err) {
       if ((err as Error)?.name === "AbortError") return;
-      setMsgs((m) => [
-        ...m,
-        {
-          role: "assistant",
-          content: "Sorry, I couldn’t reach the assistant.",
-        },
-      ]);
+      patchLast({
+        content: "Sorry, I couldn’t reach the assistant.",
+        streaming: false,
+      });
     } finally {
       setBusy(false);
     }
@@ -161,6 +298,11 @@ export default function Chatbot() {
       send();
     }
   }
+
+  const lastStreaming =
+    msgs.length > 0 &&
+    msgs[msgs.length - 1].role === "assistant" &&
+    msgs[msgs.length - 1].streaming;
 
   return (
     <div className="docs-assistant">
@@ -187,7 +329,22 @@ export default function Chatbot() {
               <div key={i} className={`msg msg--${m.role}`}>
                 <div className="msg__bubble">
                   {m.role === "assistant" ? (
-                    <MarkdownMessage content={m.content} />
+                    m.streaming ? (
+                      <div className="msg__streaming">
+                        {m.content || (
+                          <span className="msg__bubble--typing">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                          </span>
+                        )}
+                        {m.content ? (
+                          <span className="msg__cursor" aria-hidden="true" />
+                        ) : null}
+                      </div>
+                    ) : (
+                      <MarkdownMessage content={m.content} />
+                    )
                   ) : (
                     m.content
                   )}
@@ -195,7 +352,7 @@ export default function Chatbot() {
               </div>
             ))}
 
-            {busy && (
+            {busy && !lastStreaming && (
               <div className="msg msg--assistant">
                 <div className="msg__bubble msg__bubble--typing">
                   <span></span>
