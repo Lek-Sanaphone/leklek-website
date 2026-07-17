@@ -415,7 +415,7 @@ The Worker Tier is used for **decoupling** resource-intensive background tasks f
   <summary>Deploy Custom Application on AWS Elastic Beanstalk</summary>
 
 1. Create a New Environment
-2. Repear the same steps as [Create AWS Elastic Beanstalk](#create-aws-elastic-beanstalk) until Application code, instead of Sample application, select "Upload your code"
+2. Repear the same steps as [Create AWS Elastic Beanstalk](#42-lab) until Application code, instead of Sample application, select "Upload your code"
 3. Version Label: v1.0.0 and Upload your code (upload zip file that download from canvas)
 4. Then Deploy
 
