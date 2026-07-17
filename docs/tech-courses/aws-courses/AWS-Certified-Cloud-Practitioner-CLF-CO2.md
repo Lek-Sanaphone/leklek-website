@@ -609,7 +609,7 @@ Act as virtual firewalls for EC2 instances, controlling **inbound and outbound**
 
 ### Amazon S3 Security
 - S3 security is managed using two types of access control:
-    - User-Based: [IAM Policies](#iam-policies)
+    - User-Based: [IAM Policies](#iam-policies--hands-on)
     - Resourced-Based:
         - Bucket Policies: Policies that get attached to S3 Buckets
         - Object Access Control List (ACL)

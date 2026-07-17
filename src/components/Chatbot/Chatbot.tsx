@@ -1,9 +1,31 @@
 import React from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const WORKER_CHAT_URL = "https://docusaurus-rag.lekjkboy2005.workers.dev/chat";
 
 type Msg = { role: "user" | "assistant"; content: string };
-type ChatResp = { answer?: string; sources?: unknown };
+type Source = { url: string; title?: string };
+type ChatResp = { answer?: string; sources?: Source[]; error?: string };
+
+// Render an assistant message as Markdown (bold, italics, lists, code,
+// headings, tables, links). Links always open in a new tab.
+function MarkdownMessage({ content }: { content: string }) {
+  return (
+    <div className="msg__markdown">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          a: ({ node, ...props }) => (
+            <a {...props} target="_blank" rel="noreferrer" />
+          ),
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
+  );
+}
 
 export default function Chatbot() {
   const [open, setOpen] = React.useState(false);
@@ -12,6 +34,16 @@ export default function Chatbot() {
   ]);
   const [input, setInput] = React.useState("");
   const [busy, setBusy] = React.useState(false);
+  const bodyRef = React.useRef<HTMLDivElement>(null);
+  const abortRef = React.useRef<AbortController | null>(null);
+
+  // Auto-scroll to the newest message.
+  React.useEffect(() => {
+    bodyRef.current?.scrollTo({ top: bodyRef.current.scrollHeight });
+  }, [msgs, open, busy]);
+
+  // Cancel any in-flight request on unmount.
+  React.useEffect(() => () => abortRef.current?.abort(), []);
 
   async function send() {
     if (!input.trim() || busy) return;
@@ -21,30 +53,50 @@ export default function Chatbot() {
     setInput("");
     setBusy(true);
 
+    const ctrl = new AbortController();
+    abortRef.current = ctrl;
+
     try {
       const r = await fetch(WORKER_CHAT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question }),
+        signal: ctrl.signal,
       });
 
-      const data = (await r.json()) as ChatResp;
+      const data = (await r.json().catch(() => ({}))) as ChatResp;
 
-      // normalize & dedupe sources to string[]
+      if (!r.ok || data.error) {
+        throw new Error(data.error || `Request failed (${r.status})`);
+      }
+
+      // Normalize & dedupe sources into Markdown links so they render
+      // as a clean, clickable list.
       const sources: string[] = Array.isArray(data.sources)
-        ? Array.from(new Set((data.sources as unknown[]).map(String)))
+        ? Array.from(
+            new Set(
+              data.sources
+                .map((s) => {
+                  if (typeof s === "string") return s;
+                  if (s?.title && s?.url) return `[${s.title}](${s.url})`;
+                  return s?.url;
+                })
+                .filter(Boolean) as string[]
+            )
+          )
         : [];
 
       const srcBlock =
         sources.length > 0
-          ? "\n\nSources:\n" + sources.map((s) => `• ${s}`).join("\n")
+          ? "\n\n**Sources:**\n" + sources.map((s) => `- ${s}`).join("\n")
           : "";
 
       setMsgs((m) => [
         ...m,
         { role: "assistant", content: (data.answer || "…") + srcBlock },
       ]);
-    } catch {
+    } catch (err) {
+      if ((err as Error)?.name === "AbortError") return;
       setMsgs((m) => [
         ...m,
         {
@@ -57,47 +109,58 @@ export default function Chatbot() {
     }
   }
 
+  // Enter sends, Shift+Enter inserts a newline.
+  function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
+  }
+
   return (
     <div className="docs-assistant">
       {open && (
         <div className="docs-assistant__window">
           <div className="docs-assistant__header">Docs Assistant</div>
 
-          <div className="docs-assistant__body">
+          <div className="docs-assistant__body" ref={bodyRef} aria-live="polite">
             {msgs.map((m, i) => (
-              <div key={i} className="msg">
-                <span className="role">{m.role === "user" ? "You" : "AI"}:</span>{" "}
-                {m.content.split("\n").map((line, j) => (
-                  <div key={j}>
-                    {line.split(" ").map((word, k) => {
-                      const isUrl = /^https?:\/\/\S+$/i.test(word);
-                      return isUrl ? (
-                        <a key={k} href={word} target="_blank" rel="noreferrer">
-                          {word}
-                        </a>
-                      ) : (
-                        <span key={k}>{(k ? " " : "") + word}</span>
-                      );
-                    })}
-                  </div>
-                ))}
+              <div key={i} className={`msg msg--${m.role}`}>
+                <div className="msg__bubble">
+                  {m.role === "assistant" ? (
+                    <MarkdownMessage content={m.content} />
+                  ) : (
+                    m.content
+                  )}
+                </div>
               </div>
             ))}
+
+            {busy && (
+              <div className="msg msg--assistant">
+                <div className="msg__bubble msg__bubble--typing">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="docs-assistant__inputRow">
-            <input
+            <textarea
               className="docs-assistant__input"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && send()}
+              onKeyDown={onKeyDown}
               placeholder={busy ? "Thinking…" : "Type a question…"}
+              rows={1}
               disabled={busy}
             />
             <button
               className="docs-assistant__send"
               onClick={send}
-              disabled={busy}
+              disabled={busy || !input.trim()}
             >
               Send
             </button>
