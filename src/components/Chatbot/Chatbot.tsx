@@ -8,16 +8,24 @@ import { normalizeMath } from "./normalizeMath.mjs";
 
 const WORKER_CHAT_URL = "https://docusaurus-rag.lekjkboy2005.workers.dev/chat";
 
+/** Example questions shown when the bot cannot answer from the notes. */
+const DEFAULT_SUGGESTIONS = [
+  "Show me The Trapezoidal Rule formula",
+  "How to create a table in SQL",
+  "Show me Elementary Row Operations",
+  "What is Gauss-Jordan Elimination?",
+];
+
 type Msg = {
   role: "user" | "assistant";
   content: string;
   /** True while tokens are still arriving — render as plain text. */
   streaming?: boolean;
+  /** Clickable example questions under the bubble. */
+  suggestions?: string[];
 };
 type Source = { url: string; title?: string };
 
-// Contain KaTeX failures: a bad formula renders as red raw TeX instead of
-// throwing and breaking the rest of the message.
 const KATEX_OPTIONS = {
   throwOnError: false,
   strict: false,
@@ -39,11 +47,11 @@ function formatSources(sources: Source[]): string {
   return "\n\n**Sources:**\n" + links.map((s) => `- ${s}`).join("\n");
 }
 
-// Render an assistant message as Markdown (bold, italics, lists, code,
-// headings, tables, links, LaTeX math). Links always open in a new tab.
+function looksLikeDontKnow(text: string): boolean {
+  return /i don'?t know based on the available notes/i.test(text.trim());
+}
+
 function MarkdownMessage({ content }: { content: string }) {
-  // remarkMath MUST run before remarkGfm. GFM table parsing treats `|`
-  // as column markers and can corrupt augmented matrices if it runs first.
   return (
     <div className="msg__markdown">
       <ReactMarkdown
@@ -61,14 +69,37 @@ function MarkdownMessage({ content }: { content: string }) {
   );
 }
 
-/**
- * Read an SSE body from /chat and invoke callbacks for meta / token / done.
- * Protocol: data: {"type":"meta"|"token"|"done"|"error", ...}
- */
+function SuggestionChips({
+  suggestions,
+  disabled,
+  onPick,
+}: {
+  suggestions: string[];
+  disabled?: boolean;
+  onPick: (q: string) => void;
+}) {
+  if (!suggestions.length) return null;
+  return (
+    <div className="msg__suggestions" role="group" aria-label="Suggested questions">
+      {suggestions.map((q) => (
+        <button
+          key={q}
+          type="button"
+          className="msg__suggestion"
+          disabled={disabled}
+          onClick={() => onPick(q)}
+        >
+          {q}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 async function readChatStream(
   body: ReadableStream<Uint8Array>,
   handlers: {
-    onMeta: (sources: Source[]) => void;
+    onMeta: (sources: Source[], suggestions: string[]) => void;
     onToken: (text: string) => void;
     onDone: () => void;
     onError: (message: string) => void;
@@ -104,6 +135,7 @@ async function readChatStream(
           type?: string;
           text?: string;
           sources?: Source[];
+          suggestions?: string[];
           error?: string;
         };
         try {
@@ -113,7 +145,10 @@ async function readChatStream(
         }
 
         if (event.type === "meta") {
-          handlers.onMeta(Array.isArray(event.sources) ? event.sources : []);
+          handlers.onMeta(
+            Array.isArray(event.sources) ? event.sources : [],
+            Array.isArray(event.suggestions) ? event.suggestions : []
+          );
         } else if (event.type === "token" && typeof event.text === "string") {
           handlers.onToken(event.text);
         } else if (event.type === "done") {
@@ -130,7 +165,6 @@ async function readChatStream(
 
 export default function Chatbot() {
   const [open, setOpen] = React.useState(false);
-  // Wide mode gives big formulas more room; persisted for the session.
   const [wide, setWide] = React.useState(false);
   React.useEffect(() => {
     try {
@@ -146,7 +180,12 @@ export default function Chatbot() {
     });
   }
   const [msgs, setMsgs] = React.useState<Msg[]>([
-    { role: "assistant", content: "Hi! Ask me about these docs." },
+    {
+      role: "assistant",
+      content:
+        "Hi! I'm the Docs Assistant — ask me about formulas and topics in these lecture notes.",
+      suggestions: DEFAULT_SUGGESTIONS,
+    },
   ]);
   const [input, setInput] = React.useState("");
   const [busy, setBusy] = React.useState(false);
@@ -154,8 +193,6 @@ export default function Chatbot() {
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
   const abortRef = React.useRef<AbortController | null>(null);
 
-  // Grow the textarea with its content (up to the CSS max-height) and
-  // shrink it back when cleared.
   React.useEffect(() => {
     const el = inputRef.current;
     if (!el) return;
@@ -163,22 +200,19 @@ export default function Chatbot() {
     el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
   }, [input, open]);
 
-  // Auto-scroll to the newest message.
   React.useEffect(() => {
     bodyRef.current?.scrollTo({ top: bodyRef.current.scrollHeight });
   }, [msgs, open, busy]);
 
-  // Cancel any in-flight request on unmount.
   React.useEffect(() => () => abortRef.current?.abort(), []);
 
-  async function send() {
-    if (!input.trim() || busy) return;
+  async function ask(questionRaw: string) {
+    const question = questionRaw.trim();
+    if (!question || busy) return;
 
-    const question = input.trim();
     setMsgs((m) => [
       ...m,
       { role: "user", content: question },
-      // Placeholder assistant bubble — tokens append here as they arrive.
       { role: "assistant", content: "", streaming: true },
     ]);
     setInput("");
@@ -189,6 +223,7 @@ export default function Chatbot() {
 
     let answer = "";
     let sources: Source[] = [];
+    let suggestions: string[] = [];
 
     const patchLast = (patch: Partial<Msg>) => {
       setMsgs((m) => {
@@ -223,13 +258,13 @@ export default function Chatbot() {
 
       const contentType = r.headers.get("content-type") || "";
 
-      // Streaming path (SSE)
       if (contentType.includes("text/event-stream")) {
         await readChatStream(
           r.body,
           {
-            onMeta: (s) => {
+            onMeta: (s, sug) => {
               sources = s;
+              suggestions = sug;
             },
             onToken: (text) => {
               answer += text;
@@ -237,9 +272,30 @@ export default function Chatbot() {
             },
             onDone: () => {
               const srcBlock = formatSources(sources);
+              let content = (answer || "…") + srcBlock;
+              let chips = suggestions;
+
+              // Legacy / model fallback text → friendly copy + chips
+              if (looksLikeDontKnow(answer) || (!sources.length && !chips.length && looksLikeDontKnow(answer))) {
+                content =
+                  "I'm the **Docs Assistant** for these lecture notes. I answer from the study materials on this site.\n\nI couldn't find that in the notes. Try one of these instead:";
+                chips = DEFAULT_SUGGESTIONS;
+              } else if (!chips.length && looksLikeDontKnow(answer)) {
+                chips = DEFAULT_SUGGESTIONS;
+              } else if (
+                !sources.length &&
+                !chips.length &&
+                /only answer from|couldn'?t find|not in (the )?(notes|context)/i.test(
+                  answer
+                )
+              ) {
+                chips = DEFAULT_SUGGESTIONS;
+              }
+
               patchLast({
-                content: (answer || "…") + srcBlock,
+                content,
                 streaming: false,
+                suggestions: chips.length ? chips : undefined,
               });
             },
             onError: (message) => {
@@ -252,31 +308,45 @@ export default function Chatbot() {
           ctrl.signal
         );
 
-        // If the stream closed without a done event, finalize anyway.
         setMsgs((m) => {
           const last = m[m.length - 1];
           if (last?.role === "assistant" && last.streaming) {
             const copy = [...m];
+            const chips =
+              suggestions.length > 0
+                ? suggestions
+                : looksLikeDontKnow(answer)
+                  ? DEFAULT_SUGGESTIONS
+                  : undefined;
             copy[copy.length - 1] = {
               ...last,
               content: (answer || last.content || "…") + formatSources(sources),
               streaming: false,
+              suggestions: chips,
             };
             return copy;
           }
           return m;
         });
       } else {
-        // Legacy JSON fallback (older worker deploy)
         const data = (await r.json().catch(() => ({}))) as {
           answer?: string;
           sources?: Source[];
+          suggestions?: string[];
           error?: string;
         };
         if (data.error) throw new Error(data.error);
+        const text = data.answer || "…";
+        const chips =
+          data.suggestions ||
+          (looksLikeDontKnow(text) ? DEFAULT_SUGGESTIONS : undefined);
         patchLast({
-          content: (data.answer || "…") + formatSources(data.sources || []),
+          content:
+            (looksLikeDontKnow(text)
+              ? "I'm the **Docs Assistant** for these lecture notes. I answer from the study materials on this site.\n\nI couldn't find that in the notes. Try one of these instead:"
+              : text) + formatSources(data.sources || []),
           streaming: false,
+          suggestions: chips,
         });
       }
     } catch (err) {
@@ -290,8 +360,10 @@ export default function Chatbot() {
     }
   }
 
-  // Enter sends, Shift+Enter inserts a newline. Ignore Enter while an
-  // IME composition is in progress so it confirms the text instead.
+  function send() {
+    void ask(input);
+  }
+
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
       e.preventDefault();
@@ -329,22 +401,31 @@ export default function Chatbot() {
               <div key={i} className={`msg msg--${m.role}`}>
                 <div className="msg__bubble">
                   {m.role === "assistant" ? (
-                    m.streaming ? (
-                      <div className="msg__streaming">
-                        {m.content || (
-                          <span className="msg__bubble--typing">
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                          </span>
-                        )}
-                        {m.content ? (
-                          <span className="msg__cursor" aria-hidden="true" />
-                        ) : null}
-                      </div>
-                    ) : (
-                      <MarkdownMessage content={m.content} />
-                    )
+                    <>
+                      {m.streaming ? (
+                        <div className="msg__streaming">
+                          {m.content || (
+                            <span className="msg__bubble--typing">
+                              <span></span>
+                              <span></span>
+                              <span></span>
+                            </span>
+                          )}
+                          {m.content ? (
+                            <span className="msg__cursor" aria-hidden="true" />
+                          ) : null}
+                        </div>
+                      ) : (
+                        <MarkdownMessage content={m.content} />
+                      )}
+                      {!m.streaming && m.suggestions && (
+                        <SuggestionChips
+                          suggestions={m.suggestions}
+                          disabled={busy}
+                          onPick={(q) => void ask(q)}
+                        />
+                      )}
+                    </>
                   ) : (
                     m.content
                   )}
