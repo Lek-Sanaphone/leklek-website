@@ -232,6 +232,25 @@
 }
 
 /* typing indicator */
+/* KaTeX math inside assistant bubbles: boxed equations that scroll
+   horizontally instead of overflowing the bubble */
+.docs-assistant__body .msg__markdown .katex-display {
+  margin: 10px 0;
+  padding: 10px 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: var(--ifm-background-surface-color, var(--ifm-background-color));
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+}
+/* equation boxes inside list items: let the box span the line */
+.docs-assistant__body .msg__markdown li .katex-display {
+  margin: 6px 0;
+}
+.docs-assistant__body .msg__markdown .katex {
+  font-size: 1.05em;
+}
+
 .docs-assistant__body .msg__bubble--typing {
   display: inline-flex;
   gap: 4px;
