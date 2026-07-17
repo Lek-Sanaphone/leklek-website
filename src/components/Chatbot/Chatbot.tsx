@@ -3,6 +3,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+// @ts-ignore -- plain ESM module, shared with the node:test suite
+import { normalizeMath } from "./normalizeMath.mjs";
 
 const WORKER_CHAT_URL = "https://docusaurus-rag.lekjkboy2005.workers.dev/chat";
 
@@ -10,18 +12,13 @@ type Msg = { role: "user" | "assistant"; content: string };
 type Source = { url: string; title?: string };
 type ChatResp = { answer?: string; sources?: Source[]; error?: string };
 
-// The model sometimes emits LaTeX with \[...\]/\(...\) delimiters or bare
-// \begin{...}...\end{...} environments, which remark-math doesn't pick up.
-// Normalize everything to $/$$ delimiters so KaTeX renders it.
-function normalizeMath(text: string): string {
-  return text
-    .replace(/\\\[([\s\S]*?)\\\]/g, (_m, body) => `\n$$\n${body}\n$$\n`)
-    .replace(/\\\(([\s\S]*?)\\\)/g, (_m, body) => `$${body}$`)
-    .replace(
-      /(^|[^$\\])(\\begin\{([a-zA-Z*]+)\}[\s\S]*?\\end\{\3\})/g,
-      (_m, pre, body) => `${pre}\n$$\n${body}\n$$\n`
-    );
-}
+// Contain KaTeX failures: a bad formula renders as red raw TeX instead of
+// throwing and breaking the rest of the message.
+const KATEX_OPTIONS = {
+  throwOnError: false,
+  strict: false,
+  errorColor: "#cc0000",
+};
 
 // Render an assistant message as Markdown (bold, italics, lists, code,
 // headings, tables, links, LaTeX math). Links always open in a new tab.
@@ -30,7 +27,7 @@ function MarkdownMessage({ content }: { content: string }) {
     <div className="msg__markdown">
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
-        rehypePlugins={[rehypeKatex]}
+        rehypePlugins={[[rehypeKatex, KATEX_OPTIONS]]}
         components={{
           a: ({ node, ...props }) => (
             <a {...props} target="_blank" rel="noreferrer" />
@@ -45,6 +42,21 @@ function MarkdownMessage({ content }: { content: string }) {
 
 export default function Chatbot() {
   const [open, setOpen] = React.useState(false);
+  // Wide mode gives big formulas more room; persisted for the session.
+  const [wide, setWide] = React.useState(false);
+  React.useEffect(() => {
+    try {
+      setWide(sessionStorage.getItem("docs-assistant-wide") === "1");
+    } catch {}
+  }, []);
+  function toggleWide() {
+    setWide((w) => {
+      try {
+        sessionStorage.setItem("docs-assistant-wide", w ? "0" : "1");
+      } catch {}
+      return !w;
+    });
+  }
   const [msgs, setMsgs] = React.useState<Msg[]>([
     { role: "assistant", content: "Hi! Ask me about these docs." },
   ]);
@@ -95,6 +107,10 @@ export default function Chatbot() {
       if (!r.ok || data.error) {
         throw new Error(data.error || `Request failed (${r.status})`);
       }
+
+      // Raw model output, pre-normalizeMath — kept for diagnosing math
+      // rendering issues.
+      console.debug("[docs-assistant] raw answer:", data.answer);
 
       // Normalize & dedupe sources into Markdown links so they render
       // as a clean, clickable list.
@@ -147,8 +163,22 @@ export default function Chatbot() {
   return (
     <div className="docs-assistant">
       {open && (
-        <div className="docs-assistant__window">
-          <div className="docs-assistant__header">Docs Assistant</div>
+        <div
+          className={`docs-assistant__window${
+            wide ? " docs-assistant__window--wide" : ""
+          }`}
+        >
+          <div className="docs-assistant__header">
+            <span>Docs Assistant</span>
+            <button
+              className="docs-assistant__expand"
+              onClick={toggleWide}
+              aria-label={wide ? "Shrink panel" : "Expand panel"}
+              title={wide ? "Shrink panel" : "Expand panel"}
+            >
+              {wide ? "⇲" : "⇱"}
+            </button>
+          </div>
 
           <div className="docs-assistant__body" ref={bodyRef} aria-live="polite">
             {msgs.map((m, i) => (
