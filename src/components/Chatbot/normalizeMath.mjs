@@ -1,32 +1,65 @@
-// Normalizes model-emitted math so remark-math/KaTeX can render it, and
-// guarantees delimiters stay balanced so a malformed or truncated formula
-// can never swallow trailing content (e.g. the Sources list).
+// Normalizes model-emitted math so remark-math/KaTeX can render it.
+//
+// Critical invariant: display math MUST use $$ on their own lines.
+// remark-math (micromark-extension-math) mishandles single-line or
+// "opening $$ stuck to content" forms when the body spans lines — it
+// can start a math region mid-formula and swallow trailing prose
+// (including the Sources list), which then renders as one giant red
+// katex-error block.
 
-// Environments the model emits bare (outside $/$$) that should become
-// display math.
-const BARE_ENVS = "pmatrix|bmatrix|vmatrix|Bmatrix|matrix|smallmatrix|cases|aligned|align\\*?|array|gathered";
+import katex from "katex";
 
-// A \begin{env}...\end{env} block with matching names (tolerates nested
-// blocks of a *different* environment, e.g. bmatrix inside aligned).
+const BARE_ENVS =
+  "pmatrix|bmatrix|vmatrix|Bmatrix|matrix|smallmatrix|cases|aligned|align\\*?|array|gathered";
+
 const ENV_BLOCK = new RegExp(
   String.raw`\\begin\{(${BARE_ENVS})\}[\s\S]*?\\end\{\1\}`,
   "g"
 );
 
-// Connectors that may join two environments into one formula, e.g.
-// A = B, or A \xrightarrow{2R_1-R_2} B.
 const CONNECTOR_GAP = new RegExp(
   String.raw`^\s*(?:=|\+|-|\\cdot|\\times|\\to|\\rightarrow|\\Rightarrow|\\Leftrightarrow|\\sim|\\approx|\\xrightarrow(?:\[[^\]]*\])?\{[^}]*\})?\s*$`
 );
 
-// Inside an environment body, turn a lone row-separator backslash
-// (single \ before whitespace/EOL) into \\. Leaves \\, commands (\alpha)
-// and spacing commands (\,) alone.
 function fixRowSeparators(body) {
   return body.replace(/(?<!\\)\\(?=\s|$)(?!\\)/g, "\\\\");
 }
 
-// Wrap bare environment chains found in a non-math segment in $$...$$.
+/** Remove a trailing \\ immediately before \end{...}. */
+function stripTrailingRowBreak(body) {
+  return body.replace(/\\\\\s*(?=\\end\{)/g, "");
+}
+
+/** Prefer \mid for augmented-matrix bars between columns. */
+function fixAugmentedBars(body) {
+  return body.replace(/&\s*\|\s*&/g, "& \\mid &");
+}
+
+function repairEnvBody(body) {
+  return fixAugmentedBars(stripTrailingRowBreak(fixRowSeparators(body)));
+}
+
+/**
+ * If a $$ block has \end{env} but no matching \begin{env}, prepend one.
+ * Matches the screenshot failure where the model drops the opening.
+ */
+function repairMissingBegins(body) {
+  let out = body;
+  const ends = [...out.matchAll(/\\end\{([a-zA-Z*]+)\}/g)];
+  for (const m of ends) {
+    const env = m[1];
+    if (!new RegExp(String.raw`\\begin\{${env}\}`).test(out)) {
+      out = `\\begin{${env}} ${out}`;
+    }
+  }
+  return out;
+}
+
+function displayBlock(body) {
+  const cleaned = repairMissingBegins(body).trim();
+  return `\n$$\n${cleaned}\n$$\n`;
+}
+
 function wrapBareEnvs(segment) {
   const spans = [];
   let m;
@@ -36,8 +69,6 @@ function wrapBareEnvs(segment) {
   }
   if (spans.length === 0) return segment;
 
-  // Merge consecutive spans joined only by a connector (or whitespace)
-  // so "A = B" wraps as one display block.
   const merged = [spans[0].slice()];
   for (let i = 1; i < spans.length; i++) {
     const prev = merged[merged.length - 1];
@@ -52,63 +83,125 @@ function wrapBareEnvs(segment) {
   let out = "";
   let pos = 0;
   for (const [s, e] of merged) {
-    out += segment.slice(pos, s) + "\n$$\n" + segment.slice(s, e) + "\n$$\n";
+    const before = segment.slice(pos, s);
+    const orphan = before.match(/\$\$\s*$/);
+    const prefix = orphan
+      ? before.slice(0, before.length - orphan[0].length)
+      : before;
+    out += prefix + displayBlock(segment.slice(s, e));
     pos = e;
   }
   return out + segment.slice(pos);
 }
 
-// Drop/escape unpaired delimiters so math regions always terminate.
-// Fail-safe: malformed math degrades to plain text instead of an open
-// region that eats the rest of the message.
-function balanceDelimiters(text) {
-  // If the count of $$ tokens is odd, the last one is an orphan
-  // (sequential pairing) — drop it.
-  const ddCount = (text.match(/\$\$/g) || []).length;
-  if (ddCount % 2 === 1) {
-    const i = text.lastIndexOf("$$");
-    text = text.slice(0, i) + text.slice(i + 2);
-  }
+/**
+ * Left-to-right scan that turns every $$...$$ region (including
+ * single-line and hybrid forms) into a clean multiline display block,
+ * and balances leftover $ / $$ so nothing stays open.
+ */
+function rewriteDisplayMath(text) {
+  let out = "";
+  let i = 0;
+  while (i < text.length) {
+    if (text[i] === "$" && text[i + 1] === "$") {
+      const close = text.indexOf("$$", i + 2);
+      if (close === -1) {
+        // Orphan opening $$ — drop it (fail-safe).
+        i += 2;
+        continue;
+      }
+      const body = text.slice(i + 2, close);
+      out += displayBlock(body);
+      i = close + 2;
+      continue;
+    }
 
-  // Single $: mask $$ pairs, then if the unescaped $ count is odd, escape
-  // the last one so it renders as a literal dollar sign.
-  const masked = text.replace(/\$\$/g, "  ");
-  const singles = [...masked.matchAll(/(?<!\\)\$/g)];
-  if (singles.length % 2 === 1) {
-    const i = singles[singles.length - 1].index;
-    text = text.slice(0, i) + "\\$" + text.slice(i + 1);
+    if (text[i] === "$" && text[i - 1] !== "\\") {
+      const nl = text.indexOf("\n", i + 1);
+      const lineEnd = nl === -1 ? text.length : nl;
+      const close = text.indexOf("$", i + 1);
+      if (close !== -1 && close < lineEnd && text[close + 1] !== "$") {
+        const body = text.slice(i + 1, close);
+        if (/\\begin\{/.test(body)) {
+          out += displayBlock(body);
+        } else {
+          out += `$${body}$`;
+        }
+        i = close + 1;
+        continue;
+      }
+      // Unpaired or multi-line $ — escape so it can't open a region.
+      out += "\\$";
+      i += 1;
+      continue;
+    }
+
+    out += text[i];
+    i += 1;
   }
-  return text;
+  return out;
+}
+
+/**
+ * Validate each display block with KaTeX. On failure, unwrap to a fenced
+ * code block so remark-math never creates a katex-error that paints
+ * neighboring prose red.
+ */
+function sanitizeWithKatex(text) {
+  return text.replace(/\$\$\n?([\s\S]*?)\n?\$\$/g, (_full, body) => {
+    const trimmed = body.trim();
+    if (!trimmed) return "";
+    try {
+      katex.renderToString(trimmed, {
+        displayMode: true,
+        throwOnError: true,
+        strict: "ignore",
+      });
+      return displayBlock(trimmed);
+    } catch {
+      return `\n\`\`\`latex\n${trimmed}\n\`\`\`\n`;
+    }
+  });
+}
+
+/** Peel a trailing Sources section so math rewrites can't touch it. */
+function splitSources(text) {
+  const m = text.match(/\n\n\*\*Sources:\*\*[\s\S]*$/);
+  if (!m) return { body: text, sources: "" };
+  return {
+    body: text.slice(0, m.index),
+    sources: m[0],
+  };
 }
 
 export function normalizeMath(text) {
-  // 1) Convert alternative delimiters to $/$$.
-  let out = text
-    .replace(/\\\[([\s\S]*?)\\\]/g, (_m, body) => `\n$$\n${body}\n$$\n`)
-    .replace(/\\\(([\s\S]*?)\\\)/g, (_m, body) => `$${body}$`);
+  if (!text) return text;
 
-  // 2) Fix single-\ row separators inside environment bodies (applies
-  // whether or not the env is already inside $$).
+  const { body, sources } = splitSources(text);
+
+  let out = body
+    .replace(/\\\[([\s\S]*?)\\\]/g, (_m, b) => displayBlock(b))
+    .replace(/\\\(([\s\S]*?)\\\)/g, (_m, b) => `$${b}$`);
+
   out = out.replace(
     new RegExp(String.raw`\\begin\{(${BARE_ENVS})\}([\s\S]*?)\\end\{\1\}`, "g"),
-    (_m, env, body) => `\\begin{${env}}${fixRowSeparators(body)}\\end{${env}}`
+    (_m, env, b) => `\\begin{${env}}${repairEnvBody(b)}\\end{${env}}`
   );
 
-  // 3) Wrap bare environments in $$, but only outside existing math
-  // regions (no double-wrapping). Inline $...$ that contains a matrix or
-  // system environment is promoted to display math — inline KaTeX cannot
-  // scroll, so huge inline formulas would overflow the chat bubble.
+  out = rewriteDisplayMath(out);
+
   out = out
-    .split(/(\$\$[\s\S]*?\$\$|(?<!\\)\$[^$\n]+(?<!\\)\$)/)
-    .map((part, i) => {
-      if (i % 2 === 0) return wrapBareEnvs(part);
-      if (!part.startsWith("$$") && /\\begin\{/.test(part)) {
-        return `\n$$\n${part.slice(1, -1)}\n$$\n`;
-      }
-      return part;
-    })
+    .split(/(\$\$\n[\s\S]*?\n\$\$)/)
+    .map((part, idx) => (idx % 2 === 0 ? wrapBareEnvs(part) : part))
     .join("");
 
-  // 4) Guarantee balanced delimiters (handles truncated model output).
-  return balanceDelimiters(out);
+  const ddCount = (out.match(/\$\$/g) || []).length;
+  if (ddCount % 2 === 1) {
+    const i = out.lastIndexOf("$$");
+    out = out.slice(0, i) + out.slice(i + 2);
+  }
+
+  out = sanitizeWithKatex(out);
+
+  return out + sources;
 }
