@@ -3,6 +3,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+// @ts-ignore -- plain ESM module, shared with the node:test suite
+import { normalizeMath } from "./normalizeMath.mjs";
 
 const WORKER_CHAT_URL = "https://docusaurus-rag.lekjkboy2005.workers.dev/chat";
 
@@ -10,18 +12,13 @@ type Msg = { role: "user" | "assistant"; content: string };
 type Source = { url: string; title?: string };
 type ChatResp = { answer?: string; sources?: Source[]; error?: string };
 
-// The model sometimes emits LaTeX with \[...\]/\(...\) delimiters or bare
-// \begin{...}...\end{...} environments, which remark-math doesn't pick up.
-// Normalize everything to $/$$ delimiters so KaTeX renders it.
-function normalizeMath(text: string): string {
-  return text
-    .replace(/\\\[([\s\S]*?)\\\]/g, (_m, body) => `\n$$\n${body}\n$$\n`)
-    .replace(/\\\(([\s\S]*?)\\\)/g, (_m, body) => `$${body}$`)
-    .replace(
-      /(^|[^$\\])(\\begin\{([a-zA-Z*]+)\}[\s\S]*?\\end\{\3\})/g,
-      (_m, pre, body) => `${pre}\n$$\n${body}\n$$\n`
-    );
-}
+// Contain KaTeX failures: a bad formula renders as red raw TeX instead of
+// throwing and breaking the rest of the message.
+const KATEX_OPTIONS = {
+  throwOnError: false,
+  strict: false,
+  errorColor: "#cc0000",
+};
 
 // Render an assistant message as Markdown (bold, italics, lists, code,
 // headings, tables, links, LaTeX math). Links always open in a new tab.
@@ -30,7 +27,7 @@ function MarkdownMessage({ content }: { content: string }) {
     <div className="msg__markdown">
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
-        rehypePlugins={[rehypeKatex]}
+        rehypePlugins={[[rehypeKatex, KATEX_OPTIONS]]}
         components={{
           a: ({ node, ...props }) => (
             <a {...props} target="_blank" rel="noreferrer" />
@@ -95,6 +92,10 @@ export default function Chatbot() {
       if (!r.ok || data.error) {
         throw new Error(data.error || `Request failed (${r.status})`);
       }
+
+      // Raw model output, pre-normalizeMath — kept for diagnosing math
+      // rendering issues.
+      console.debug("[docs-assistant] raw answer:", data.answer);
 
       // Normalize & dedupe sources into Markdown links so they render
       // as a clean, clickable list.
