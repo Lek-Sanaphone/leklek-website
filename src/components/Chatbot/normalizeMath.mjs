@@ -95,10 +95,18 @@ export function normalizeMath(text) {
   );
 
   // 3) Wrap bare environments in $$, but only outside existing math
-  // regions (no double-wrapping).
+  // regions (no double-wrapping). Inline $...$ that contains a matrix or
+  // system environment is promoted to display math — inline KaTeX cannot
+  // scroll, so huge inline formulas would overflow the chat bubble.
   out = out
     .split(/(\$\$[\s\S]*?\$\$|(?<!\\)\$[^$\n]+(?<!\\)\$)/)
-    .map((part, i) => (i % 2 === 0 ? wrapBareEnvs(part) : part))
+    .map((part, i) => {
+      if (i % 2 === 0) return wrapBareEnvs(part);
+      if (!part.startsWith("$$") && /\\begin\{/.test(part)) {
+        return `\n$$\n${part.slice(1, -1)}\n$$\n`;
+      }
+      return part;
+    })
     .join("");
 
   // 4) Guarantee balanced delimiters (handles truncated model output).

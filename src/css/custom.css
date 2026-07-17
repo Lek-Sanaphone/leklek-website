@@ -89,10 +89,10 @@
   transform: scale(0.95);
 }
 
-/* window */
+/* window: responsive, never larger than the viewport */
 .docs-assistant__window {
-  width: 360px;
-  height: 520px;
+  width: min(92vw, 480px);
+  height: min(80vh, 640px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -103,16 +103,41 @@
   box-shadow: var(--ifm-global-shadow-md);
   /* remove blur */
 }
+/* wide mode (header toggle) for viewing big formulas */
+.docs-assistant__window--wide {
+  width: min(96vw, 760px);
+  height: min(85vh, 720px);
+}
 
 /* sticky header/footer for readability */
 .docs-assistant__header {
   position: sticky;
   top: 0;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   padding: 12px;
   font-weight: 600;
   border-bottom: 1px solid var(--ifm-color-emphasis-200);
   background: var(--ifm-background-surface-color, var(--ifm-background-color));
+}
+
+.docs-assistant__expand {
+  flex: 0 0 auto;
+  min-width: 32px;
+  min-height: 32px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ifm-font-color-base);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.docs-assistant__expand:hover {
+  background: var(--ifm-color-emphasis-100);
 }
 
 /* chat body */
@@ -128,10 +153,13 @@
   color: var(--ifm-font-color-base);
 }
 
-/* one message row; aligned left (assistant) or right (user) */
+/* one message row; aligned left (assistant) or right (user).
+   min-width: 0 down the flex chain lets children shrink so
+   overflow-x on .katex-display engages instead of clipping. */
 .docs-assistant__body .msg {
   display: flex;
   max-width: 100%;
+  min-width: 0;
 }
 .docs-assistant__body .msg--user {
   justify-content: flex-end;
@@ -143,10 +171,26 @@
 /* chat bubble */
 .docs-assistant__body .msg__bubble {
   max-width: 85%;
+  min-width: 0;
   padding: 8px 12px;
   border-radius: 14px;
   word-wrap: break-word;
   overflow-wrap: anywhere;
+}
+/* assistant bubbles may use the full row so matrices get room
+   before needing to scroll */
+.docs-assistant__body .msg--assistant .msg__bubble {
+  max-width: 98%;
+}
+.docs-assistant__body .msg__markdown {
+  min-width: 0;
+  max-width: 100%;
+}
+/* fallback: a paragraph holding wide inline math scrolls instead of
+   clipping (inline KaTeX cannot wrap or scroll by itself) */
+.docs-assistant__body .msg__markdown p:has(.katex) {
+  overflow-x: auto;
+  padding-bottom: 2px;
 }
 .docs-assistant__body .msg--user .msg__bubble {
   background: var(--ifm-color-primary);
@@ -233,15 +277,27 @@
 
 /* typing indicator */
 /* KaTeX math inside assistant bubbles: boxed equations that scroll
-   horizontally instead of overflowing the bubble */
+   horizontally instead of overflowing the bubble. Edge gradients act as
+   scroll shadows: the "covers" scroll with the content (attachment: local)
+   and hide the shadows when that edge is fully scrolled. */
 .docs-assistant__body .msg__markdown .katex-display {
   margin: 10px 0;
   padding: 10px 12px;
   overflow-x: auto;
   overflow-y: hidden;
-  background: var(--ifm-background-surface-color, var(--ifm-background-color));
+  max-width: 100%;
   border: 1px solid var(--ifm-color-emphasis-300);
   border-radius: 8px;
+  background-color: var(--ifm-background-surface-color, var(--ifm-background-color));
+  background-image:
+    linear-gradient(90deg, var(--ifm-background-surface-color, #fff) 40%, rgba(255, 255, 255, 0)),
+    linear-gradient(270deg, var(--ifm-background-surface-color, #fff) 40%, rgba(255, 255, 255, 0)),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0)),
+    linear-gradient(270deg, rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0));
+  background-position: left center, right center, left center, right center;
+  background-size: 24px 100%, 24px 100%, 10px 100%, 10px 100%;
+  background-repeat: no-repeat;
+  background-attachment: local, local, scroll, scroll;
 }
 /* equation boxes inside list items: let the box span the line */
 .docs-assistant__body .msg__markdown li .katex-display {
@@ -319,10 +375,15 @@
   cursor: not-allowed;
 }
 
-/* mobile */
+/* mobile: fill most of the viewport, slightly smaller math so more
+   fits before scrolling; tap targets keep their size */
 @media (max-width: 480px) {
-  .docs-assistant__window {
-    width: min(94vw, 420px);
-    height: 60vh;
+  .docs-assistant__window,
+  .docs-assistant__window--wide {
+    width: 94vw;
+    height: min(75vh, 600px);
+  }
+  .docs-assistant__body .msg__markdown .katex {
+    font-size: 0.95em;
   }
 }

@@ -42,6 +42,21 @@ function MarkdownMessage({ content }: { content: string }) {
 
 export default function Chatbot() {
   const [open, setOpen] = React.useState(false);
+  // Wide mode gives big formulas more room; persisted for the session.
+  const [wide, setWide] = React.useState(false);
+  React.useEffect(() => {
+    try {
+      setWide(sessionStorage.getItem("docs-assistant-wide") === "1");
+    } catch {}
+  }, []);
+  function toggleWide() {
+    setWide((w) => {
+      try {
+        sessionStorage.setItem("docs-assistant-wide", w ? "0" : "1");
+      } catch {}
+      return !w;
+    });
+  }
   const [msgs, setMsgs] = React.useState<Msg[]>([
     { role: "assistant", content: "Hi! Ask me about these docs." },
   ]);
@@ -148,8 +163,22 @@ export default function Chatbot() {
   return (
     <div className="docs-assistant">
       {open && (
-        <div className="docs-assistant__window">
-          <div className="docs-assistant__header">Docs Assistant</div>
+        <div
+          className={`docs-assistant__window${
+            wide ? " docs-assistant__window--wide" : ""
+          }`}
+        >
+          <div className="docs-assistant__header">
+            <span>Docs Assistant</span>
+            <button
+              className="docs-assistant__expand"
+              onClick={toggleWide}
+              aria-label={wide ? "Shrink panel" : "Expand panel"}
+              title={wide ? "Shrink panel" : "Expand panel"}
+            >
+              {wide ? "⇲" : "⇱"}
+            </button>
+          </div>
 
           <div className="docs-assistant__body" ref={bodyRef} aria-live="polite">
             {msgs.map((m, i) => (

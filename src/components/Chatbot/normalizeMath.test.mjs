@@ -58,6 +58,14 @@ test("\\[..\\] and \\(..\\) delimiters convert", () => {
   assert.ok(out.includes("$y_0$"));
 });
 
+test("inline $ containing an environment is promoted to display math", () => {
+  const input =
+    "Visual reference: $\\begin{aligned} a &= b \\\\ c &= d \\end{aligned}$ done";
+  const out = normalizeMath(input);
+  assert.equal(ddCount(out), 2, "promoted to one $$ block");
+  assert.ok(!/(?<!\$)\$\\begin/.test(out), "no inline-$ matrix left");
+});
+
 test("stray unpaired single $ is escaped, not left open", () => {
   const out = normalizeMath("Price is $5 and that is all");
   const masked = out.replace(/\$\$/g, "");
