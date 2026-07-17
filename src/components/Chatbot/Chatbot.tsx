@@ -1,6 +1,8 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 
 const WORKER_CHAT_URL = "https://docusaurus-rag.lekjkboy2005.workers.dev/chat";
 
@@ -8,20 +10,34 @@ type Msg = { role: "user" | "assistant"; content: string };
 type Source = { url: string; title?: string };
 type ChatResp = { answer?: string; sources?: Source[]; error?: string };
 
+// The model sometimes emits LaTeX with \[...\]/\(...\) delimiters or bare
+// \begin{...}...\end{...} environments, which remark-math doesn't pick up.
+// Normalize everything to $/$$ delimiters so KaTeX renders it.
+function normalizeMath(text: string): string {
+  return text
+    .replace(/\\\[([\s\S]*?)\\\]/g, (_m, body) => `\n$$\n${body}\n$$\n`)
+    .replace(/\\\(([\s\S]*?)\\\)/g, (_m, body) => `$${body}$`)
+    .replace(
+      /(^|[^$\\])(\\begin\{([a-zA-Z*]+)\}[\s\S]*?\\end\{\3\})/g,
+      (_m, pre, body) => `${pre}\n$$\n${body}\n$$\n`
+    );
+}
+
 // Render an assistant message as Markdown (bold, italics, lists, code,
-// headings, tables, links). Links always open in a new tab.
+// headings, tables, links, LaTeX math). Links always open in a new tab.
 function MarkdownMessage({ content }: { content: string }) {
   return (
     <div className="msg__markdown">
       <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
+        remarkPlugins={[remarkGfm, remarkMath]}
+        rehypePlugins={[rehypeKatex]}
         components={{
           a: ({ node, ...props }) => (
             <a {...props} target="_blank" rel="noreferrer" />
           ),
         }}
       >
-        {content}
+        {normalizeMath(content)}
       </ReactMarkdown>
     </div>
   );
@@ -35,7 +51,17 @@ export default function Chatbot() {
   const [input, setInput] = React.useState("");
   const [busy, setBusy] = React.useState(false);
   const bodyRef = React.useRef<HTMLDivElement>(null);
+  const inputRef = React.useRef<HTMLTextAreaElement>(null);
   const abortRef = React.useRef<AbortController | null>(null);
+
+  // Grow the textarea with its content (up to the CSS max-height) and
+  // shrink it back when cleared.
+  React.useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+  }, [input, open]);
 
   // Auto-scroll to the newest message.
   React.useEffect(() => {
@@ -109,9 +135,10 @@ export default function Chatbot() {
     }
   }
 
-  // Enter sends, Shift+Enter inserts a newline.
+  // Enter sends, Shift+Enter inserts a newline. Ignore Enter while an
+  // IME composition is in progress so it confirms the text instead.
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
       e.preventDefault();
       send();
     }
@@ -149,6 +176,7 @@ export default function Chatbot() {
 
           <div className="docs-assistant__inputRow">
             <textarea
+              ref={inputRef}
               className="docs-assistant__input"
               value={input}
               onChange={(e) => setInput(e.target.value)}
