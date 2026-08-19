@@ -5,7 +5,7 @@ title: 48433 Software Architecture
 ---
 # 48433 - Summary
 # 1. Introduction to Software Architecture
-## 1.1 Lecture
+## 1.1 Introduction
 
 ### What Is Software Architecture?
 
@@ -200,4 +200,733 @@ make_it_fly(Sparrow())         # ✅ works
 
 > **TL;DR:** Architecture = structures for reasoning about a system, seen through C&C / module / allocation views. It matters because it's cheap to explore early but locks in quality and flexibility later. SOLID gives concrete rules for keeping class design flexible. Modern systems demand more rigorous modelling due to scale and complexity.
 
+## 1.2 C4 model
+<details>
+    <summary><strong>C4 model</strong></summary>
+
+<img src="https://software-architecture-guild.com/images/competencies/modeling/frameworks/c4.abstractions.png" />
+
+The C4 model is a framework for visualizing software architecture. It acts like a set of maps that help software developers navigate large or complex codebases by zooming in from a high-level overview down to the specific code.
+
+More Information: ![ProcessOn C4 model][https://www.processon.io/blog/c4-model-for-software-architecture]
+
 ---
+It is structured into four levels of abstraction:
+* **Level 1: System Context:** This provides the "overview first" by showing the entire software system, its users, and its dependencies on other systems.
+* **Level 2: Containers:** This level zooms in to show the overall shape of the architecture and your technology choices. In the C4 model, a software system is made up of one or more "containers" (such as a client-side web app, server-side web app, mobile app, microservice, or database schema).
+* **Level 3: Components:** Zooming in further, this level displays the logical components and their interactions within a single container.
+* **Level 4: Code:** This is the most granular level, providing "details on demand" by showing the specific implementation details of the components, such as individual classes.
+
+</details>
+
+<details>
+    <summary><strong>Example - Internal Banking System</strong></summary>
+
+<detail>
+    <summary><strong>Level 1: System Context</strong></summary>
+<img src="https://software-architecture-guild.com/images/competencies/modeling/frameworks/c4.system_context.png"/>    
+</detail>
+
+<detail>
+    <summary><strong>Level 2: Containers</strong></summary>
+<img src="https://software-architecture-guild.com/images/competencies/modeling/frameworks/c4.containers.png"/>
+</detail>
+
+<detail>
+    <summary><strong>Level 3: Components</strong></summary>
+<img src="https://software-architecture-guild.com/images/competencies/modeling/frameworks/c4.components.png"/>
+</detail>
+
+<detail>
+    <summary><strong>Level 4: Code</strong></summary>
+<img src="https://software-architecture-guild.com/images/competencies/modeling/frameworks/c4.code.png"/>
+</detail>
+
+</details>
+---
+
+# 2. Application Architecture
+
+## 2.1 Architecture Context
+
+Architecture must consider:
+
+* **Functional requirements:** What the system must do.
+* **Stakeholder goals:** What users, customers, developers, and regulators need.
+* **Constraints:** Time, budget, skills, technology, and regulations.
+* **Enablers:** Existing skills, systems, or technologies that can help delivery.
+* **Risks:** Events that may prevent success.
+* **Opportunities:** Potential benefits to pursue.
+
+**Usage narrative:** A short story describing who uses the system, what they do, and their expected outcome.
+
+## 2.2 Requirements, Quality Attributes, and Risk Management
+
+### Functional Requirements
+
+**Functional requirements (FRs)** describe **what the system must do**.
+
+> Example: The system must allow customers to place online orders.
+
+Functions are assigned to components such as modules, services, databases, and interfaces.
+
+### Non-Functional Requirements
+
+**Non-functional requirements (NFRs)** describe **how well the system should work**. Quality attributes are a major type of NFR.
+
+* **FR:** Process an online order.
+* **NFR:** Process it securely within two seconds.
+
+NFRs should be specific, measurable, and prioritised. They often conflict: better security can reduce usability, higher availability can increase costs, and better performance can make modification harder.
+
+### Quality Attributes
+
+```mermaid
+flowchart TB
+    subgraph QualityAttributes["QUALITY ATTRIBUTES"]
+        direction TB
+        NFR["NON-FUNCTIONAL REQUIREMENTS"]
+
+        subgraph QualityRowOne
+            direction LR
+            AV["Availability"] ~~~ DE["Deployability"] ~~~ EE["Energy Efficiency"] ~~~ MO["Modifiability"]
+        end
+
+        subgraph QualityRowTwo
+            direction LR
+            PE["Performance"] ~~~ SE["Security"] ~~~ TE["Testability"] ~~~ US["Usability"]
+        end
+    end
+
+    style NFR fill:#DBEAFE,stroke:#2563EB,stroke-width:2px
+    style QualityAttributes fill:#EAF3FF,stroke:#2563EB,stroke-width:4px
+    style QualityRowOne fill:none,stroke:none,color:transparent
+    style QualityRowTwo fill:none,stroke:none,color:transparent
+    style AV fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style DE fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style EE fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style MO fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style PE fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style SE fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style TE fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style US fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+| Quality attribute | Meaning | Common approaches |
+|---|---|---|
+| **Availability** | The system is accessible and recovers from failure. | Redundancy, retry, circuit breaker |
+| **Deployability** | The system can be released and rolled back safely. | CI/CD, blue-green, canary deployment |
+| **Energy efficiency** | The system minimises energy consumption. | Power monitoring, disabling unused resources |
+| **Modifiability** | The system is easy and inexpensive to change. | Low coupling, high cohesion, layers |
+| **Performance** | The system meets speed and resource requirements. | Load balancing, throttling |
+| **Security** | The system protects data and access. | Validation, intrusion prevention |
+| **Testability** | Faults are easy to find and diagnose. | Dependency injection, strategy pattern |
+| **Usability** | Users can complete tasks easily. | Feedback, undo, progress indicators, MVC |
+
+#### Important Concepts
+
+* **CIA security triad:** Confidentiality, Integrity, and Availability.
+* **Deployment pipeline:** Development → Integration → Staging → Production.
+* **Low coupling:** Modules have fewer dependencies.
+* **High cohesion:** Each module has one focused responsibility.
+* **Performance measures:** Latency, response time, throughput, and memory efficiency.
+
+### NFRs and Risk Management
+
+#### Agile Scrum and DevOps
+
+* **Scrum:** Develops software through short sprints.
+* **DevOps:** Supports continuous testing, deployment, and monitoring.
+* Sprint planning covers requirements, design, NFRs, and risks.
+
+#### Product Backlog
+
+The product backlog tracks user stories, priorities, sprint allocation, progress, NFRs, and risks. It is continuously updated.
+
+#### Common NFRs
+
+| NFR | Meaning |
+|---|---|
+| **Performance** | System response speed |
+| **Scalability** | Ability to handle more workload |
+| **Security** | Protection of data and access |
+| **Usability** | Ease of use |
+| **Maintainability** | Ease of updating and supporting the system |
+
+#### Risk Identification and Assessment
+
+* **Identify:** Find and classify potential risks.
+* **Assess:** Measure probability and impact.
+* **Prioritise:** Handle the most serious risks first.
+* **Record:** Add risks to the risk matrix.
+
+#### Expected Monetary Value
+
+Expected Monetary Value (EMV) estimates the financial effect of a risk:
+
+$$
+\text{EMV} = \text{Probability} \times \text{Impact}
+$$
+
+For multiple outcomes:
+
+$$
+\text{Total EMV} = \sum(\text{Probability} \times \text{Impact})
+$$
+
+Example:
+
+$$
+(0.98 \times \$25{,}000) - (0.02 \times \$5{,}000) = \$24{,}400
+$$
+
+A positive EMV means the expected financial outcome is favourable.
+
+#### Risk Response and Monitoring
+
+* **Avoid:** Remove the risk.
+* **Mitigate:** Reduce the risk.
+* **Accept:** Monitor the risk.
+* **Transfer:** Move the risk to another party.
+
+Assign an owner and response plan, then continuously update the risk matrix.
+
+---
+
+# 3. Data Architecture
+
+## 3.1 Data Modelling
+
+Data modelling designs how data and its relationships should be represented. There are three levels.
+
+### Conceptual Data Model
+
+This is the big-picture business view. It defines:
+
+* Key entities
+* Their relationships
+* Business rules
+
+For a university system, the entities may include `Student`, `Subject`, `Lecturer`, and `Enrolment`.
+
+At this level, we may say that a student can enrol in many subjects, and a subject can have many students. We do not yet decide on tables, column names, or database technology.
+
+### Logical Data Model
+
+This is more detailed but still independent of a particular database system. It defines:
+
+* Tables or entities
+* Attributes
+* Primary keys
+* Foreign keys
+* Mandatory fields
+* Relationship rules
+
+| Table | Important fields |
+| --- | --- |
+| Student | StudentID, Name, Email |
+| Subject | SubjectCode, SubjectName |
+| Enrolment | StudentID, SubjectCode, EnrolmentDate |
+
+It explains what the data should look like logically, but not whether a field is `VARCHAR(100)` or which index will be created.
+
+### Physical Data Model
+
+This is the implementation-level database design. It includes:
+
+* Exact data types, such as `VARCHAR`, `INT`, and `DATE`
+* Tables and associative tables
+* Primary and foreign keys
+* Indexes
+* Database-specific performance settings
+
+## 3.2 Data Ingestion
+
+Data ingestion means moving data from its original sources into a destination where it can be stored, processed, or analysed.
+
+
+### ETL and ELT
+
+#### ETL: Extract, Transform, Load
+
+ETL is the traditional approach:
+
+1. Extract data from source systems.
+2. Transform it by cleaning, standardising, validating, and combining it.
+3. Load the prepared data into a data warehouse.
+
+For example, customer names and dates can be cleaned before being loaded into a reporting database.
+
+The limitation is that data often needs a defined structure before it enters the warehouse. This makes ETL less flexible for real-time, image, video, log, or other unstructured data.
+
+#### ELT: Extract, Load, Transform
+
+ELT changes the order:
+
+1. Extract data.
+2. Load it in raw form into a central repository, usually a data lake.
+3. Transform it later when a particular use case needs it.
+
+The main advantage is that the original data is retained. This is useful because:
+
+* Raw history and lineage are preserved.
+* Structured, semi-structured, unstructured, and streaming data can all be kept.
+* Teams can use data for new purposes later.
+* Data can be accessed before it is fully transformed.
+
+### ETL vs ELT
+
+| ETL | ELT |
+| --- | --- |
+| Transform before storage in a warehouse | Store raw data first, then transform it |
+| Less flexible | More flexible |
+| Traditionally batch-based | Better suited to cloud and diverse data |
+| Raw data may not be retained | Raw data and history are retained |
+
+## 3.3 Data Management Systems
+
+### Data Warehouse
+
+A data warehouse is centralised storage designed for analytics, reporting, and business intelligence. It stores curated, structured, cleaned data.
+
+For example, a retail company’s warehouse may combine sales, customer, product, and inventory data to create company-wide reports. It is optimised for large analytical queries, not daily transactional activity such as placing an order.
+
+### Data Mart
+
+A data mart is a smaller, focused part of a data warehouse for one business area. Examples include finance, marketing, and HR data marts.
+
+Types of data mart:
+
+* **Dependent:** Created from an existing data warehouse.
+* **Independent:** Created directly from source systems without a warehouse.
+* **Hybrid:** Combines warehouse data with other operational data.
+
+### Data Lake
+
+A data lake stores large quantities of raw data in its original format. It can contain:
+
+* Tables
+* JSON or XML
+* PDFs
+* Images and videos
+* Logs
+* Sensor data
+
+A warehouse uses more structure before analysis. A lake accepts raw data first and applies structure later when needed.
+
+### Warehouse vs Lake vs Mart
+
+| Feature | Data warehouse | Data lake | Data mart |
+| --- | --- | --- | --- |
+| Data type | Mostly curated and structured | Any type, including raw files and media | Focused subset, usually structured |
+| Main purpose | BI, reports, dashboards | Exploration, ML, large-scale analytics | Department-specific analysis |
+| Users | Organisation-wide analysts and teams | Engineers, data scientists, analysts | One department or business group |
+| Data schema | Usually schema-on-write | Usually schema-on-read | Usually predefined |
+| Example | Company-wide sales reporting | Raw logs, images, sensor streams | Marketing campaign dashboard |
+
+### Schema-on-Write vs Schema-on-Read
+
+* **Schema-on-write:** Define the structure before storing data. This is common in data warehouses.
+* **Schema-on-read:** Store data first, then decide its structure when analysing it. This is common in data lakes.
+
+### Large Organisations Often Use All Three
+
+```mermaid
+flowchart LR
+    A["Raw data sources"] --> B["Data lake"]
+    B --> C["Data warehouse"]
+    C --> D["Finance data mart"]
+    C --> E["Marketing data mart"]
+```
+
+## 3.4 Types of Data Architectures
+
+### Data Fabric
+
+A data fabric is an architecture that connects data across many systems, clouds, databases, data lakes, warehouses, APIs, and applications.
+
+Its goal is to make data easier to find, access, govern, and use, even when it is physically stored in many places. Key features include:
+
+* **Data integration:** Connects different sources.
+* **Data virtualisation:** Lets users access data without knowing its physical location.
+* **Data governance:** Enforces security, privacy, quality, and compliance rules.
+* **Data orchestration:** Automates pipelines and workflows.
+* **Metadata management:** Records datasets’ meaning, ownership, and lineage.
+
+Think of data fabric as an intelligent connecting layer over an organisation’s distributed data environment.
+
+### Data Mesh
+
+A data mesh is a decentralised approach in which each business domain owns and manages its own data.
+
+For example:
+
+* Marketing owns marketing data products.
+* Sales owns sales data products.
+* Customer service owns support data products.
+
+Instead of one central data team becoming responsible for every dataset, domain teams take responsibility for making their data useful, documented, secure, and shareable.
+
+Key principles:
+
+* **Domain-oriented ownership:** Teams own data from their business area.
+* **Data as a product:** Data should be reliable, documented, discoverable, and usable by others.
+* **Self-service platform:** Teams receive shared tools for storage, access, monitoring, and governance.
+* **Federated governance:** Shared organisation-wide rules exist, while data ownership remains distributed.
+
+### Data Fabric vs Data Mesh
+
+| Data fabric | Data mesh |
+| --- | --- |
+| Focuses on connecting and integrating data technically | Focuses on distributing ownership organisationally |
+| Uses automation, metadata, virtualisation, and orchestration | Uses domain teams and data-product thinking |
+| Answers: “How can all our data work together?” | Answers: “Who should own and maintain each dataset?” |
+
+## 3.5 Big Data Solutions
+
+### Architectural Shifts in the Big Data Era
+
+| Area | Traditional approach | Modern approach |
+| --- | --- | --- |
+| Data generation | Mostly relational, structured, batch data | Relational + NoSQL, structured + unstructured, batch + real time |
+| Ingestion | On-premises ETL | Cloud ELT and streaming |
+| Storage | Centralised warehouse | Cloud warehouses, distributed storage, data lakes |
+| Analytics | Historical reports and data mining | Predictive/prescriptive analytics, AI/ML, real-time insights |
+| Consumption | Central dashboards and reports | Self-service tools and AI-driven insights |
+
+**Polyglot persistence** means using different database technologies for different needs, rather than forcing every type of data into one relational database.
+
+### NoSQL Databases
+
+NoSQL databases were developed for data that is massive, distributed, rapidly changing, or not neatly structured in tables.
+
+Relational databases are still very important, especially when strong consistency and complex transactions are needed. However, they can be less suitable for huge amounts of sparse, semi-structured, or globally distributed internet-scale data.
+
+Common NoSQL characteristics:
+
+* Can scale across many machines
+* Support fast reads and writes
+* Often have flexible or schema-less structures
+* Support replication and distribution
+* May accept trade-offs in strict ACID transactions for speed and scalability
+
+#### Main NoSQL Types
+
+| Type | Best for | Example use |
+| --- | --- | --- |
+| Key-value store | Very fast, simple lookups | Sessions, cache, chat data |
+| Document database | Flexible JSON-like records | Product catalogues, content management |
+| Column store | Large analytical or time-series data | Event logs, IoT data |
+| Graph database | Relationship-heavy data | Social networks, fraud detection, recommendations |
+
+### Big Data Architecture Patterns
+
+#### Batch Architecture
+
+Batch architecture processes accumulated data at scheduled times.
+
+For example, it can generate a sales report every night using all transactions from that day. It is best when immediate results are not required.
+
+```mermaid
+flowchart LR
+    A["Data collected<br/>throughout the day"] --> B["Stored in database<br/>or data lake"]
+    B --> C["Scheduled batch job<br/>(e.g. every night)"]
+    C --> D["Reports and dashboards"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style C fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+#### Streaming Architecture
+
+Streaming architecture processes data continuously or almost immediately as it arrives.
+
+For example, it can detect suspicious card transactions as they occur. It is best when a fast response is important.
+
+```mermaid
+flowchart LR
+    A["Live event<br/>(e.g. payment or GPS update)"] --> B["Stream platform<br/>(e.g. Kafka)"]
+    B --> C["Real-time processing"]
+    C --> D["Immediate alert,<br/>action, or dashboard update"]
+
+    style A fill:#FFFFFF,stroke:#059669,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#059669,stroke-width:2px
+    style C fill:#FFFFFF,stroke:#059669,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#059669,stroke-width:2px
+```
+
+#### Lambda Architecture
+
+Lambda architecture combines batch and streaming processing:
+
+* The batch layer processes complete historical data accurately.
+* The speed layer processes recent live data quickly.
+* The results are combined for analysis.
+
+For example, a social-media platform may analyse historical user behaviour in batch while also responding to new posts and interactions in near real time.
+
+```mermaid
+flowchart TB
+    A["Incoming data"] --> B["Batch layer<br/>Processes full historical data"]
+    A --> C["Speed layer<br/>Processes newest data immediately"]
+
+    B --> D["Serving / combined layer"]
+    C --> D
+    D --> E["Accurate and near-real-time analytics"]
+
+    style A fill:#FFFFFF,stroke:#EA580C,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#EA580C,stroke-width:2px
+    style C fill:#FFFFFF,stroke:#EA580C,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#EA580C,stroke-width:2px
+    style E fill:#FFFFFF,stroke:#EA580C,stroke-width:2px
+```
+
+## 3.6 Data Dictionary Table 
+
+### Purpose and Characteristics
+
+A data dictionary documents each data element, including its:
+
+* Name
+* Format
+* Length
+* Business meaning
+
+It provides a shared reference for:
+
+* Consistent database design
+* Data architecture implementation
+
+
+---
+
+# 4. Cloud Reference Architecture
+## 4.1 On-Premisess vs Cloud
+<details>
+    <summary>On-Premise</summary>
+
+On-Premises
+
+An on-premises system is hosted and managed using infrastructure owned by the organisation.
+
+The organisation is responsible for:
+
+* physical servers;
+* networking equipment;
+* operating systems;
+* databases;
+* application deployment;
+* security;
+* backups and maintenance.
+
+On-premises infrastructure provides greater control but usually requires higher initial costs, specialised staff and more maintenance.
+</details>
+
+<details>
+    <summary>Cloud</summary>
+
+A cloud system uses infrastructure and services provided by companies such as AWS, Microsoft Azure or Google Cloud.
+
+Cloud computing provides:
+
+* faster deployment;
+* elastic scaling;
+* pay-as-you-use pricing;
+* managed backups and recovery;
+* access to specialised services;
+* reduced infrastructure maintenance.
+
+Possible concerns include security, privacy, ongoing costs, internet dependency and vendor lock-in.
+---
+| Model    | Description                             | Customer manages                   | Example           |
+| -------- | --------------------------------------- | ---------------------------------- | ----------------- |
+| **IaaS** | Provides virtual infrastructure         | OS, runtime, applications and data | AWS EC2           |
+| **PaaS** | Provides a managed application platform | Applications and data              | Google App Engine |
+| **SaaS** | Provides a complete application         | Configuration and usage            | Gmail, Salesforce |
+---
+Other Cloud Service Models
+* Network as a Service (NaaS)
+* Communications as a Service (CaaS)
+* Compute as a Service (CompaaS)
+* Data Storage as a Service (DSaaS)
+
+</details>
+
+## 4.2 Principles for cloud-native architecture
+Cloud-native architecture means designing a system to take advantage of cloud capabilities instead of simply placing an existing application on a cloud server.
+
+<details>
+    <summary>Principle 1: Design for Automation</summary>
+
+Cloud systems should automate repetitive and error-prone activities.
+
+Automation can be applied to:
+
+* infrastructure provisioning;
+* software building and testing;
+* application deployment;
+* scaling;
+* monitoring;
+* backup and recovery.
+
+Examples include:
+
+* using Docker to package applications;
+* using Terraform to create infrastructure;
+* using CI/CD pipelines to test and deploy software;
+* using autoscaling to add or remove instances.
+
+Automation makes deployment faster, more consistent and less vulnerable to human error.
+</details>
+
+<details>
+    <summary>Principle 2: Be Smart with State</summary>
+
+State is information about a user’s current situation within an application.
+
+Examples include:
+
+* login status;
+* shopping-cart contents;
+* form progress;
+* game-session progress.
+
+If state is stored inside one application server, the information may be lost when the server crashes. It also becomes difficult to send the user to another server.
+
+Therefore, application servers should be stateless where possible. Important state should be stored externally in systems such as:
+
+* Redis;
+* managed databases;
+* cloud storage.
+
+For example, an online store can store shopping-cart information in Redis. Any application server can then retrieve the cart using the customer’s identifier.
+</details>
+
+<details>
+    <summary>Principle 3: Favour Managed Services</summary>
+
+Managed services are operated and maintained by the cloud provider.
+
+Examples include:
+
+* managed databases;
+* message queues;
+* cloud storage;
+* machine-learning services;
+* analytics services.
+
+The provider normally handles:
+
+* infrastructure maintenance;
+* updates;
+* backups;
+* replication;
+* availability.
+
+This allows the development team to focus on the product. However, using provider-specific services may create vendor lock-in.
+
+Vendor lock-in can be reduced by:
+
+* using open standards;
+* using open-source-compatible services;
+* placing provider-specific code behind interfaces;
+* using containers;
+* documenting a migration strategy.
+
+</details>
+
+<details>
+    <summary>Principle 4: Practise Defence in Depth</summary>
+
+Defence in depth means protecting the system with multiple security layers.
+
+These layers may include:
+
+1. Edge firewall: blocks suspicious external traffic.
+2. Network segmentation: separates internal parts of the system.
+3. Authentication: verifies the identity of users and services.
+4. Authorisation: controls what each user or service can access.
+5. Application security: validates input and checks permissions.
+6. Endpoint security: protects individual devices and servers.
+7. Encryption: protects data during storage and transmission.
+8. Continuous monitoring: detects suspicious behaviour.
+
+Cloud-native architecture should not automatically trust a component simply because it is located inside the organisation’s network.
+</details>
+
+<details>
+    <summary>Principle 5: Always Be Architecting</summary>
+
+Cloud architecture should continuously evolve as:
+
+* user requirements change;
+* traffic increases;
+* security threats develop;
+* cloud services improve;
+* organisational needs change;
+* new technologies become available.
+
+Architects should regularly review and improve the system rather than waiting for a major failure.
+
+For example, a video-streaming platform must adapt its architecture to support new video formats, higher resolutions and increasing user demand.
+</details>
+
+<details>
+    <summary>Applying the Principles to C4 Diagrams</summary>
+
+The container and component diagrams from previous weeks should be updated to reflect cloud decisions.
+
+Possible changes include:
+
+* replacing a self-hosted database with a managed database;
+* adding object storage;
+* adding a message queue;
+* introducing authentication services;
+* adding caching;
+* separating state from application servers;
+* showing cloud-hosted APIs.
+
+The design should then be justified using the five cloud-native principles.
+</details>
+
+
+## 4.3 Deployment Diagram
+A deployment diagram shows how software systems and containers are installed and run on infrastructure in a particular environment, such as development, staging, or production.
+
+* Deployment nodes represent where software runs, including:
+    * Physical servers or devices
+    * Virtual machines and cloud services such as IaaS or PaaS
+    * Containers such as Docker
+    * Execution environments such as database servers, Java application servers, or Microsoft IIS
+
+* Deployment nodes can be nested. For example, a Docker container may run inside a virtual machine hosted on AWS.
+
+* The diagram can also include infrastructure components, such as:
+    * DNS services
+    * Load balancers
+    * Firewalls
+
+* AWS, Azure, or other cloud-provider icons may be used, but all icons should be explained in the diagram’s key or legend.
+
+In simple terms: A deployment diagram explains where each part of a system runs and how the infrastructure components are arranged.
+
+### 4.3.1 Example Bank Deployment Diagram
+<img src="https://online.visual-paradigm.com/repository/images/d05814ec-ea32-4f01-a160-b07805252807/c4-model-design/c4-model-deployment-diagram-for-internet-banking-system.png" />
+
+### 4.3.2 Example Pet Clinic Diagram
+<img src="https://tarf.co.uk/Reference/Architecture/media/20240119134009.png" />
+
+## 4.4 System Landscape Diagram
+A System Landscape Diagram shows how multiple software systems and people fit together across an organisation, department, or enterprise.
+
+Unlike a standard C4 System Context Diagram, which focuses on one specific system, a System Landscape Diagram provides a broader overview without making any single system the main focus.
+
+* Scope: An entire enterprise, organisation, department, or similar area.
+* Main elements: People, software systems, and the relationships between them.
+* Purpose: To understand how systems interact and support the wider organisation.
+* Audience: Both technical and non-technical stakeholders, inside and outside the development team.
+* Further detail: Each important system can be explored separately using the standard C4 model.
+
+<img src="https://tarf.co.uk/Reference/Architecture/media/20240119133739.png"/>
