@@ -930,3 +930,139 @@ Unlike a standard C4 System Context Diagram, which focuses on one specific syste
 * Further detail: Each important system can be explored separately using the standard C4 model.
 
 <img src="https://tarf.co.uk/Reference/Architecture/media/20240119133739.png"/>
+
+---
+
+# 5. Security and Privacy
+
+## 5.1 Dynamic Diagram
+
+A **dynamic diagram** shows how system elements interact **at runtime** to complete a feature, use case, or user story. Interactions are numbered to show the order of communication. It can include systems, containers, or components.
+
+**Purpose:** understand **how data moves through the system** before analysing security threats.
+
+<details>
+    <summary>Simple example</summary>
+
+```mermaid
+flowchart LR
+    A["User"] -->|"1"| B["Login Controller"]
+    B -->|"2"| C["Security Component"]
+    C -->|"3"| D["Database"]
+    D -->|"4"| E["Response"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style C fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style E fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+`User → Login Controller → Security Component → Database → Response`
+
+</details>
+
+## 5.2 Threat Modelling
+
+**Threat modelling** is the process of identifying what could go wrong in a system and how to reduce the risk.
+
+Focus on:
+
+* **Entry points** — where users or systems can access the application
+* **Trust boundaries** — where data moves between different trust levels
+* **Data flow** — how information moves through the system
+* **Threats** — possible security problems
+* **Mitigations** — controls used to reduce those threats
+
+## 5.3 Security Principles
+
+<details>
+    <summary>Minimise Attack Surface</summary>
+
+Reduce the number of possible places an attacker can target.
+
+Examples:
+
+* Disable unnecessary services
+* Close unused ports
+* Limit exposed APIs
+* Restrict admin access
+
+</details>
+
+<details>
+    <summary>Secure the Weakest Link</summary>
+
+A system's security can depend on its least secure component.
+
+Example:
+
+`Strong encryption + Secure database + Weak password = Still vulnerable`
+
+The tutorial asks you to consider both principles when analysing a system.
+
+</details>
+
+## 5.4 STRIDE Threat Model
+
+STRIDE is used to classify common security threats. Apply it to components and data flows in the architecture to identify possible threats.
+
+| STRIDE | Meaning | Security Property | Simple Meaning |
+|---|---|---|---|
+| **S** | Spoofing | Authentication | Pretending to be another user |
+| **T** | Tampering | Integrity | Changing data or code |
+| **R** | Repudiation | Non-repudiation | Denying an action |
+| **I** | Information Disclosure | Confidentiality | Accessing information without permission |
+| **D** | Denial of Service | Availability | Making a service unavailable |
+| **E** | Elevation of Privilege | Authorization | Gaining permissions you should not have |
+
+## 5.5 Mitigation
+
+A **mitigation** is a security control used to reduce or prevent a threat.
+
+| Threat | Possible Mitigation |
+|---|---|
+| Spoofing | Authentication / MFA |
+| Tampering | Integrity checks |
+| Repudiation | Logging and audit records |
+| Information Disclosure | Access control / encryption |
+| Denial of Service | Rate limiting |
+| Elevation of Privilege | Authorization controls |
+
+## 5.6 Connection to C4 Diagrams
+
+Security and privacy should be included in architecture diagrams such as:
+
+* Application/Data Container Diagram
+* Component Diagram
+* Deployment Diagram
+
+The goal is to show not only **how the system is built**, but also **how it is protected**.
+
+<details>
+    <summary>Key process to remember</summary>
+
+```mermaid
+flowchart TD
+    A["Architecture"] --> B["Dynamic Diagram<br/>How does the system operate?"]
+    B --> C["Data Flow<br/>Where does the data go?"]
+    C --> D["Threat Modelling<br/>What could go wrong?"]
+    D --> E["STRIDE<br/>What type of threat is it?"]
+    E --> F["Mitigation<br/>How do we reduce the threat?"]
+    F --> G["C4 Diagram<br/>Show security in the architecture"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style C fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style E fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style F fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style G fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+> **Dynamic Diagram** = How the system works
+> **Threat Modelling** = What could go wrong
+> **STRIDE** = Classify the threat
+> **Mitigation** = How to protect against it
+
+</details>
