@@ -243,6 +243,208 @@ It is structured into four levels of abstraction:
 </detail>
 
 </details>
+
+<details>
+    <summary><strong>Example - Urban Marathon</strong></summary>
+
+<details>
+    <summary><strong>L1 & L2 Containers Architecture</strong></summary>
+
+```mermaid
+flowchart LR
+    classDef userStyle fill:#1D4ED8,stroke:#1E40AF,stroke-width:2px,color:#FFFFFF;
+    classDef contextStyle fill:#2563EB,stroke:#1D4ED8,stroke-width:2px,color:#FFFFFF;
+    classDef containerStyle fill:#60A5FA,stroke:#2563EB,stroke-width:2px,color:#FFFFFF;
+    classDef extStyle fill:#93C5FD,stroke:#3B82F6,stroke-width:2px,color:#1E3A8A;
+
+    subgraph USERS ["System Users"]
+        U_Runner["Runner / Participant"]
+        U_Spec["Spectator"]
+        U_Dir["Race Director"]
+        U_Vol["Volunteer Coordinator"]
+        U_Ven["Expo Vendor"]
+    end
+
+    subgraph CONTEXT ["System Context Boundary"]
+        CTX_Portal["Participant and Spectator<br/>Portal Entry"]
+        CTX_Admin["Event Operations and<br/>Admin Hub"]
+    end
+
+    subgraph CONTAINERS ["System Containers"]
+        C_App["Mobile App<br/>(Live maps, tracking)"]
+        C_Web["Web Portal<br/>(Registrations, Admin)"]
+        C_GW["Shared API Gateway<br/>(Auth, Profiles)"]
+        C_RegAPI["Registration API<br/>(Entries, Vendors)"]
+        C_TrackAPI["Tracking API<br/>(Telemetry, Splits)"]
+        C_MainDB[("Primary DB<br/>(PostgreSQL)")]
+        C_BackDB[("Backup DB<br/>(Replication)")]
+    end
+
+    subgraph EXTERNAL ["External Systems"]
+        EXT_Sensors["Timing Sensors<br/>(RFID)"]
+        EXT_City["City Services<br/>(Road Permits)"]
+        EXT_Notif["Notification Gateway<br/>(Push / SMS)"]
+    end
+
+    class U_Runner,U_Spec,U_Dir,U_Vol,U_Ven userStyle;
+    class CTX_Portal,CTX_Admin contextStyle;
+    class C_App,C_Web,C_GW,C_RegAPI,C_TrackAPI,C_MainDB,C_BackDB containerStyle;
+    class EXT_Sensors,EXT_City,EXT_Notif extStyle;
+
+    style USERS fill:#E5E7EB,stroke:#9CA3AF,stroke-width:2px
+    style CONTEXT fill:#E5E7EB,stroke:#9CA3AF,stroke-width:2px
+    style CONTAINERS fill:#E5E7EB,stroke:#9CA3AF,stroke-width:2px
+    style EXTERNAL fill:#E5E7EB,stroke:#9CA3AF,stroke-width:2px
+
+    linkStyle default stroke:#FF8C00,stroke-width:2px;
+
+    U_Runner -->|"Track and view"| CTX_Portal
+    U_Spec -->|"Track and view"| CTX_Portal
+    U_Dir -->|"Manage event"| CTX_Admin
+    U_Vol -->|"Manage event"| CTX_Admin
+    U_Ven -->|"Manage event"| CTX_Admin
+
+    CTX_Portal -->|"Launches"| C_App
+    CTX_Admin -->|"Launches"| C_Web
+
+    C_App -->|"Mobile HTTPS"| C_GW
+    C_Web -->|"Web HTTPS"| C_GW
+    C_Web -->|"SQL read"| C_MainDB
+
+    C_GW -->|"Route reg tasks"| C_RegAPI
+    C_GW -->|"Route tracking"| C_TrackAPI
+
+    C_RegAPI -->|"SQL read/write"| C_MainDB
+    C_TrackAPI -->|"Log split times"| C_MainDB
+    C_MainDB -->|"Sync standby"| C_BackDB
+
+    EXT_Sensors -->|"RFID splits"| C_TrackAPI
+    C_RegAPI -->|"Road permits"| EXT_City
+    C_GW -->|"Push / SMS"| EXT_Notif
+```
+
+</details>
+
+<details>
+    <summary><strong>L3 Components Architecture</strong></summary>
+
+```mermaid
+flowchart LR
+    classDef compStyle fill:#BFDBFE,stroke:#3B82F6,stroke-width:1.5px,color:#1E3A8A;
+    classDef darkSub fill:#374151,stroke:#4B5563,stroke-width:1px,color:#FFFFFF;
+
+    subgraph APITRACK ["Tracking API"]
+        TRK_Ingest["RFID Sensor Ingestor"]
+        TRK_Splits["Split Time and Pace Calculator"]
+        TRK_Board["Leaderboard Engine"]
+    end
+
+    subgraph MOBILEAPP ["Mobile App"]
+        MA_UI["Map and Tracking UI"]
+        MA_Sync["API Sync Client"]
+        MA_Push["Push Receiver Module"]
+    end
+
+    subgraph WEBPORTAL ["Web Portal"]
+        WP_Admin["Admin Operations UI"]
+        WP_Reg["Registration Form Module"]
+        WP_Auth["Session Manager"]
+    end
+
+    subgraph APIGATEWAY ["API Gateway"]
+        GW_Notif["Notification Dispatcher"]
+        GW_Router["Request Router and Limiter"]
+        GW_Auth["Auth and JWT Service"]
+    end
+
+    subgraph APIREG ["Registration API"]
+        REG_Core["Runner Entry Engine"]
+        REG_Vendor["Vendor and Volunteer Module"]
+        REG_Permit["City Service Sync"]
+    end
+
+    class TRK_Ingest,TRK_Splits,TRK_Board compStyle;
+    class MA_UI,MA_Sync,MA_Push compStyle;
+    class WP_Admin,WP_Reg,WP_Auth compStyle;
+    class GW_Notif,GW_Router,GW_Auth compStyle;
+    class REG_Core,REG_Vendor,REG_Permit compStyle;
+    class APITRACK,MOBILEAPP,WEBPORTAL,APIGATEWAY,APIREG darkSub;
+
+    linkStyle default stroke:#FF8C00,stroke-width:2px;
+
+    MA_UI -->|"Uses"| MA_Sync
+    WP_Admin -->|"Uses"| WP_Auth
+
+    TRK_Ingest -->|"Raw split data"| TRK_Splits
+    TRK_Splits -->|"Calculated pace"| TRK_Board
+    TRK_Splits -->|"Triggers alerts"| GW_Notif
+
+    MA_Sync -->|"Calls API"| GW_Router
+    WP_Admin -->|"Calls API"| GW_Router
+    WP_Reg -->|"Calls API"| GW_Router
+
+    GW_Router -->|"Validates"| GW_Auth
+    GW_Router -->|"Routes reg"| REG_Core
+    GW_Router -->|"Routes tracking"| TRK_Ingest
+```
+
+</details>
+
+<details>
+    <summary><strong>L4 Class Architecture</strong></summary>
+
+```mermaid
+flowchart LR
+    classDef classStyle fill:#BFDBFE,stroke:#3B82F6,stroke-width:1.5px,color:#1E3A8A;
+    classDef darkSub fill:#374151,stroke:#4B5563,stroke-width:1px,color:#FFFFFF;
+
+    subgraph APIGATEWAYCORE ["API Gateway"]
+        RequestRouter["RequestRouter<br/>- routeMap: Map<br/>- rateLimitConfig: Config<br/>+ routeRequest()<br/>+ checkRateLimit()"]
+        JWTAuthService["JWTAuthService<br/>- secretKey: String<br/>- tokenExpiry: Int<br/>+ validateToken()<br/>+ generateToken()"]
+        UserSession["UserSession<br/>- sessionId: UUID<br/>- userId: UUID<br/>- role: String<br/>+ isExpired()<br/>+ invalidate()"]
+    end
+
+    subgraph APIREGISTRATIONCORE ["Registration API"]
+        RegistrationController["RegistrationController<br/>- regService: RunnerService<br/>+ handleRegister()<br/>+ handleCancel()"]
+        RunnerService["RunnerService<br/>- runnerRepo: Repository<br/>- bibAssigner: Assigner<br/>+ registerRunner()<br/>+ getRunnerDetails()"]
+        Runner["Runner<br/>- runnerId: UUID<br/>- name: String<br/>- email: String<br/>- status: Enum<br/>+ updateProfile()<br/>+ getRegistrationStatus()"]
+        EmergencyContact["EmergencyContact<br/>- contactId: UUID<br/>- name: String<br/>- phone: String<br/>- relation: String<br/>+ getContactInfo()<br/>+ updateContact()"]
+        BibAssignment["BibAssignment<br/>- bibNumber: Int<br/>- waveGroup: String<br/>- assignedAt: DateTime<br/>+ assignBib()<br/>+ verifyBib()"]
+    end
+
+    subgraph APITRACKINGCORE ["Tracking API"]
+        RFIDIngestController["RFIDIngestController<br/>- sensorStream: Stream<br/>- bufferSize: Int<br/>+ ingestRawTag()<br/>+ validateSensorData()"]
+        PaceCalculatorService["PaceCalculatorService<br/>- courseDistance: Double<br/>- splitPoints: List<br/>+ calculatePace()<br/>+ projectFinishTime()"]
+        SplitTimeRecord["SplitTimeRecord<br/>- splitId: UUID<br/>- bibNumber: Int<br/>- checkpointId: String<br/>- timestamp: DateTime<br/>+ recordSplit()<br/>+ getElapsedTime()"]
+        RunnerPaceState["RunnerPaceState<br/>- runnerId: UUID<br/>- currentPace: Double<br/>- totalDistance: Double<br/>+ updatePace()<br/>+ getCurrentRank()"]
+        LeaderboardService["LeaderboardService<br/>- topRunnersCache: Cache<br/>- categoryRanks: Map<br/>+ updateRankings()<br/>+ getLeaderboard()"]
+    end
+
+    class RequestRouter,JWTAuthService,UserSession classStyle;
+    class RegistrationController,RunnerService,Runner,EmergencyContact,BibAssignment classStyle;
+    class RFIDIngestController,PaceCalculatorService,SplitTimeRecord,RunnerPaceState,LeaderboardService classStyle;
+    class APIGATEWAYCORE,APIREGISTRATIONCORE,APITRACKINGCORE darkSub;
+
+    linkStyle default stroke:#FF8C00,stroke-width:2px;
+
+    RequestRouter -->|"authenticates"| JWTAuthService
+    JWTAuthService -->|"validates token"| UserSession
+    RequestRouter -->|"dispatches route"| RegistrationController
+    RegistrationController -->|"delegates reg"| RunnerService
+    RunnerService -->|"creates entity"| Runner
+    Runner -->|"has 1..*"| EmergencyContact
+    Runner -->|"assigns 1..1"| BibAssignment
+
+    RFIDIngestController -->|"passes raw tag"| PaceCalculatorService
+    PaceCalculatorService -->|"persists split"| SplitTimeRecord
+    PaceCalculatorService -->|"calculates pace"| RunnerPaceState
+    RunnerPaceState -->|"recalculates rank"| LeaderboardService
+```
+
+</details>
+
+</details>
+
 ---
 
 # 2. Application Architecture
