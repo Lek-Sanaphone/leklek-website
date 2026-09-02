@@ -1066,3 +1066,456 @@ flowchart TD
 > **Mitigation** = How to protect against it
 
 </details>
+
+---
+
+# 6. Architecture Styles and Communication Patterns
+
+Week 6 focuses on:
+
+* recognising **bad architecture**
+* understanding **dependencies**
+* choosing suitable **architecture styles**
+* choosing how components **communicate**
+
+## 6.1 Architecture Smells
+
+Architecture smells are warning signs that a system may be difficult to maintain, change, or scale.
+
+| Architecture Smell | Simple Meaning | Marathon Example | Improvement |
+|---|---|---|---|
+| **Feature Concentration** | One component does too many things | **Backend API** handles registration, schedules, volunteers, vendors, tracking, notifications, feedback, and results | Split into focused components or services |
+| **Scattered Functionality** | One responsibility is spread across multiple components | Notification responsibilities exist across Web App, Mobile App, Backend API, and Notification Provider | Centralise notification rules |
+| **Dense Structure** | Too many direct dependencies between components | **Backend API** directly connects to apps, database, authentication, payment, timing, notification, and mapping systems | Use focused integration components and asynchronous messaging |
+| **Cyclic Dependency** | Components eventually depend back on each other | No cyclic dependency identified in the current Marathon architecture | Recheck after architecture changes |
+| **Unstable Dependency** | A core component depends directly on less-stable or external systems | Backend API directly depends on Payment, Notification, Mapping, and Timing services | Use adapters, queues, retries, timeouts, and failure handling |
+
+
+<details>
+    <summary>Easy way to identify them</summary>
+
+```mermaid
+flowchart TD
+    Q1["One component does too much?"] --> A1["Feature Concentration"]
+    Q2["Same responsibility exists everywhere?"] --> A2["Scattered Functionality"]
+    Q3["Too many arrows or connections?"] --> A3["Dense Structure"]
+    Q4["Dependencies form a loop?"] --> A4["Cyclic Dependency"]
+    Q5["Core system relies directly on external systems?"] --> A5["Unstable Dependency"]
+
+    style Q1 fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style Q2 fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style Q3 fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style Q4 fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style Q5 fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style A1 fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style A2 fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style A3 fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style A4 fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style A5 fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+```
+
+</details>
+
+<details>
+    <summary>Single Responsibility Principle</summary>
+
+To avoid **Feature Concentration**, each container or component should have **one clear responsibility**. This keeps changes and fixes focused and localised.
+
+Instead of one Backend API owning every capability:
+
+```text
+Backend API
+ ├─ Registration
+ ├─ Tracking
+ ├─ Results
+ ├─ Volunteers
+ ├─ Vendors
+ └─ Notifications
+```
+
+separate the responsibilities:
+
+```text
+Backend API
+ ├─ Registration Component
+ ├─ Event Management Component
+ ├─ Volunteer Component
+ ├─ Vendor Component
+ ├─ Tracking Component
+ └─ Results Component
+```
+
+The updated Marathon solution follows this structure.
+
+</details>
+
+<details>
+    <summary>Marathon Database example</summary>
+
+The original Marathon Database stores registration, schedules, volunteers, vendors, timing records, results, and feedback, creating **Feature Concentration**.
+
+The improved architecture separates:
+
+```mermaid
+flowchart LR
+    A["Operational Database"] --- B["Live-Tracking Data Store"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+This keeps normal operational data separate from rapidly changing race-tracking data.
+
+</details>
+
+## 6.2 Dependencies
+
+If `A → B`:
+
+* **A depends on B**
+* A must know how to connect to B
+* B does not need to know about A
+* communication can move both ways, but A normally initiates it
+
+<details>
+    <summary>Marathon examples</summary>
+
+```mermaid
+flowchart LR
+    A["Web App"] --> C["Backend API"]
+    B["Mobile App"] --> C
+    C --> D["Marathon Database"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style C fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+| Component | Depends On |
+|---|---|
+| Web Application | Backend API |
+| Mobile Application | Backend API |
+| Backend API | Marathon Database |
+
+</details>
+
+## 6.3 Architecture Styles
+
+Compare architecture styles by **advantages**, **disadvantages**, and **suitable use cases**, then justify which styles should be used in the system.
+
+| Style | Meaning / Marathon Use | Advantages | Disadvantages |
+|---|---|---|---|
+| **Layered** | Separates presentation, business, and data responsibilities | Clear structure; easier testing and maintenance | Layers may become tightly coupled; limited independent scaling |
+| **Service-Oriented** | Used for Payment, Mapping, Notification, and Authentication integrations | Reusable services and standard interfaces | More coordination and governance |
+| **Event-Driven** | Used for timing, tracking, race updates, and alerts | Handles traffic spikes, asynchronous processing, and real-time events | Harder tracing, testing, ordering, and error handling |
+| **Microservices** | Separate capabilities such as Registration, Tracking, or Results | Independent deployment/scaling and failure isolation | More deployment, networking, monitoring, and data complexity |
+
+<details>
+    <summary>Marathon selected approach</summary>
+
+The sample solution uses a **hybrid architecture**:
+
+```mermaid
+flowchart TD
+    H["Hybrid Architecture"] --> L["Layered<br/>internal application organisation"]
+    H --> S["Service-Oriented<br/>external integrations"]
+    H --> E["Event-Driven<br/>timing, tracking, notifications"]
+    H --> M["Microservices<br/>selected functions needing independent scaling"]
+
+    style H fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style L fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style S fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style E fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style M fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+</details>
+
+## 6.4 Communication Patterns
+
+The tutorial introduces four main communication methods:
+
+| Pattern | Simple Meaning | Marathon Example |
+|---|---|---|
+| **Repository** | Components read and write shared stored data | Backend API → Operational Database |
+| **API** | Consumer sends a request to a provider | Web/Mobile → Backend API |
+| **Persistent Connection** | Connection remains open for real-time communication | Notification Service → Mobile App |
+| **Queue / Broker** | A middleman carries messages asynchronously | Timing Events → Event Broker → Tracking Processor |
+
+## 6.5 Repository Communication
+
+Multiple containers read and write data through a shared repository, usually a database.
+
+```mermaid
+flowchart TD
+    A["Backend API"] --> B["Operational Database"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+### Limitations
+
+* mainly supports **CRUD**
+* constant polling can waste resources
+* multiple writers can create consistency problems
+
+CRUD: **Create**, **Read**, **Update**, **Delete**.
+
+## 6.6 API Communication
+
+With APIs, `Consumer → Provider`. The **consumer initiates communication** and can **pull** or **push** information.
+
+<details>
+    <summary>Marathon examples</summary>
+
+```mermaid
+flowchart LR
+    A["Web App"] --> C["Backend API"]
+    B["Mobile App"] --> C
+    C --> D["Payment Service"]
+    C --> E["Mapping Service"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style C fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style E fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+These use APIs over **HTTPS/JSON** in the sample architecture.
+
+</details>
+
+### REST APIs
+
+REST is the main API style discussed in the tutorial.
+
+> **URL = resource/noun**
+> **HTTP method = action/verb**
+
+| Method | Example | Meaning |
+|---|---|---|
+| GET | `/tickets` | Retrieve tickets |
+| GET | `/tickets/123` | Retrieve one ticket |
+| POST | `/tickets` | Create |
+| PUT | `/tickets/123` | Update |
+| DELETE | `/tickets/123` | Delete |
+
+Important response codes:
+
+| Code | Meaning |
+|---|---|
+| **200** | Success |
+| **400** | Bad request |
+| **401** | Not authenticated |
+| **403** | No permission |
+| **404** | Not found |
+
+REST APIs are also **stateless**: each request is processed independently without relying on previous requests. Data is commonly exchanged using **JSON**.
+
+### API Limitation → Persistent Connections
+
+REST communication is initiated by the consumer. That creates a problem for real-time updates.
+
+```mermaid
+flowchart TD
+    A["Race alert occurs"] --> B["Server needs to notify Mobile App"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+The server should not need to wait for the Mobile App to ask for an update. This is where **persistent connections** are useful.
+
+## 6.7 Persistent Connections / WebSockets
+
+A persistent connection remains open:
+
+```mermaid
+flowchart LR
+    A["Client"] <-->|"WebSocket"| B["Server"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+After the consumer creates the connection:
+
+* the client can send messages
+* the server can send messages
+* either side can close it
+
+Used for timely Marathon:
+
+* race updates
+* emergency alerts
+* mobile notifications
+
+### Limitations
+
+* **Ambiguous interface:** WebSockets do not strongly define what messages or events should look like, so both sides must agree on the format.
+* **Difficult to scale:** persistent connections make the backend more stateful and harder to divide across services.
+
+## 6.8 Queues and Brokers
+
+Instead of services communicating directly (`Producer → Consumer`), use a middleman:
+
+```mermaid
+flowchart TD
+    A["Producer"] --> B["Queue / Broker"]
+    B --> C["Consumer"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style C fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+Message queues can provide:
+
+* reliability
+* ordering
+* prioritisation
+* load balancing
+* buffering
+* playback
+* translation
+
+<details>
+    <summary>Marathon timing example</summary>
+
+This is an important example of **event-driven communication**:
+
+```mermaid
+flowchart TD
+    A["Timing Devices"] --> B["IoT Data Ingestion"]
+    B --> C["Event Broker"]
+    C --> D["Tracking Event Processor"]
+    D --> E["Tracking DB"]
+    D --> F["Operational DB"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style C fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style E fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style F fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+Why use a broker? If thousands of runners cross checkpoints at once, the broker helps **buffer events and decouple the timing devices from processing**.
+
+```mermaid
+flowchart TD
+    A["Thousands of timing events"] --> B["Event Broker"]
+    B --> C["Processed safely by consumers"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style C fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+</details>
+
+<details>
+    <summary>Publish / Subscribe</summary>
+
+With **Pub/Sub**:
+
+* a **publisher** produces events
+* a **subscriber** receives events
+* a service can be both
+
+Events are organised into **topics/channels**. The publisher does not need to know every subscriber.
+
+```mermaid
+flowchart TD
+    A["Publisher"] --> B["Topic: Race Update"]
+    B --> C["Event Broker"]
+    C --> D["Mobile"]
+    C --> E["Dashboard"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style C fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style E fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+</details>
+
+<details>
+    <summary>Marathon notification example</summary>
+
+Instead of `Backend API → Notification Provider`, the improved architecture uses:
+
+```mermaid
+flowchart TD
+    A["Backend API"] --> B["Event Broker"]
+    B --> C["Notification Worker"]
+    C --> D["Notification Provider"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style C fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+Notification delivery becomes **asynchronous**, so sending a notification does not need to block the user's main request.
+
+</details>
+
+## 6.9 Marathon Communication Summary
+
+| Source → Destination | Pattern | Why |
+|---|---|---|
+| Web → Backend API | API | Immediate response |
+| Mobile → Backend API | API | Current race information |
+| Backend → Operational DB | Repository | Store authoritative data |
+| Backend → Payment | API | Payment confirmation |
+| Backend → Mapping | API | Route information |
+| Timing → IoT | Broker / MQTT | High-volume device communication |
+| IoT → Event Processing | Queue/Broker | Scalable asynchronous processing |
+| Processor → Tracking DB | Repository | Frequent tracking updates |
+| Backend → Notifications | Queue/Broker | Avoid blocking user requests |
+| Notification → Mobile | Persistent connection | Real-time updates |
+
+<details>
+    <summary>Main Week 6 takeaway</summary>
+
+```mermaid
+flowchart TD
+    A["Good Architecture"] --> B["Clear Responsibilities"]
+    A --> C["Controlled Dependencies"]
+    A --> D["Correct Communication Pattern"]
+
+    style A fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style C fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+> **Architecture Style** = how the system is organised.
+> **Architecture Smell** = warning that the organisation has a problem.
+> **Dependency** = which component relies on another.
+> **Communication Pattern** = how components exchange information.
+
+For the Marathon system:
+
+```text
+Immediate request?
+      → API
+
+Store/retrieve data?
+      → Repository
+
+Real-time two-way/update communication?
+      → Persistent Connection
+
+High-volume or asynchronous events?
+      → Queue / Broker
+```
+
+This is the core logic connecting the Week 6 tutorial concepts to the Marathon Management System sample solution.
+
+</details>
