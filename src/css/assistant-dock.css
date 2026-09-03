@@ -1,0 +1,137 @@
+/* Dock Docs Assistant as a full-height right rail when the chat window is open. */
+
+html:has(.docs-assistant__window) {
+  overflow-x: hidden;
+}
+
+html:has(.docs-assistant__window) #__docusaurus {
+  margin-right: var(--docs-assistant-width, 380px);
+}
+
+html:has(.docs-assistant__window) .theme-doc-toc-desktop,
+html:has(.docs-assistant__window) .col--3:has(.theme-doc-toc-desktop) {
+  display: none;
+}
+
+html:has(.docs-assistant__window) .docs-assistant {
+  inset: 0 0 0 auto;
+  right: 0;
+  bottom: auto;
+  width: var(--docs-assistant-width, 380px);
+  height: 100dvh;
+  align-items: stretch;
+  gap: 0;
+}
+
+html:has(.docs-assistant__window) .docs-assistant__window,
+html:has(.docs-assistant__window) .docs-assistant__window--wide {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  border-radius: 0;
+  border-right: none;
+  box-shadow: var(--ifm-global-shadow-lw);
+}
+
+html:has(.docs-assistant__window) .docs-assistant__expand {
+  display: none;
+}
+
+html:has(.docs-assistant__window) .docs-assistant__toggle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+  animation: none;
+  pointer-events: none;
+}
+
+/* Sit on the panel seam in the viewport, not inside the overflow:hidden window.
+   `right` is the distance from the viewport's right edge to the handle's right
+   edge. Do not set `left` — that previously stretched the handle across the page. */
+.docs-assistant__resize {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: auto;
+  right: calc(var(--docs-assistant-width, 380px) - 10px);
+  width: 20px;
+  margin: 0;
+  z-index: 10002;
+  cursor: col-resize;
+  touch-action: none;
+  pointer-events: auto;
+  background: transparent;
+}
+
+.docs-assistant__resize::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  transform: translateX(-50%);
+  background: var(--ifm-color-primary);
+  opacity: 0.85;
+}
+
+.docs-assistant__resize:hover::after,
+.docs-assistant__resize:focus-visible::after,
+html.docs-assistant-resizing .docs-assistant__resize::after {
+  opacity: 1;
+}
+
+html.docs-assistant-resizing {
+  cursor: col-resize;
+  user-select: none;
+}
+
+html.docs-assistant-resizing * {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+.docs-assistant__close {
+  flex: 0 0 auto;
+  min-width: 32px;
+  min-height: 32px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ifm-font-color-base);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.docs-assistant__close:hover {
+  background: var(--ifm-color-emphasis-100);
+}
+
+@media (max-width: 996px) {
+  html:has(.docs-assistant__window) #__docusaurus {
+    margin-right: 0;
+  }
+
+  html:has(.docs-assistant__window) .docs-assistant {
+    inset: 0;
+    width: 100%;
+  }
+
+  .docs-assistant__resize {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.docs-assistant__window) #__docusaurus {
+    transition: none;
+  }
+}
