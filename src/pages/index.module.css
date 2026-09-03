@@ -31,14 +31,16 @@
 .hero {
   text-align: center;
   max-width: 750px;
+  width: 100%;
   margin: auto;
 }
 
-.avatar {
-  width: 200px;
-  height: 200px;
-  border-radius: 0%;
-  margin-bottom: 1rem;
+.heroImage {
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  margin: 0 auto 1rem;
 }
 
 .buttons {

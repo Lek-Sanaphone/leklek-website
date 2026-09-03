@@ -75,7 +75,7 @@ const config = {
             'https://github.com/Lek-Sanaphone/leklek-website/tree/main/',
         },
         theme: {
-          customCss: './src/css/custom.css',
+          customCss: ['./src/css/custom.css', './src/css/assistant-dock.css'],
         },
         sitemap: {
           changefreq: 'weekly',
