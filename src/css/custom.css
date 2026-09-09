@@ -428,6 +428,25 @@
   font-size: 1.05em;
 }
 
+/* Hidden copy of mermaid source for the docs indexer. Not shown to readers. */
+pre.docs-mermaid-source {
+  display: none !important;
+}
+
+.docs-assistant__body .msg__markdown .msg__mermaid {
+  overflow-x: auto;
+  max-width: 100%;
+  margin: 0 0 8px;
+  padding: 8px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+  background-color: var(--ifm-background-surface-color, var(--ifm-background-color));
+}
+.docs-assistant__body .msg__markdown .msg__mermaid--loading {
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.9em;
+}
+
 .docs-assistant__body .msg__bubble--typing {
   display: inline-flex;
   gap: 4px;
