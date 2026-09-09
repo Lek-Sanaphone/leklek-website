@@ -5,6 +5,7 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 // @ts-ignore -- plain ESM module, shared with the node:test suite
 import { normalizeMath } from "./normalizeMath.mjs";
+import MermaidBlock from "./MermaidBlock";
 
 const WORKER_CHAT_URL = "https://docusaurus-rag.lekjkboy2005.workers.dev/chat";
 
@@ -61,6 +62,27 @@ function MarkdownMessage({ content }: { content: string }) {
           a: ({ node, ...props }) => (
             <a {...props} target="_blank" rel="noreferrer" />
           ),
+          pre: ({ children }) => <>{children}</>,
+          code: ({ className, children, ...props }) => {
+            const text = String(children).replace(/\n$/, "");
+            if (/language-mermaid/.test(className || "")) {
+              return <MermaidBlock chart={text} />;
+            }
+            if (className) {
+              return (
+                <pre>
+                  <code className={className} {...props}>
+                    {children}
+                  </code>
+                </pre>
+              );
+            }
+            return (
+              <code className={className} {...props}>
+                {children}
+              </code>
+            );
+          },
         }}
       >
         {normalizeMath(content)}
