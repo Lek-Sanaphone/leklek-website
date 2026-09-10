@@ -1679,3 +1679,476 @@ flowchart TD
 
 Weeks 3–5 teach you how to follow program execution and data. Week 6 uses that knowledge to recognise unsafe program behaviour and software vulnerabilities.
 
+
+---
+# 7. Code Verification and Predicate Logic
+## 7.1 Main question and Purpose
+<details>
+    <summary>Purpose</summary>
+
+* Main question
+    * Given a pre-condition and a program, can we **prove** that a safety assertion always holds?
+* Weeks 3–6 analyse what a program can do. Week 7 checks whether what it does is **correct / safe**.
+* The slides take program paths and SVF statements, translate them into logical formulas, and check each path.
+
+```mermaid
+flowchart TD
+    w6["Week 6<br/>This should be true for safety"] --> a["assert(condition)"]
+    a --> w7["Week 7<br/>Can we prove this condition always holds?"]
+```
+
+</details>
+
+| Week | Main question | Connection to Week 7 |
+| ---- | ------------- | -------------------- |
+| **Week 3 — Control flow** | Where can execution go? | Gives the program paths that can be checked |
+| **Week 4 — Data dependence** | Where can data / pointers go? | Gives relationships between values along those paths |
+| **Week 5 — Information flow** | Can data flow from source to sink? | Identifies important flows that may need verification |
+| **Week 6 — Vulnerabilities** | What can go wrong? | Introduces safety conditions such as `assert(index < size)` |
+| **Week 7 — Verification** | Can we prove the safety condition holds? | Converts paths + assertions into logic and checks them |
+
+## 7.2 Formal verification
+**Formal verification** means proving whether code satisfies a given **specification** using mathematical logic.
+
+```mermaid
+flowchart TD
+    spec["Specification<br/>What should happen?"] --> specF["Logical formula"]
+    impl["Code implementation<br/>What actually happens?"] --> implF["Logical formula"]
+    specF --> compare["Compare / verify"]
+    implF --> compare
+    compare --> solver["Solver"]
+```
+
+The lecture describes this as translating the specification and implementation into logical formulas, then using theorem-proving tools to check them.
+
+## 7.3 Specification: pre-condition and post-condition
+In this subject, specifications are embedded in the source code using **assume** and **assert**. The slides express this with **Hoare logic**:
+
+```text
+P { prog } Q
+```
+
+| Part | Meaning |
+| ---- | ------- |
+| `P` | **Pre-condition** — assumption before the program |
+| `prog` | Program being checked |
+| `Q` | **Post-condition** — assertion that should hold afterward |
+
+```c++
+assume(x > 0);    // P
+
+y = x + 1;        // program
+
+assert(y > 0);    // Q
+```
+
+> If `x > 0` before execution, running the program should guarantee `y > 0`.
+
+## 7.4 Main verification question
+Week 7 asks:
+
+> **Given the pre-condition and the program, will the assertion always hold?**
+
+```c++
+assume(100 > x && x > 0);
+
+if (x > 10) {
+    y = x + 1;
+}
+else {
+    y = 10;
+}
+
+assert(y >= x + 1);
+```
+
+Here:
+
+* `P = 100 > x > 0`
+* `Q = y >= x + 1`
+
+## 7.5 Check each program path
+This is where **Week 3 control flow** becomes important. The example has two paths:
+
+```mermaid
+flowchart TD
+    q{"x > 10?"} -->|Yes| p1["y = x + 1"]
+    q -->|No| p2["y = 10"]
+```
+
+<details>
+    <summary>Path 1</summary>
+
+```text
+x > 10
+y = x + 1
+```
+
+Assertion: `y >= x + 1`
+
+Because `y = x + 1`, the assertion holds on this path.
+
+</details>
+
+<details>
+    <summary>Path 2</summary>
+
+```text
+x <= 10
+y = 10
+```
+
+Try `x = 10`. Then `y = 10`, but:
+
+```text
+y >= x + 1
+10 >= 11  ✗
+```
+
+So `x = 10` is a **counterexample**. The lecture identifies this same counterexample for the else path.
+
+</details>
+
+## 7.6 Counterexample
+A **counterexample** is:
+
+> A valid input that makes the required assertion fail.
+
+Instead of trying every possible input (`x = 1`, `x = 2`, …, `x = 99`), we ask a solver:
+
+> Does **any** valid input exist that breaks the assertion?
+
+That question becomes the logical verification formula.
+
+## 7.7 Convert code into logical formulas
+Each program path is translated into constraints. The slides state that the `SVFStmt`s from each program path are translated into a logical formula `ϕ`, then each path is checked.
+
+```mermaid
+flowchart TD
+    path["Program path"] --> constraints["Logical constraints"]
+    constraints --> solver["Solver"]
+```
+
+<details>
+    <summary>Path 1 formula</summary>
+
+```text
+P
+AND
+x > 10
+AND
+y = x + 1
+```
+
+</details>
+
+<details>
+    <summary>Path 2 formula</summary>
+
+```text
+P
+AND
+x <= 10
+AND
+y = 10
+```
+
+</details>
+
+## 7.8 How we search for a bug
+The required property is:
+
+```text
+P ∧ Program → Q
+```
+
+> If the pre-condition holds and the program executes, then the post-condition should hold.
+
+To search for a bug, the lecture instead looks for:
+
+```text
+P ∧ Program ∧ ¬Q
+```
+
+```mermaid
+flowchart TD
+    p["P<br/>Valid input"] --> and["AND"]
+    prog["Program<br/>Valid execution"] --> and
+    nq["¬Q<br/>Assertion is FALSE"] --> and
+    and --> q["Can a valid execution exist<br/>where the assertion fails?"]
+```
+
+## 7.9 SAT and UNSAT
+A solver checks whether a logical formula has a solution.
+
+<details>
+    <summary>SAT — Satisfiable</summary>
+
+There is at least one set of values that makes the formula true.
+
+Example: `x > 5 AND x < 10` has a solution `x = 7`, so the formula is **SAT**.
+
+The lecture says an automated prover returns a **model** when a formula is satisfiable.
+
+</details>
+
+<details>
+    <summary>UNSAT — Unsatisfiable</summary>
+
+No values can satisfy the formula.
+
+Example: `x > 10 AND x < 5` is impossible, so the formula is **UNSAT**.
+
+</details>
+
+For the bug formula `P ∧ Program ∧ ¬Q`:
+
+```mermaid
+flowchart TD
+    formula["P ∧ Program ∧ ¬Q"] --> solver["Solver"]
+    solver --> sat["SAT"]
+    solver --> unsat["UNSAT"]
+    sat --> cex["Counterexample exists"]
+    cex --> fail["Assertion can fail"]
+    unsat --> none["No counterexample"]
+    none --> holds["Property holds for the checked case"]
+```
+
+## 7.10 Propositional logic
+Before predicate logic, Week 7 reviews **propositional logic**.
+
+A proposition is a statement that is either **TRUE** or **FALSE**.
+
+Example:
+
+* `P = "x > 10"`
+* `Q = "y < 5"`
+
+| Logic | Meaning | Code equivalent |
+| ----- | ------- | --------------- |
+| `P ∧ Q` | AND | `P && Q` |
+| `P ∨ Q` | OR | `P \|\| Q` |
+| `¬P` | NOT | `!P` |
+| `P → Q` | If P then Q | implication |
+
+<details>
+    <summary>Inference example</summary>
+
+```c++
+if (x > 10 && y < 5)
+    z = 15;
+```
+
+Let:
+
+* `P1 = x > 10`
+* `P2 = y < 5`
+* `Q = z = 15`
+
+Then `(P1 ∧ P2) → Q`:
+
+```text
+P1
+P2
+──────
+Q
+```
+
+This is a basic inference pattern.
+
+</details>
+
+## 7.11 Why propositional logic is not enough
+Propositional logic treats `x > 10` as one whole statement `P`. It does not analyse the internal relationship between `x`, `>`, and `10`.
+
+The slides explain that propositional logic has limited ability to represent properties, relationships, or statements about **all** or **some** objects.
+
+Programs contain many relationships:
+
+* `x > 10`
+* `y < x`
+* `index < size`
+* `result = x + 1`
+
+Therefore we need something more expressive: **predicate logic**.
+
+## 7.12 Predicate logic / first-order logic
+Predicate logic extends propositional logic with:
+
+* variables
+* predicates
+* relationships
+* quantifiers
+
+<details>
+    <summary>One-variable predicate</summary>
+
+```text
+R(x): x > 5
+```
+
+* `x` is a variable
+* `x > 5` is a predicate / property
+
+If `x = 6`, then `R(6)` is `6 > 5`, which is **TRUE**.
+
+</details>
+
+<details>
+    <summary>Two-variable predicate</summary>
+
+```text
+R(x, y): x > y
+```
+
+`R(10, 5)` is `10 > 5`, which is **TRUE**.
+
+This is why predicate logic is useful for analysing program variables.
+
+</details>
+
+## 7.13 Quantifiers
+Predicate logic introduces two important symbols.
+
+<details>
+    <summary>∀ — Universal</summary>
+
+Means **for all / every**. `∀x` = for every `x`.
+
+In verification:
+
+> The assertion should hold for **all valid inputs**.
+
+</details>
+
+<details>
+    <summary>∃ — Existential</summary>
+
+Means **there exists / at least one**. `∃x` = there exists some `x`.
+
+In bug finding:
+
+> Does **one input exist** that breaks the assertion?
+
+</details>
+
+The slides define `∀` as all / every and `∃` as some / there exists.
+
+```text
+Safety:
+∀ valid inputs → assertion holds
+
+Bug finding:
+∃ input → assertion fails
+```
+
+## 7.14 Knowledge base — KB
+The Predicate Logic slides use `KB` for **Knowledge Base**:
+
+> The collection of logical constraints / facts extracted from the program.
+
+Example:
+
+```text
+KB:
+x > 10
+y = x + 1
+
+Q:
+y > 10
+```
+
+We ask `KB ⊢ Q ?`
+
+> Given everything in `KB`, must `Q` also be true?
+
+The lecture describes this as asking whether `Q` is true in every situation that satisfies the constraints in `KB`.
+
+## 7.15 Theorem provers
+Doing this manually becomes impractical because programs contain too many paths, variables, logical relationships, and assertions.
+
+The subject therefore focuses on automated theorem-prover tools rather than manual mathematical proofs.
+
+```mermaid
+flowchart TD
+    code["Code"] --> paths["Program paths"]
+    paths --> formulas["Logical formulas"]
+    formulas --> prover["Theorem prover"]
+    prover --> result["SAT / UNSAT"]
+```
+
+## 7.16 SAT versus SMT solver
+
+| Solver | Handles | Example |
+| ------ | ------- | ------- |
+| **SAT** | Boolean / propositional formulas | `P ∧ Q`, `P ∨ ¬Q` |
+| **SMT** | Richer expressions with values and arithmetic | `x > 10`, `y = x + 1`, `index < size` |
+
+The slides describe SMT as an extension / generalisation of SAT for richer formulas, and identify **Z3** as the SMT solver used in this subject.
+
+```mermaid
+flowchart TD
+    z3["Z3"] --> smt["SMT solver"]
+    smt --> check["Checks logical constraints from code"]
+```
+
+## 7.17 Week 7 overall process
+
+```mermaid
+flowchart TD
+    prev["Previous weeks"] --> paths["Find program paths<br/>Week 3"]
+    paths --> stmts["Program statements"]
+    stmts --> assertQ["Week 6 safety requirement<br/>assert(Q)"]
+    assertQ --> w7["Week 7"]
+    w7 --> combo["Pre-condition P<br/>+ Program path<br/>+ Post-condition Q"]
+    combo --> logic["Translate into logic"]
+    logic --> bug["Check counterexample formula<br/>P ∧ Program ∧ ¬Q"]
+    bug --> solver["SAT / SMT solver"]
+    solver --> sat["SAT"]
+    solver --> unsat["UNSAT"]
+    sat --> cex["Counterexample exists"]
+    cex --> fail["Assertion can fail"]
+    unsat --> none["No valid counterexample"]
+```
+
+## 7.18 Cheat sheet
+
+| Concept | Meaning |
+| ------- | ------- |
+| **Formal verification** | Use logic to verify program correctness |
+| **Specification** | What the program should guarantee |
+| **Pre-condition `P`** | Assumption before execution |
+| **Post-condition `Q`** | Assertion after execution |
+| **Hoare form** | `P {prog} Q` |
+| **Counterexample** | Input that makes `Q` fail |
+| **Proposition** | Statement that is true or false |
+| **Predicate** | Property / relation involving variables |
+| `∧` | AND |
+| `∨` | OR |
+| `¬` | NOT |
+| `→` | implies |
+| `∀` | for all |
+| `∃` | there exists |
+| **KB** | Known program constraints |
+| **SAT** | Formula has a solution |
+| **UNSAT** | Formula has no solution |
+| **SMT** | Solver for richer arithmetic / logic constraints |
+| **Z3** | SMT solver used in this subject |
+
+<details>
+    <summary>Most important thing to remember</summary>
+
+```text
+Weeks 3–6:
+Find paths, data flows and vulnerabilities.
+
+Week 7:
+Turn those program behaviours and
+safety requirements into logic
+and check whether they can fail.
+```
+
+> **Week 7 = Path + Program Constraints + Assertion → Logical Formula → Solver → Counterexample or no counterexample.**
+
+</details>
+
