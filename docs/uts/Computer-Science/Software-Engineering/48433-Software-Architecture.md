@@ -1721,3 +1721,489 @@ High-volume or asynchronous events?
 This is the core logic connecting the Week 6 tutorial concepts to the Marathon Management System sample solution.
 
 </details>
+
+---
+
+# 7. Architecture Evaluation
+
+Week 7 focuses on:
+
+* checking whether a design can **meet requirements** and handle realistic situations
+* comparing architecture alternatives with **ATAM**
+* finding failure risks with **HAZOP**
+* documenting decisions and **updating the C4 model**
+
+## 7.1 Purpose of Architecture Evaluation
+
+Architecture evaluation checks whether a system design can **meet requirements, handle realistic situations, and avoid major failures**.
+
+Mistakes are easier and cheaper to fix early.
+
+```mermaid
+flowchart TD
+    A["Architecture"] --> B["Evaluate"]
+    B --> C["Find weaknesses"]
+    C --> D["Compare alternatives"]
+    D --> E["Improve design"]
+    E --> F["Document decisions"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style C fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style E fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style F fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+## 7.2 ATAM — Architecture Trade-off Analysis Method
+
+ATAM evaluates how well an architecture handles different **scenarios** and helps compare alternatives.
+
+> **ATAM = Which architecture is better for this situation, and what trade-offs do we accept?**
+
+```mermaid
+flowchart TD
+    A["Scenario"] --> B["Alternative A vs B"]
+    B --> C["Benefits"]
+    C --> D["Trade-offs"]
+    D --> E["Decision"]
+    E --> F["Justification"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style C fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style E fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style F fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+<details>
+    <summary>Tutor sample — architectural alternatives</summary>
+
+| Scenario | Alternatives | Benefits | Trade-offs | Decision | Justification |
+|---|---|---|---|---|---|
+| Large burst of timing events | **A:** Direct to Backend API<br />**B:** IoT Data Ingestion + Event Stream | A: Simple<br />B: Buffers traffic, scalable, reliable | A: API overload/lost events<br />B: More infrastructure and ordering complexity | **B** | Protects Backend API and supports race-day scaling |
+| Notification Provider unavailable | **A:** Synchronous API call<br />**B:** Queue + asynchronous delivery | A: Immediate result<br />B: Retries and failure isolation | A: Provider failure affects app<br />B: Delivery may be delayed | **B** | Improves resilience |
+| Tracking data grows heavily | **A:** Use Operational DB<br />**B:** Separate Tracking Data Store | A: Simple<br />B: Independent scaling | A: Tracking may slow core DB<br />B: More integration complexity | **B** | Protects registration/admin workloads |
+
+</details>
+
+<details>
+    <summary>Event burst</summary>
+
+Instead of sending timing events straight to the Backend API:
+
+```mermaid
+flowchart TD
+    A["Timing Devices"] --> B["Backend API"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+use a buffer so the API is not overwhelmed:
+
+```mermaid
+flowchart TD
+    A["Timing Devices"] --> B["IoT Ingestion"]
+    B --> C["Event Stream"]
+    C --> D["Processor"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style C fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+The Event Stream acts as a **buffer**, so the Backend API is not overwhelmed.
+
+</details>
+
+<details>
+    <summary>Notification failure</summary>
+
+Instead of a synchronous call:
+
+```mermaid
+flowchart LR
+    A["Backend API"] --> B["Provider"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+use a queue so the user request does not fail immediately if the provider is down:
+
+```mermaid
+flowchart LR
+    A["Backend API"] --> B["Queue"]
+    B --> C["Worker"]
+    C --> D["Provider"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style C fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+</details>
+
+<details>
+    <summary>Large tracking data</summary>
+
+Separate high-volume tracking data from operational data:
+
+```mermaid
+flowchart TD
+    A["Operational DB"] --> B["registration / admin / results"]
+    C["Tracking DB"] --> D["live tracking"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style C fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+This prevents tracking traffic from slowing important operational functions.
+
+</details>
+
+## 7.3 Trade-offs
+
+A design is rarely best at everything.
+
+| Decision | Improves | Trade-off |
+|---|---|---|
+| Event Stream | Scalability, reliability | More complexity |
+| Separate Tracking DB | Performance | Data consistency becomes harder |
+| Notification queue | Availability | Notifications may be delayed |
+| Validation | Correctness / security | More processing |
+
+So architecture evaluation asks:
+
+> **Are these disadvantages acceptable compared with the benefits?**
+
+## 7.4 HAZOP — Hazard and Operability Analysis
+
+HAZOP looks for possible failures in **interactions between system components**.
+
+> **HAZOP = What can go wrong when data moves through the system?**
+
+You normally examine an interaction such as:
+
+```mermaid
+flowchart TD
+    A["Timing Device"] --> B["IoT Data Ingestion"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+Then apply guide words.
+
+## 7.5 HAZOP Guide Words
+
+| Guide Word | Meaning | Simple Example |
+|---|---|---|
+| **No** | Nothing arrives | No timing event |
+| **More** | Extra / duplicate data | Same event received twice |
+| **Part of** | Missing information | Checkpoint ID missing |
+| **Other than** | Information exists but is wrong | Wrong runner ID |
+| **Early** | Arrives too early | Event received before expected time |
+| **Late** | Arrives too late | Tracking event delayed |
+| **Before / After** | Wrong sequence | CP2 processed before CP1 |
+
+## 7.6 HAZOP Analysis
+
+<details>
+    <summary>Tutor sample — HAZOP analysis</summary>
+
+| Interaction | Guide Word | Deviation | Cause | Consequence | Risk | Mitigation |
+|---|---|---|---|---|---|---|
+| Timing Device → IoT Ingestion | **No** | No event received | Device / network / battery failure | Runner time / location missing | High | Buffer locally and resend |
+| Timing Device → IoT Ingestion | **More** | Duplicate events | Retry / repeated delivery | Duplicate results | High | Unique event ID + deduplication |
+| Timing Device → IoT Ingestion | **Part of** | Required field missing | Faulty / incomplete message | Cannot match event correctly | High | Validate required fields |
+| Timing Device → IoT Ingestion | **Other than** | Wrong runner / checkpoint ID | Misconfiguration / tampering | Wrong tracking / results | High | Authenticate and validate |
+| IoT Ingestion → Event Stream | **Late** | Event delayed | Congestion / overload / retries | Tracking becomes inaccurate | Medium | Monitor latency and scale |
+| Event Stream → Processing | **Before / After** | Events processed in wrong order | Async / parallel processing | Wrong progress / results | High | Timestamps + sequence numbers |
+
+</details>
+
+<details>
+    <summary>No</summary>
+
+```mermaid
+flowchart LR
+    A["Timing Device"] -.->|"nothing arrives"| B["IoT Ingestion"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+Nothing arrives, so the system cannot record the runner event.
+
+</details>
+
+<details>
+    <summary>More</summary>
+
+```mermaid
+flowchart TD
+    A["Event 15"] --> D["IoT Ingestion"]
+    B["Event 15"] --> D
+    C["Event 15"] --> D
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style C fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style D fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+```
+
+The same event arrives multiple times.
+
+> Use a unique event ID and ignore duplicates.
+
+</details>
+
+<details>
+    <summary>Part of</summary>
+
+Expected:
+
+```text
+Runner ID
+Checkpoint ID
+Time
+```
+
+Received:
+
+```text
+Runner ID
+Time
+```
+
+Some required data is missing.
+
+</details>
+
+<details>
+    <summary>Other than</summary>
+
+All fields exist, but one is wrong.
+
+```text
+Actual runner: 521
+Received ID: 125
+```
+
+</details>
+
+<details>
+    <summary>Late</summary>
+
+```text
+Runner crosses checkpoint: 10:30
+System receives event: 10:36
+```
+
+The event is correct, but too delayed.
+
+</details>
+
+<details>
+    <summary>Before / After</summary>
+
+Expected:
+
+```text
+CP1 → CP2 → CP3
+```
+
+Received:
+
+```text
+CP2 → CP1 → CP3
+```
+
+Use timestamps and sequence numbers to reorder events.
+
+</details>
+
+## 7.7 HAZOP Answer Structure
+
+A proper HAZOP answer should follow the structure used in the tutor solution:
+
+```mermaid
+flowchart TD
+    A["Interaction"] --> B["Guide Word"]
+    B --> C["Deviation"]
+    C --> D["Cause"]
+    D --> E["Consequence"]
+    E --> F["Risk"]
+    F --> G["Mitigation"]
+    G --> H["Responsible Element"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style C fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style E fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style F fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style G fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style H fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+## 7.8 ATAM vs HAZOP
+
+| | ATAM | HAZOP |
+|---|---|---|
+| Main purpose | Compare architecture choices | Find failure risks |
+| Starts with | Scenario | Interaction |
+| Question | Which design is better? | What can go wrong? |
+| Looks at | Benefits + trade-offs | Deviation + cause + consequence |
+| Result | Architectural decision | Risk mitigation |
+| Example | Direct API vs Event Stream | What if event arrives late? |
+
+> **ATAM = Choose / improve the design**
+> **HAZOP = Try to find how the design can fail**
+
+## 7.9 Architectural Decisions
+
+After evaluation, important decisions should be documented.
+
+<details>
+    <summary>Tutor sample — architectural decisions</summary>
+
+| Issue | Decision | Rationale |
+|---|---|---|
+| Timing bursts overload API | Use IoT Ingestion + Event Stream | Buffers traffic and allows scaling |
+| Provider failure blocks requests | Use queued notifications | Supports retries and isolates failure |
+| Tracking affects main DB | Use separate Tracking Store | Independent scaling |
+| Duplicate / incomplete events | Validate and deduplicate | Protect result integrity |
+| Events arrive out of order | Reorder using timestamps / sequence | Correct progress / results |
+| Results published too early | Require verification | Prevent incorrect official results |
+
+</details>
+
+A useful documentation pattern is:
+
+```mermaid
+flowchart TD
+    A["Issue"] --> B["Alternatives"]
+    B --> C["Decision"]
+    C --> D["Rationale"]
+    D --> E["Affected C4 Elements"]
+    E --> F["Stakeholders"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style C fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style E fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style F fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+## 7.10 Evaluation Changes the Architecture
+
+The tutor's final architecture adds components because of the problems found during evaluation.
+
+| Problem | Architecture Improvement |
+|---|---|
+| Event burst | IoT Data Ingestion + Event Broker |
+| Invalid events | Validation + Dead-Letter Queue |
+| Duplicate / out-of-order events | Tracking Event Processor |
+| Provider failure | Notification Worker + Queue |
+| Large tracking volume | Separate Tracking Data Store |
+| Hard-to-detect failures | Monitoring and Alerting |
+
+The updated C4 diagram includes the Event Broker, DLQ, Tracking Processor, Notification Worker, monitoring, separate tracking storage, audit logs, and identity service.
+
+## 7.11 Dead-Letter Queue
+
+A **Dead-Letter Queue (DLQ)** stores messages that cannot be processed correctly.
+
+```mermaid
+flowchart TD
+    A["Incoming Event"] --> B["Validation"]
+    B --> C["Valid"]
+    B --> D["Invalid"]
+    C --> E["Process"]
+    D --> F["DLQ"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style C fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style E fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style F fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+```
+
+Instead of losing the failed event, the system keeps it for:
+
+* investigation
+* retry
+* correction
+
+The tutor's architecture sends invalid timing events and failed processing / notifications to the DLQ.
+
+## 7.12 Monitoring
+
+Monitoring checks whether the architecture is operating correctly.
+
+The sample monitors:
+
+* queue depth
+* ingestion latency
+* event processing
+* notification delivery
+* DLQ failures
+
+> **Not every problem can be prevented, so the system must also detect problems quickly.**
+
+## 7.13 Connection to C4
+
+Earlier weeks:
+
+```mermaid
+flowchart TD
+    A["Requirements"] --> B["C4 Context"]
+    B --> C["C4 Container"]
+    C --> D["Architecture Design"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style C fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+Week 7:
+
+```mermaid
+flowchart TD
+    A["Existing C4"] --> B["ATAM"]
+    B --> C["HAZOP"]
+    C --> D["Find problems"]
+    D --> E["Add / change components"]
+    E --> F["Updated C4"]
+
+    style A fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style B fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style C fill:#EAF3FF,stroke:#2563EB,stroke-width:2px
+    style D fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style E fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+    style F fill:#FFFFFF,stroke:#2563EB,stroke-width:2px
+```
+
+Week 7 is about **testing and improving the architecture you already designed**.
+
+<details>
+    <summary>Main Week 7 takeaway</summary>
+
+> **Architecture Evaluation** checks whether a design can handle realistic scenarios and failures.
+> **ATAM** compares architectural alternatives, benefits, and trade-offs to choose an appropriate design.
+> **HAZOP** examines interactions using guide words such as No, More, Part of, Other than, Late, and Before / After to identify causes, consequences, risks, and mitigations.
+> The results are then used to improve the architecture, update the C4 model, and document architectural decisions and rationale.
+
+</details>
+
