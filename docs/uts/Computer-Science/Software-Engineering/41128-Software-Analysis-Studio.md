@@ -2152,3 +2152,509 @@ and check whether they can fail.
 
 </details>
 
+---
+# 8. Software Verification and Z3 Theorem Prover
+## 8.1 Main question and Purpose
+<details>
+    <summary>Purpose</summary>
+
+* Main question
+    * How do we turn **program code into logical constraints**, then use **Z3** to check whether those constraints can actually happen?
+* The slides focus on manually translating source code into Z3 expressions, understanding the Z3 solver, and using the provided `Z3Mgr` APIs.
+
+```mermaid
+flowchart TD
+    code["C / C++ code"] --> llvm["LLVM / SVFIR"]
+    llvm --> z3c["Translate statements<br/>into Z3 constraints"]
+    z3c --> solver["Z3 solver"]
+    solver --> result["SAT / UNSAT / UNKNOWN"]
+```
+
+</details>
+
+## 8.2 What is Z3?
+**Z3** is an **SMT solver** developed by Microsoft Research. It is used for software verification, static checking, testing, and other analysis tasks.
+
+> Give me some logical rules, and I will check whether there is any possible solution.
+
+<details>
+    <summary>Slide example</summary>
+
+Constraints:
+
+```text
+x > 10
+y = x + 1
+```
+
+Z3 can choose `x = 11`, `y = 12`. Those values are possible, so the result is `sat`.
+
+</details>
+
+## 8.3 SAT, UNSAT and UNKNOWN
+Z3 returns one of these results when checking a formula.
+
+| Result | Easy meaning |
+| ------ | ------------ |
+| `sat` | At least one solution exists |
+| `unsat` | No solution can satisfy all constraints together |
+| `unknown` | Z3 cannot determine the answer |
+
+```text
+SAT   = possible
+UNSAT = impossible
+```
+
+<details>
+    <summary>SAT example</summary>
+
+```text
+x = 10
+x > 5
+```
+
+Possible, so `sat`.
+
+</details>
+
+<details>
+    <summary>UNSAT example</summary>
+
+```text
+x = 10
+x = 20
+```
+
+Impossible, so `unsat`.
+
+</details>
+
+## 8.4 Important Z3 commands
+
+| Command | Meaning |
+| ------- | ------- |
+| `declare-const` | Create a variable |
+| `declare-fun` | Create a function |
+| `assert` | Add a constraint |
+| `check-sat` | Check if constraints are satisfiable |
+| `get-model` | Show one possible solution |
+| `eval` | Evaluate a value using the solution |
+
+<details>
+    <summary>Example</summary>
+
+```lisp
+(declare-const x Int)
+(assert (> x 10))
+(check-sat)
+```
+
+Meaning:
+
+* create integer `x`
+* require `x > 10`
+* ask Z3 whether this is possible
+
+Answer: `sat`.
+
+</details>
+
+## 8.5 Understanding Z3 syntax
+Z3 usually writes expressions as `(operator value1 value2)` instead of normal C/C++ style.
+
+| C/C++ | Z3 |
+| ----- | --- |
+| `x > 10` | `(> x 10)` |
+| `x == 10` | `(= x 10)` |
+| `x + 1` | `(+ x 1)` |
+| `x != y` | `(not (= x y))` |
+
+```lisp
+(assert (= y (+ x 1)))
+```
+
+simply means `y = x + 1`.
+
+## 8.6 `assert`
+In Z3, `assert` means:
+
+> Add a rule that must be true.
+
+```lisp
+(assert (> x 10))
+(assert (= y (+ x 1)))
+```
+
+Z3 now needs to satisfy both:
+
+```text
+x > 10
+AND
+y = x + 1
+```
+
+Every new `assert` adds another condition.
+
+## 8.7 Uninterpreted functions
+An **uninterpreted function** is a function where Z3 does not know its internal implementation.
+
+For `f(x)`, Z3 may only know that `f` accepts an `Int` and returns an `Int`. It does not care about the code inside `f`.
+
+<details>
+    <summary>Same input, one output — SAT</summary>
+
+```text
+f(10) = 1
+```
+
+Possible, so `sat`.
+
+</details>
+
+<details>
+    <summary>Same input, two outputs — UNSAT</summary>
+
+```text
+f(10) = 1
+f(10) = 2
+```
+
+Impossible, because the same function with the same input cannot return two different values. Result: `unsat`.
+
+</details>
+
+<details>
+    <summary>Different inputs, same output — SAT</summary>
+
+```text
+x != y
+f(x) = f(y)
+```
+
+This can still be `sat`, because different inputs are allowed to produce the same output.
+
+</details>
+
+## 8.8 Arithmetic and types
+Z3 supports common arithmetic and comparison operations such as `+`, `-`, `*`, `/`, `<`, `>`, `<<`, `>>`, `&`, and `|`.
+
+Operands should use compatible types. The slides warn against mixing types without explicit conversion.
+
+If `a` is `Int` and `b` is `Float`, combining them directly may cause a **sort mismatch**.
+
+This is similar to LLVM IR, where types such as `i32`, `i64`, `float`, and `double` matter.
+
+## 8.9 `ite` — if then else
+Z3 represents conditional expressions using `ite(condition, trueValue, falseValue)`.
+
+```c++
+if (condition)
+    result = trueValue;
+else
+    result = falseValue;
+```
+
+```text
+ite(x > 10, 20, 0)
+```
+
+means: if `x > 10` then `result = 20`, else `result = 0`.
+
+The slides use `ite` for comparisons and branches.
+
+<details>
+    <summary>Connection to control flow</summary>
+
+Earlier weeks modelled a branch as two paths. Week 8 can represent that mathematically:
+
+```mermaid
+flowchart TD
+    q{"if (x)"} -->|true| t["trueValue"]
+    q -->|false| f["falseValue"]
+```
+
+```text
+ite(x, trueValue, falseValue)
+```
+
+</details>
+
+## 8.10 Arrays — `store` and `select`
+Z3 arrays are important because they can be used to represent memory.
+
+| Operation | Meaning | C-like | Z3 idea |
+| --------- | ------- | ------ | ------- |
+| `store` | Write a value into an array / memory location | `a[x] = y` | `store(a, x, y)` |
+| `select` | Read a value from an array / memory location | `z = a[x]` | `select(a, x)` |
+
+```text
+STORE  = write
+SELECT = read
+```
+
+## 8.11 `push` and `pop`
+Think of these as:
+
+* `push` = **save** the current solver state
+* `pop` = **restore** the previous solver state
+
+The slides explain that `push` creates a new scope and `pop` removes the assertions added since the matching `push`.
+
+<details>
+    <summary>Temporary constraint</summary>
+
+```text
+x > 0
+
+PUSH
+    x = 10
+    check-sat
+POP
+
+Back to:
+x > 0
+```
+
+The temporary constraint `x = 10` disappears after `pop`.
+
+</details>
+
+<details>
+    <summary>Why this is useful for branches</summary>
+
+You can analyse true and false paths separately so constraints from different paths are not mixed together:
+
+```text
+PUSH
+assert(x > 10)
+analyse TRUE path
+POP
+
+PUSH
+assert(x <= 10)
+analyse FALSE path
+POP
+```
+
+```mermaid
+flowchart TD
+    q{"if (x > 10)"} -->|true| t["PUSH true-path constraints"]
+    q -->|false| f["PUSH false-path constraints"]
+    t --> pop1["POP"]
+    f --> pop2["POP"]
+```
+
+</details>
+
+## 8.12 `Z3Mgr`
+The subject provides a wrapper called `Z3Mgr` to make Z3 easier to use from the assignment code.
+
+| API | Meaning |
+| --- | ------- |
+| `getZ3Expr(...)` | Create a Z3 expression |
+| `getMemObjAddress(...)` | Create / address a memory object |
+| `getGepObjAddress(...)` | Create an address with an offset |
+| `addToSolver(...)` | Add a constraint |
+| `resetSolver()` | Clear constraints |
+| `solver.check()` | Check SAT / UNSAT |
+| `getEvalExpr(...)` | Evaluate an expression |
+| `printExprValues()` | Print expression values |
+
+`getEvalExpr()` checks the solver, retrieves a model if the constraints are satisfiable, and evaluates the requested expression in that model.
+
+## 8.13 Main translation rules
+The slides show how SVF statements map into Z3 constraints.
+
+| SVF statement | C-like meaning | Z3 idea |
+| ------------- | -------------- | ------- |
+| `AddrStmt` | `p = &a` | give `p` an address |
+| `CopyStmt` | `p = q` | `p == q` |
+| `LoadStmt` | `p = *q` | load value from memory |
+| `StoreStmt` | `*p = q` | store value into memory |
+| `GepStmt` | `p = &q[i]` | address + offset |
+| `PhiStmt` | merge path values | choose value from executed path |
+| `BranchStmt` | `if` / `else` | use `ite(...)` |
+| `UnaryOp` | `!p` | unary logic |
+| `BinaryOp` | `r = p + q` | equivalent Z3 operation |
+| `CmpStmt` | `p > q` etc. | comparison |
+| Call / Return | function call | use scope + value passing |
+
+<details>
+    <summary>Important examples</summary>
+
+```text
+p = q
+→ p == q
+
+r = p + q
+→ r == p + q
+
+if (x)
+    r = p
+else
+    r = q
+→ r == ite(x, p, q)
+```
+
+</details>
+
+## 8.14 Why SSA is important
+The slides state that code being translated should be in **SSA form**, such as SVFIR.
+
+```c++
+a = 1;
+a = 2;
+```
+
+If Z3 sees both assignments as the same variable, it interprets them as `a` must equal `1` **and** `a` must equal `2`, which is `unsat`.
+
+SSA gives each assignment its own version:
+
+```text
+a1 = 1
+a2 = 2
+```
+
+This is why earlier LLVM / SVFIR work matters in Week 8.
+
+## 8.15 Scalar translation example
+The slides use:
+
+```c++
+int a;
+int b;
+
+a = 0;
+b = a + 1;
+
+assert(b > 0);
+```
+
+This becomes approximately:
+
+```text
+a = 0
+b = a + 1
+b > 0
+```
+
+Z3 checks whether all of these conditions can be true. Yes: `a = 0`, `b = 1`, so `sat`.
+
+The slides show the full flow from C code → `Z3Mgr` → Z3 formulas → solver.
+
+```mermaid
+flowchart TD
+    c["C code"] --> t["Translator"]
+    t --> z["Z3 constraints"]
+    z --> s["Z3 solver"]
+```
+
+## 8.16 Memory example
+The slides also use:
+
+```c++
+int* p;
+int x;
+
+p = malloc(...);
+*p = 5;
+x = *p;
+
+assert(x == 5);
+```
+
+The logic is:
+
+* `p` points to a memory location
+* `*p = 5` writes `5` into the memory pointed to by `p`
+* `x = *p` reads that value from memory
+* therefore `x = 5`, and `assert(x == 5)` is consistent with the constraints
+
+The slides model memory using a Z3 array and use store / load operations around that memory map.
+
+```mermaid
+flowchart TD
+    p["p"] --> mem["memory: 5"]
+    mem --> load["*p"]
+    load --> x["x"]
+    x --> five["5"]
+```
+
+## 8.17 How Week 8 connects to previous weeks
+
+```mermaid
+flowchart TD
+    c["C / C++"] --> llvm["LLVM IR"]
+    llvm --> svf["SVFIR / SSA"]
+    svf --> graphs["ICFG + PAG"]
+    graphs --> cfg["Control-flow analysis"]
+    cfg --> ptr["Pointer / data-flow analysis"]
+    ptr --> z3c["Translate operations<br/>into logical constraints"]
+    z3c --> z3["Z3"]
+    z3 --> result["SAT / UNSAT"]
+```
+
+| Earlier concept | Connection to Week 8 |
+| --------------- | -------------------- |
+| LLVM / SVFIR | Provides the program representation to translate |
+| SSA | Makes assignments suitable for logical formulas |
+| ICFG | Helps identify executable paths |
+| Pointer analysis | Helps reason about addresses and memory |
+| Load / Store | Become Z3 memory operations |
+| Branches | Can become `ite` expressions / path constraints |
+| Data / taint flow | Determines how information moves |
+| Assertions | Become properties that can be checked using constraints |
+
+So Week 8 is where many earlier concepts start coming together.
+
+## 8.18 Cheat sheet
+
+| Concept | Meaning |
+| ------- | ------- |
+| **Z3** | SMT solver used to solve logical constraints |
+| **SAT** | A solution exists |
+| **UNSAT** | No solution exists |
+| **UNKNOWN** | Z3 cannot determine the result |
+| `assert` | Add a constraint |
+| `check-sat` | Ask Z3 if all constraints can be satisfied |
+| `get-model` | Show one solution |
+| `ite` | if-then-else |
+| `select` | Read from array / memory |
+| `store` | Write to array / memory |
+| `push` | Save solver state |
+| `pop` | Restore solver state |
+| **SSA** | Each variable definition has its own version |
+| **Z3Mgr** | Wrapper used in this subject to interact with Z3 |
+
+<details>
+    <summary>Main translations</summary>
+
+```text
+p = q
+→ p == q
+
+r = p + q
+→ r == p + q
+
+if / else
+→ ite(...)
+
+*p = q
+→ store to memory
+
+p = *q
+→ load from memory
+
+a[i]
+→ select
+
+a[i] = value
+→ store
+```
+
+The slides finish by asking you to understand the Z3 formula format, understand `Z3Mgr`, review the Assignment 3 examples, complete the quizzes, and implement manual code-to-Z3 translation.
+
+> **Week 8 is about translating program behaviour into logical constraints so Z3 can determine whether that behaviour is possible.**
+
+</details>
+
