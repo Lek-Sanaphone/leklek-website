@@ -1145,6 +1145,11 @@ A **dynamic diagram** shows how system elements interact **at runtime** to compl
 
 <details>
     <summary>Simple example</summary>
+Tutorial Diagram
+
+<img src="https://miro.medium.com/v2/resize:fit:1400/1*SmxJZZPcZkDvFvq9g1Pbzg.png" />
+
+---
 
 ```mermaid
 flowchart LR
