@@ -2658,3 +2658,556 @@ The slides finish by asking you to understand the Z3 formula format, understand 
 
 </details>
 
+---
+# 9. Assertion-based Verification Using Static Symbolic Execution
+## 9.1 Main question and Purpose
+<details>
+    <summary>Purpose</summary>
+
+* Main question
+    * How do we **automatically check whether an assertion can fail** using **Static Symbolic Execution (SSE)** and **Z3**?
+* Instead of running a program with one real input, SSE uses **symbolic values**.
+* This lets the analysis reason about many possible inputs at once.
+
+```text
+Normal execution                 Symbolic execution
+────────────────                 ──────────────────
+int x;                           int x;
+y = x + 1;                       y = x + 1;
+
+x = 5                            x = symbolic
+y = 6                            y = x + 1
+```
+
+</details>
+
+## 9.2 Overall Week 9 workflow
+
+```text
+Source Program
+     ↓
+ICFG finds possible paths
+     ↓
+Follow one path
+     ↓
+Read SVF statements
+     ↓
+Translate statements into Z3 constraints
+     ↓
+Reach assertion
+     ↓
+Negate the assertion
+     ↓
+Ask Z3
+     ↓
+SAT or UNSAT
+```
+
+The ICFG is used because symbolic execution needs to know which sequence of statements forms a valid execution path.
+
+## 9.3 Assertion checking
+Suppose:
+
+```c++
+assert(y >= x + 1);
+```
+
+The assertion is:
+
+```text
+Q: y >= x + 1
+```
+
+To find a bug, we ask:
+
+> Can the assertion be false?
+
+So we check `NOT Q`, which becomes:
+
+```text
+y < x + 1
+```
+
+| Result | Meaning |
+| ------ | ------- |
+| `unsat` | No counterexample exists — assertion is safe on this path |
+| `sat` | A counterexample exists — assertion may fail |
+
+The slides verify assertions by checking the path constraints together with the negated assertion.
+
+## 9.4 Example: one path
+Program:
+
+```c++
+if (x > 10) {
+    y = x + 1;
+}
+
+assert(y >= x + 1);
+```
+
+For this path:
+
+```text
+x > 10
+y = x + 1
+```
+
+To search for an assertion failure:
+
+```text
+x > 10
+AND
+y = x + 1
+AND
+y < x + 1
+```
+
+But if `y = x + 1`, then `y < x + 1` would mean:
+
+```text
+x + 1 < x + 1
+```
+
+That is impossible, so the result is `unsat`. This path cannot violate the assertion.
+
+## 9.5 Why ICFG is used again
+ICFG answers:
+
+> Which program paths are possible?
+
+Example:
+
+```c++
+if (x > 10)
+    y = x + 1;
+else
+    y = 10;
+```
+
+ICFG gives two paths:
+
+```text
+Path 1                      Path 2
+──────                      ──────
+x > 10                      x <= 10
+   ↓                           ↓
+y = x + 1                   y = 10
+   ↓                           ↓
+assert                      assert
+```
+
+Week 9 then checks each path separately.
+
+| Part | Role |
+| ---- | ---- |
+| **ICFG** | Finds the route |
+| **SSE** | Understands the values on the route |
+| **Z3** | Checks whether the route can break the assertion |
+
+## 9.6 Translating statements into Z3
+The later slides explain how to convert different program statements into Z3 expressions.
+
+```text
+Program instruction
+       ↓
+SVF statement
+       ↓
+Z3 constraint
+```
+
+## 9.7 `CmpStmt` — comparison
+`CmpStmt` represents comparisons such as `x == y`, `x != y`, `x > y`, and `x <= y`.
+
+Example:
+
+```c++
+b = (x == y);
+```
+
+Symbolically:
+
+```text
+b = if x == y then 1 else 0
+```
+
+In Z3:
+
+```text
+b == ite(x == y, 1, 0)
+```
+
+`ite` means **if-then-else**.
+
+```text
+CmpStmt = comparison
+```
+
+The slides translate comparison operators such as `==`, `!=`, `>`, `>=`, `<`, and `<=` into Z3 expressions.
+
+## 9.8 `BinaryOpStmt` — calculation
+`BinaryOpStmt` represents arithmetic or bitwise operations.
+
+Example:
+
+```c++
+z = x + y;
+```
+
+becomes:
+
+```text
+z = x + y
+```
+
+| SVF operation | Meaning |
+| ------------- | ------- |
+| `Add` | `+` |
+| `Sub` | `-` |
+| `Mul` | `*` |
+| `SDiv` | `/` |
+| `SRem` | `%` |
+
+```text
+BinaryOpStmt = calculation
+```
+
+The slides show these operations being translated into Z3 constraints.
+
+## 9.9 Simple example using `CmpStmt` and `BinaryOpStmt`
+Program:
+
+```c++
+y = x;
+b = (x == y);
+z = x + y;
+
+assert(z == 2 * x);
+```
+
+Symbolic meaning:
+
+```text
+y = x
+b = ite(x == y, 1, 0)
+z = x + y
+```
+
+To search for failure, check `z != 2*x`:
+
+```text
+y = x
+AND
+z = x + y
+AND
+z != 2*x
+```
+
+Because `y = x`, then `z = x + x = 2*x`, so `z != 2*x` is impossible. Result: `unsat`.
+
+The slide uses this example to show that the assertion has no counterexample.
+
+## 9.10 Memory operations
+Week 9 also handles pointers and memory.
+
+```c++
+int* p;
+
+p = malloc(...);
+*p = x + 5;
+y = *p;
+
+assert(y == x + 5);
+```
+
+Normal execution may use a real address such as `p = 0x1234`. Symbolic execution instead uses a **virtual address**:
+
+```text
+p = symbolic memory address
+```
+
+Then:
+
+```text
+*p = x + 5   →   Memory[p] = x + 5
+y = *p       →   y = Memory[p]
+```
+
+Therefore `y = x + 5`.
+
+The slides model allocated memory using virtual addresses instead of real runtime addresses.
+
+## 9.11 `AddrStmt`, `StoreStmt`, `LoadStmt`
+These are easier if you translate the names into normal programming operations.
+
+| SVF statement | Meaning | Example |
+| ------------- | ------- | ------- |
+| `AddrStmt` | Get an address | `p = &x` |
+| `StoreStmt` | Write to memory | `*p = 10` |
+| `LoadStmt` | Read from memory | `y = *p` |
+
+```text
+AddrStmt                 StoreStmt                LoadStmt
+────────                 ─────────                ────────
+p = &x                   *p = 10                  y = *p
+   ↓                        ↓                        ↓
+p points to x            write 10 into memory     read value from memory
+```
+
+The Week 9 algorithms handle these three memory operations directly.
+
+## 9.12 Relation to earlier pointer analysis
+Earlier pointer analysis asked:
+
+```text
+What can p point to?
+```
+
+Example:
+
+```c++
+p = &x;
+```
+
+might produce:
+
+```text
+pts(p) = {x}
+```
+
+Week 9 asks something different:
+
+```text
+What symbolic value is stored at the memory location p points to?
+```
+
+```text
+Earlier:
+pointer → object
+
+Week 9:
+pointer → object → symbolic value
+```
+
+## 9.13 `GepStmt` — field or array access
+`GepStmt` is used to locate something inside a larger object.
+
+```c++
+struct st {
+    int a;
+    int b;
+};
+```
+
+If `p->b` is accessed, symbolic execution needs an address for field `b`.
+
+```text
+p
+│
+▼
+┌─────────────┐
+│ a           │
+├─────────────┤
+│ b  ← target │
+└─────────────┘
+```
+
+```text
+GepStmt = find the address of a field or array element
+```
+
+The slide models fields using a base object plus a field offset, giving each field its own virtual address.
+
+## 9.14 Struct example
+Program:
+
+```c++
+struct st {
+    int a;
+    int b;
+};
+
+struct st* p = malloc(...);
+
+q = &(p->b);
+*q = x;
+
+int k = p->b;
+
+assert(k == x);
+```
+
+Step by step:
+
+```text
+p
+↓
+struct object
+
+q
+↓
+points to field b
+```
+
+Then `*q = x` means `p->b = x`, and `k = p->b` means `k = x`. So `assert(k == x)` is safe.
+
+## 9.15 Function calls — `push()` and `pop()`
+When symbolic execution enters another function, Z3 temporarily saves the current solver state.
+
+```text
+Caller
+  │
+  │ push()
+  ▼
+Callee function
+  │
+  │ analyse function
+  ▼
+return
+  │
+  │ pop()
+  ▼
+Caller continues
+```
+
+| Call | Meaning |
+| ---- | ------- |
+| `push()` | Save current constraint state |
+| `pop()` | Restore previous constraint state |
+
+The Week 9 call and return algorithms use Z3's solver stack in this way.
+
+## 9.16 Branch checking
+Before following a branch, symbolic execution checks whether that branch is possible.
+
+Current knowledge:
+
+```text
+x = 5
+```
+
+Branch:
+
+```c++
+if (x > 10)
+```
+
+Check:
+
+```text
+x = 5
+AND
+x > 10
+```
+
+Z3 returns `unsat`. Therefore this branch cannot happen, and the analysis does not continue down this path.
+
+The slide's `handleBranch` algorithm temporarily adds the branch condition and checks satisfiability.
+
+## 9.17 Z3 has two main jobs in Week 9
+
+<details>
+    <summary>Job 1: Check whether a path is possible</summary>
+
+```text
+Path constraints
+      ↓
+Z3
+      ↓
+SAT   → possible path
+UNSAT → impossible path
+```
+
+</details>
+
+<details>
+    <summary>Job 2: Check whether an assertion can fail</summary>
+
+```text
+Path constraints
++
+NOT assertion
+      ↓
+Z3
+      ↓
+SAT   → counterexample exists
+UNSAT → no counterexample
+```
+
+</details>
+
+Be careful: **SAT is not always bad**.
+
+| Context | Meaning of SAT |
+| ------- | -------------- |
+| Branch checking | Path is possible |
+| Assertion checking | Assertion can fail |
+
+The meaning depends on **what constraints you gave Z3**.
+
+## 9.18 Easy way to remember all statement types
+
+| Category | Statements | Meaning |
+| -------- | ---------- | ------- |
+| **Values** | `CmpStmt`, `BinaryOpStmt` | Comparison and calculation |
+| **Memory** | `AddrStmt`, `LoadStmt`, `StoreStmt` | Address, read, write |
+| **Objects** | `GepStmt` | Field or array element |
+| **Control flow** | Branch, Call, Return | Where execution goes |
+
+## 9.19 Cheat sheet
+
+```text
+                 PROGRAM
+                    │
+                    ▼
+                  ICFG
+          find execution paths
+                    │
+                    ▼
+          Static Symbolic Execution
+                    │
+       ┌────────────┼────────────┐
+       │            │            │
+       ▼            ▼            ▼
+   Values        Memory      Control Flow
+ CmpStmt       AddrStmt       Branch
+ BinaryOp      LoadStmt       Call
+               StoreStmt      Return
+               GepStmt
+       │            │            │
+       └────────────┼────────────┘
+                    ▼
+             Z3 constraints
+                    │
+                    ▼
+             Reach assertion
+                    │
+                    ▼
+            Add NOT assertion
+                    │
+                    ▼
+                 Z3 Solver
+                /         \
+              SAT        UNSAT
+               │           │
+               ▼           ▼
+       Counterexample   No counterexample
+       may exist        on this path
+```
+
+| Concept | Meaning |
+| ------- | ------- |
+| **SSE** | Static Symbolic Execution — reason about many inputs using symbols |
+| **ICFG** | Finds feasible program paths to check |
+| **Negated assertion** | `NOT Q` — used to search for a counterexample |
+| `CmpStmt` | Comparison → often `ite(...)` in Z3 |
+| `BinaryOpStmt` | Arithmetic / bitwise calculation |
+| `AddrStmt` | Get an address |
+| `StoreStmt` | Write to memory |
+| `LoadStmt` | Read from memory |
+| `GepStmt` | Address of a field or array element |
+| `push` / `pop` | Save / restore solver state around calls |
+| Branch check | Temporarily add branch condition and ask Z3 |
+
+> **Week 9 uses the ICFG to find program paths, symbolically translates each SVF statement into Z3 constraints, and checks whether any feasible path can violate an assertion.**
+
