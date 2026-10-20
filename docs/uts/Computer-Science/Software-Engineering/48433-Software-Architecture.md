@@ -2212,3 +2212,578 @@ Week 7 is about **testing and improving the architecture you already designed**.
 
 </details>
 
+---
+
+# 8-12. Project Selection and Peer Review (PR)
+
+---
+
+# Extend (Elective Topic)
+
+These four topics apply architectural principles to dedicated devices, web applications, product families, and independently deployed services.
+
+## Extend: Embedded Systems
+
+*Lecture reference from the supplied notes: Embedded Software 2022 — 62 slides.*
+
+### What Is an Embedded System?
+
+An **embedded system** is a special-purpose computer that performs one or a few dedicated functions, usually inside a larger device.
+
+Examples include car braking systems, pacemakers, microwaves, smart meters, and industrial controllers.
+
+| Characteristic | What it means |
+|---|---|
+| **Dedicated purpose** | Designed for specific tasks rather than general computing |
+| **Firmware** | Software commonly stored in Flash or read-only memory |
+| **Limited resources** | Restricted CPU, memory, storage, and power |
+| **Limited interface** | May have no screen or keyboard |
+| **Timing constraints** | Some tasks must finish within strict deadlines |
+| **Hardware integration** | Interacts closely with sensors, actuators, and other physical devices |
+
+**Quiz distinction:** A control system is not necessarily embedded; it can run on a general-purpose computer. An embedded system is not necessarily hard real-time.
+
+### Constraints and Quality Attributes
+
+Hardware limits shape the architecture. A battery-powered controller, for example, must balance useful work against CPU usage, memory, and energy consumption.
+
+| Quality attribute | Architectural goal |
+|---|---|
+| **Real-time performance** | Complete operations within their required time limits |
+| **Computational efficiency** | Minimise CPU, memory, and power usage |
+| **Portability** | Adapt software to different or newer hardware |
+| **Reliability and recoverability** | Operate correctly and recover safely from failures |
+| **High determinacy** | Define predictable behaviour, including responses to exceptional conditions |
+
+**Hard real-time:** Missing a required deadline counts as system failure, even when the computed result is correct.
+
+**High determinacy:** Define how the system responds to expected conditions and exceptions, including safe fallback actions.
+
+### Designing for Reliability
+
+The architecture should both **reduce the chance of failure** and **support recovery** when a failure occurs.
+
+| Technique | Purpose |
+|---|---|
+| **Watchdog timer** | Detect an unresponsive system and trigger recovery, such as a restart |
+| **Redundancy** | Use duplicate modules and compare results to detect faults |
+| **Modularity** | Separate responsibilities so faults are easier to contain |
+| **Low coupling** | Limit how much one component's failure affects others |
+| **Simplicity** | Reduce unexpected interactions and difficult failure combinations |
+| **Fallback behaviour** | Move to a defined safe response when normal operation fails |
+
+**Trade-off:** Tight coupling may reduce communication overhead, but it can make changes and failures spread between components. Loose coupling makes components easier to change and isolate.
+
+### Evaluating the Architecture
+
+Evaluate performance, timing, reliability, hardware capacity, and failure scenarios before implementation. **Architecture Description Languages (ADLs)** and diagrams can support this analysis.
+
+Two limitations matter:
+
+* **Model fidelity:** The model may not accurately represent hardware speed, capacity, or power consumption.
+* **Simulation:** Real behaviour and interactions can be difficult to predict before the system exists.
+
+### Operating System Architectures
+
+| Aspect | Microkernel | Monolithic kernel |
+|---|---|---|
+| **Structure** | Small kernel; many services run separately | More services integrated into the kernel |
+| **Communication** | Often relies on message passing between services | More direct calls within the kernel |
+| **Performance** | Messaging and context switches can add overhead | Direct interaction can reduce overhead |
+| **Fault isolation** | Separate services can improve isolation | A kernel-service fault can affect the whole system |
+| **Extensibility** | Services can be easier to replace independently | Changes require care across integrated kernel code |
+| **Main challenge** | Communication and process coordination | Kernel complexity and interdependencies |
+
+**Layering** describes how responsibilities and dependencies are organised. It is not synonymous with a monolithic kernel; a kernel can use layers internally.
+
+### Real-Time Scheduling
+
+A **Real-Time Operating System (RTOS)** provides scheduling and predictable execution mechanisms so tasks can meet deadlines. Meeting those deadlines also depends on the workload and system design.
+
+| Approach | How it works | Main consideration |
+|---|---|---|
+| **Priority-based** | In a preemptive scheduler, higher-priority tasks can interrupt lower-priority tasks | Flexible, but shared resources can cause priority inversion |
+| **Time-triggered** | Tasks run at predetermined times or clock intervals | Predictable timing, but the schedule must accommodate the workload |
+
+**Priority inversion:** A high-priority task waits for a resource held by a lower-priority task. Other work may delay the lower-priority task and extend that wait.
+
+### Intelligent Real-Time Control
+
+Autonomous vehicles and robots combine perception, modelling, decision-making, and physical action.
+
+```mermaid
+flowchart LR
+    E["Environment"] --> S["Sensing"]
+    S --> W["World modelling"]
+    W --> B["Behaviour generation"]
+    W --> V["Value judgement"]
+    V --> B
+    B --> A["Actuation"]
+    A --> E
+```
+
+This simplified flow shows how the responsibilities relate:
+
+* **Sensing:** Collect and interpret environmental information.
+* **World modelling:** Maintain a representation of the environment.
+* **Value judgement:** Assess costs, benefits, and uncertainty.
+* **Behaviour generation:** Plan actions.
+* **Actuation:** Carry out actions in the physical world.
+
+**Remember:** Embedded architecture balances resource limits, predictable timing, reliability, recovery, and interaction with hardware.
+
+## Extend: Web Application
+
+*Lecture reference from the supplied notes: WebSystems 2022 — 46 slides.*
+
+### What Is a Web Application?
+
+A **web application** is accessed through a browser or web-based interface. Its components communicate over a network, commonly using HTTP or HTTPS.
+
+```mermaid
+flowchart LR
+    C["Browser / Client<br/>User interface"] <-->|"HTTP / HTTPS"| S["Web / Application Server<br/>Business logic and APIs"]
+    S <-->|"Queries and results"| D[("Database<br/>Persistent data")]
+```
+
+### HTTP and Session State
+
+**HTTP is stateless:** The protocol does not automatically remember previous interactions. Applications add mechanisms to associate requests with a user session.
+
+A typical server-side session works as follows:
+
+1. The user logs in.
+2. The server creates a session and returns a cookie containing a session identifier.
+3. The browser sends that cookie with later requests.
+4. The server uses the identifier to look up the session.
+
+**Quiz distinction:** A stateless protocol can support an application that maintains state. The application manages that state explicitly.
+
+### Communication Between Components
+
+| Aspect | XML-RPC | REST | SOAP |
+|---|---|---|---|
+| **Core idea** | Invoke remote procedures | Interact with resources identified by URIs | Exchange structured messages |
+| **Representation** | XML | Flexible, such as JSON or XML | XML |
+| **Communication** | Commonly HTTP POST | Commonly uses HTTP methods | Often HTTP; other transports are possible |
+| **Typical strength** | Simple remote function calls | Resource-oriented interfaces | Formal messaging and service contracts |
+| **Main consideration** | Procedure-oriented interface | Requires consistent resource and method design | More messaging and tooling complexity |
+
+**XML-RPC** encodes remote procedure calls and responses in XML. **REST (Representational State Transfer)** is an architectural style, rather than a message format.
+
+**SOAP** uses structured XML messages. SOAP services often describe their operations and message types using **WSDL (Web Services Description Language)**.
+
+| HTTP method | Typical purpose |
+|---|---|
+| `GET` | Retrieve a resource |
+| `POST` | Submit data for processing, often creating a resource |
+| `PUT` | Create or replace the state of the resource at a known URI |
+| `DELETE` | Remove a resource |
+
+### Model–View–Controller and Action–Domain–Responder
+
+**Model–View–Controller (MVC)** separates application responsibilities:
+
+| Component | Responsibility |
+|---|---|
+| **Model** | Application data and domain logic |
+| **View** | Presentation and user interface |
+| **Controller** | Handle input and coordinate the Model and View |
+
+```mermaid
+flowchart LR
+    U["User request"] --> C["Controller"]
+    C <-->|"Read or update"| M["Model"]
+    C --> V["View"]
+    V --> R["Response"]
+```
+
+This is a simplified request flow; interactions vary between MVC implementations.
+
+**Action–Domain–Responder (ADR)** separates HTTP request handling into three roles:
+
+* **Action:** Receive input and coordinate the operation.
+* **Domain:** Execute business logic and manage state.
+* **Responder:** Construct the HTTP response.
+
+### Fat Client vs Thin Client
+
+| Fat client | Thin client |
+|---|---|
+| More processing on the user's device | More processing on the server |
+| Greater client-side responsibility | Greater centralised responsibility |
+| Example: Calculate a loan estimate locally | Example: Submit a reservation for server-side processing |
+
+These describe where processing happens. A web application can combine both approaches for different functions.
+
+### N-Tier Architecture and Scaling
+
+**N-tier architecture** separates an application into tiers, such as presentation, application logic, and data storage. Tiers can run on different servers and scale independently.
+
+| Scaling approach | What changes | Example |
+|---|---|---|
+| **Horizontal** | Add more instances or servers | Distribute traffic across three application servers with a load balancer |
+| **Vertical** | Increase one server's capacity | Add CPU or RAM to the application server |
+
+**Session-state consideration:** Horizontal scaling is easier when requests can reach any instance. Keeping session state in shared storage reduces reliance on one server's local memory.
+
+### Quality Attributes
+
+| Attribute | Goal |
+|---|---|
+| **Scalability** | Handle increasing users and traffic |
+| **Security** | Protect users, applications, and data |
+| **Usability** | Make interfaces understandable and easy to use |
+| **Reliability** | Continue operating and recover from failures |
+| **Modifiability** | Accommodate frequent requirement changes |
+| **Performance** | Provide suitable response times and throughput |
+
+**Throughput** is the number of requests completed per unit of time. **Response time** is how long an individual request takes. High throughput does not guarantee a fast response for every user.
+
+### Related Web Concepts
+
+| Concept | Meaning |
+|---|---|
+| **Web 2.0** | User participation, collaboration, and user-generated content |
+| **E-commerce** | Electronic buying and selling |
+| **Software as a Service (SaaS)** | Software delivered as a service over a network |
+| **Internet of Things (IoT)** | Connected physical devices exchanging information |
+| **Cloud computing** | Shared computing resources that can be provisioned and scaled |
+
+**Remember:** Web architecture connects clients, application logic, and data while balancing scalability, security, usability, and performance.
+
+## Extend: Product Line Architectures
+
+*Lecture reference from the supplied notes: Product Line Architecture 2022 — 46 slides.*
+
+### What Is a Software Product Line?
+
+A **Software Product Line (SPL)** is a family of related systems built from shared core assets, with controlled variations for different products or customers.
+
+For example, a family of cameras may share image-processing software while supporting different sensors, lenses, and features.
+
+```mermaid
+flowchart TD
+    C["Shared core assets<br/>Architecture, components, requirements, tests"] --> A["Product A<br/>Core + Variation 1"]
+    C --> B["Product B<br/>Core + Variation 2"]
+    C --> D["Product C<br/>Core + Variation 3"]
+```
+
+### Core Terminology
+
+| Term | Meaning |
+|---|---|
+| **Commonality** | Features, components, and processes shared across the family |
+| **Variability** | Characteristics that differ between products |
+| **Core assets** | Reusable requirements, architecture, code, tests, documentation, tools, and processes |
+| **Variation point** | A planned place where products can differ |
+
+**Key distinction:** A product line reuses the wider development effort, including architecture and tests. It goes beyond copying code between projects.
+
+### Benefits and Trade-offs
+
+| Benefit | Why it matters |
+|---|---|
+| **Lower development cost** | Shared assets reduce repeated work |
+| **Faster time to market** | Products need less development from scratch |
+| **Higher productivity** | Teams reuse established solutions |
+| **Improved quality** | Fixes to shared assets can benefit multiple products |
+| **More predictable development** | Plans, tests, and methods can be reused |
+| **Architectural consistency** | Products follow common design principles |
+
+The benefits require investment and ongoing control:
+
+* **Initial cost:** Shared assets take time to build and generalise.
+* **Reduced flexibility:** Individual products must fit the shared architecture.
+* **Configuration complexity:** Teams must manage supported feature combinations and versions.
+* **Organisational commitment:** Reuse needs consistent processes and ownership.
+* **Feature growth:** Uncontrolled additions can make the family difficult to maintain.
+
+**Lecture-specific cost point:** The supplied notes describe recovering the extra investment after the third product. Treat this as the lecture's illustration; actual break-even depends on costs and reuse.
+
+### Designing for Variation
+
+Begin with the shared business processes. Identify what stays constant and what must vary, then carry out three architectural activities:
+
+1. **Identify variation points:** Find requirements and components that differ between products.
+2. **Support variation points:** Provide mechanisms for controlled differences.
+3. **Evaluate the architecture:** Check that it supports the intended product family and its quality requirements.
+
+| Variability technique | How it works | Example |
+|---|---|---|
+| **Parameterisation** | Configure behaviour through values | Set language, currency, or transaction limits |
+| **Information hiding** | Put interchangeable implementations behind a stable interface | Swap payment providers |
+| **Inheritance** | Extend or specialise shared functionality | Implement specialised product variants |
+
+The goal is to support planned differences without repeatedly changing the shared core architecture.
+
+### Managing Product Line Evolution
+
+Product lines evolve as technology and customer needs change. Watch for:
+
+* **Feature bloat:** Too many features accumulate in the shared assets.
+* **Incompatible components:** Variants no longer work together.
+* **Architectural limits:** New requirements exceed what the original architecture supports.
+* **Uncontrolled variation:** Too many combinations become difficult to build, test, and maintain.
+
+**Design principle:** Plan and control reuse. More reuse is useful only when the resulting products remain manageable.
+
+<details>
+<summary><strong>Case study — CelsiusTech Ship System 2000</strong></summary>
+
+The supplied notes describe a naval command-and-control product family with a shared architecture across different systems.
+
+Key architectural features include:
+
+* Support for different sensors, weapons, and computing environments.
+* Strongly typed messages and hardware-independent component interactions.
+* Strict architectural layering.
+* Significant reuse between products.
+
+Its quality concerns include **performance, modifiability, safety, reliability, availability, and testability**.
+
+The case illustrates how a shared architecture can support variations across complex real-time products.
+
+</details>
+
+**Remember:** Product line architecture combines shared assets with controlled variation to build a family of related products.
+
+## Extend: Microservices Architecture
+
+*Lecture reference from the supplied notes: Microservices Architecture 2022 — 36 slides.*
+
+### What Are Microservices?
+
+**Microservices architecture** divides an application into services organised around focused business capabilities. Services communicate through defined interfaces and can be deployed independently.
+
+An e-commerce application might separate customers, products, orders, payments, and recommendations into services.
+
+### Monolithic vs Microservices Architecture
+
+| Aspect | Monolithic application | Microservices |
+|---|---|---|
+| **Deployment** | One main deployable application | Multiple independently deployable services |
+| **Execution** | Modules commonly run within one application process | Services run in separate processes |
+| **Changes** | Commonly require redeploying the application | Can be released service by service |
+| **Scaling** | Commonly scales the whole application | Can scale individual services |
+| **Operations** | Simpler initial deployment and monitoring | More distributed infrastructure to manage |
+| **Coupling** | Can be modular, but boundaries may be easier to cross | Requires deliberate control of API and data dependencies |
+
+```mermaid
+flowchart TD
+    subgraph MONO["Monolith: one deployment"]
+        M["Customers + Orders + Payments + Products"]
+    end
+    subgraph MICRO["Microservices: separate deployments"]
+        C["Customer Service"]
+        O["Order Service"]
+        P["Payment Service"]
+        R["Product Service"]
+        O --> C
+        O --> P
+        O --> R
+    end
+```
+
+### Service Boundaries: Cohesion and Coupling
+
+| Concept | Meaning | Desired direction |
+|---|---|---|
+| **Cohesion** | How closely related a service's responsibilities are | **High:** Keep related behaviour together |
+| **Coupling** | How strongly services depend on each other | **Low:** Limit the effects of changes and failures |
+
+A good service has a focused business responsibility, hides its internal implementation, and exposes a clear API.
+
+The **Single Responsibility Principle** helps define a coherent reason for a service to change. A useful business capability may still require several services to collaborate.
+
+### Benefits
+
+| Benefit | Architectural value |
+|---|---|
+| **Independent development** | Teams can work on separate services |
+| **Independent deployment** | Release changes without redeploying the entire application |
+| **Independent scaling** | Allocate capacity to the services that need it |
+| **Fault isolation** | Boundaries can help contain failures |
+| **Maintainability** | Focused codebases can be easier to understand |
+| **Technology flexibility** | Services can use different languages or storage technologies |
+| **Team autonomy** | Teams can own development, deployment, and support |
+
+**Fault isolation is conditional:** A service failure can still affect its callers. Service boundaries alone do not guarantee that the rest of the application stays available.
+
+### Costs and Challenges
+
+| Challenge | Why it occurs |
+|---|---|
+| **Distributed complexity** | Services communicate across process and network boundaries |
+| **Communication overhead** | Remote calls add latency and can fail |
+| **Testing difficulty** | Behaviour depends on interactions between services |
+| **Operational complexity** | Many services need deployment, monitoring, and maintenance |
+| **Data consistency** | Updates may span independently owned data stores |
+| **Debugging difficulty** | One failure may involve several services |
+| **Rollout coordination** | Changes affecting multiple services need compatible interfaces and release planning |
+
+### Data Ownership and Eventual Consistency
+
+Each service should **own its data or schema**. Other services access that data through defined interfaces rather than directly depending on its internal tables.
+
+Data ownership supports independent changes and storage choices. It also makes cross-service transactions harder and may require duplicated data with explicit synchronisation.
+
+**Eventual consistency** allows temporary differences between copies of data. If no new updates occur and propagation succeeds, the copies eventually converge.
+
+Example: an order service keeps a copy of a customer's current contact address.
+
+1. The customer updates their contact address in the Customer Service.
+2. The Order Service temporarily retains the previous copy.
+3. The update propagates to the Order Service.
+4. Both services reflect the same current contact address.
+
+This example concerns a synchronised contact record; an existing order may intentionally preserve its original shipping address.
+
+| Consistency model | What readers observe |
+|---|---|
+| **Strong consistency** | In the usual single-copy model, reads reflect the latest completed write |
+| **Eventual consistency** | Readers may temporarily see older values while updates propagate |
+
+**Quiz distinction:** Independent services can use different technology stacks, but they must still agree on communication contracts and how shared information stays consistent.
+
+### Migrating from a Monolith
+
+Migration can happen incrementally:
+
+1. Identify distinct business capabilities.
+2. Select a focused capability to extract.
+3. Implement it as an independently running service.
+4. Define its API and data ownership.
+5. Integrate it with the remaining monolith.
+6. Repeat as the benefits justify further extraction.
+
+```mermaid
+flowchart LR
+    M["Monolithic application"] --> R["Extract one capability<br/>Define interfaces and integrate"]
+    R --> H["Remaining monolith"]
+    R --> S["Independent service"]
+    H <-->|"Defined interface"| S
+```
+
+A business function may be delivered by several collaborating services. It does not have to fit entirely inside one service.
+
+### Layering and Dependencies
+
+Services can be arranged in layers, with higher-level services coordinating lower-level capabilities. The supplied notes also describe front-end macroservices coordinating back-end microservices.
+
+**Keep the examples distinct:** CelsiusTech uses strict layering in its product line. Microservices do not inherently require one strict hierarchy; their dependencies still need clear boundaries.
+
+### Team Organisation and DevOps
+
+A team can own the full service lifecycle:
+
+```text
+Development → Testing → Deployment → Monitoring → Maintenance
+```
+
+The lecture's **“you build it, you support it”** approach connects implementation with operational responsibility. Clear ownership helps teams respond to failures and changing requirements.
+
+### Common Anti-patterns
+
+| Anti-pattern | Problem | Design response |
+|---|---|---|
+| **Service that does too much** | Becomes a miniature monolith with unrelated responsibilities | Revisit boundaries around cohesive business capabilities |
+| **Shared persistence** | Services directly depend on the same database structures | Establish data ownership and communicate through defined interfaces |
+
+### When Are Microservices Useful?
+
+Consider microservices when:
+
+* Different capabilities need independent scaling.
+* Teams benefit from separate ownership and release schedules.
+* Independent deployment provides clear value.
+* A growing application has boundaries that can be separated meaningfully.
+
+For a small or early-stage application, distributed operations may cost more than they help. Choose service boundaries and deployment complexity to match the actual requirements.
+
+**Remember:** Microservices aim for high cohesion, low coupling, and independent development, deployment, and scaling—with additional distributed-system complexity.
+
+## Extend: Topic Comparison
+
+| Topic | Main focus | Core principle | Main challenge |
+|---|---|---|---|
+| **Embedded systems** | Dedicated functions within physical devices | Predictability, efficiency, and reliability | Resource limits and real-time deadlines |
+| **Web applications** | Applications accessed across a network | Client–server communication and separation of responsibilities | Security, performance, and scalability |
+| **Product line architectures** | Families of related products | Shared assets and controlled variation | Initial investment and variability management |
+| **Microservices** | Independently deployable services | High cohesion and low coupling | Distributed operations and data consistency |
+
+These topics can overlap. A product line can contain embedded systems, and a web application can use microservices.
+
+## Extend: Quiz Review
+
+Try answering each question before expanding it.
+
+<details>
+<summary><strong>1. What happens when a hard real-time system misses a deadline?</strong></summary>
+
+The missed deadline counts as system failure, even if the result is otherwise correct.
+
+</details>
+
+<details>
+<summary><strong>2. What is high determinacy?</strong></summary>
+
+Defined, predictable behaviour for operating conditions and exceptions, including fallback actions when normal operation cannot continue.
+
+</details>
+
+<details>
+<summary><strong>3. How do horizontal and vertical scaling differ?</strong></summary>
+
+**Horizontal:** Add more instances or servers. **Vertical:** Increase the capacity of an existing server, such as its CPU or RAM.
+
+</details>
+
+<details>
+<summary><strong>4. What does HTTP being stateless mean?</strong></summary>
+
+HTTP does not automatically retain context between requests. Applications can maintain sessions explicitly, for example using a cookie that identifies a server-side session.
+
+</details>
+
+<details>
+<summary><strong>5. What is the central principle of a software product line?</strong></summary>
+
+Build related products from shared core assets while controlling the variations between them.
+
+</details>
+
+<details>
+<summary><strong>6. What are the three product-line variability techniques?</strong></summary>
+
+**Parameterisation, information hiding, and inheritance.** They allow configuration, interchangeable implementations, and specialisation respectively.
+
+</details>
+
+<details>
+<summary><strong>7. What two qualities should good microservices have?</strong></summary>
+
+**High cohesion** within each service and **low coupling** between services.
+
+</details>
+
+<details>
+<summary><strong>8. Can microservices be developed, deployed, and scaled independently?</strong></summary>
+
+Yes. This is a central goal, supported by clear service boundaries, compatible interfaces, and independent data ownership.
+
+</details>
+
+<details>
+<summary><strong>9. Can microservices use different technology stacks?</strong></summary>
+
+Yes. Services can use different languages and storage technologies while communicating through agreed interfaces.
+
+</details>
+
+<details>
+<summary><strong>10. What is eventual consistency?</strong></summary>
+
+Copies of data may temporarily differ but eventually converge if updates stop and propagation succeeds.
+
+</details>
